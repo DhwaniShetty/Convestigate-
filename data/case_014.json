@@ -1,0 +1,84 @@
+{
+  "case_id":"014",
+  "title":"THE MAN WHO MOVED",
+  "genre":"Crime_mystery",
+   "status": "prototype",
+   "difficulty":"medium",
+
+   "victim":{
+    "name":"lena heart",
+    "age":"19",
+    "occupation":"univerity_student"
+   },
+
+   "suspects":[
+    {
+    "id":"501",
+    "name":"Daniel Cross",
+    "age":"42",
+    "occupation":"government_benefits_administratorbusinessman",
+    "relationship_to_victim":"unkonown"
+      },
+       {
+    "id": "502",
+    "name": "Marcus Reed",
+    "age": 24,
+    "occupation": "university_student",
+    "relationship_to_victim": "friend"
+  },
+  {
+    "id": "503",
+    "name": "Elena Hart",
+    "age": 47,
+    "occupation": "teacher",
+    "relationship_to_victim": "mother"
+  }
+],
+  "timeline":[
+     {
+    "time": "21:47",
+    "event": "Lena leaves the university library"
+  },
+  {
+    "time": "22:03",
+    "event": "Lena is seen near Northbridge Park"
+  },
+  {
+    "time": "22:18",
+    "event": "Lena's phone stops responding"
+  },
+  {
+    "time": "22:41",
+    "event": "Lena's body is discovered"
+  }
+],
+"evidence": [
+  {
+    "id": "E01",
+    "name": "Library Exit Record",
+    "type": "digital_record",
+    "description": "A record showing Lena leaving the university library at 21:47.",
+    "reliability": "high",
+    "status": "locked"
+  },
+  {
+    "id": "E02",
+    "name": "Park Witness Statement",
+    "type": "witness_statement",
+    "description": "A witness claims to have seen Lena near Northbridge Park at approximately 22:03.",
+    "reliability": "medium",
+    "status": "locked"
+  }
+],
+"puzzles": [
+  {
+    "id": "P01",
+    "name": "Timeline Reconstruction",
+    "type": "timeline",
+    "description": "Arrange the events in the correct chronological order.",
+    "unlocks": ["E01", "E02"]
+  }
+]
+   
+   
+}
