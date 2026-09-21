@@ -68,16 +68,39 @@
     "description": "A witness claims to have seen Lena near Northbridge Park at approximately 22:03.",
     "reliability": "medium",
     "status": "locked"
-  }
+  },
+  {
+    "id": "E03",
+    "name": "Daniel Cross Employment Record",
+    "type": "employment_record",
+    "description": "Daniel Cross's employment history shows several transfers and unexplained gaps that require further investigation.",
+    "reliability": "high",
+    "status": "locked"
+}
+
 ],
 "puzzles": [
-  {
-    "id": "P01",
-    "name": "Timeline Reconstruction",
-    "type": "timeline",
-    "description": "Arrange the events in the correct chronological order.",
-    "unlocks": ["E01", "E02"]
-  }
+    {
+        "id": "P01",
+        "name": "Timeline Reconstruction",
+        "type": "timeline",
+        "description": "Arrange the events in the correct chronological order.",
+        "unlocks": ["E01", "E02"]
+    },
+    {
+        "id": "P02",
+        "name": "Employment Records",
+        "type": "pattern_matching",
+        "description": "Examine Daniel Cross's employment history and identify unusual patterns in his transfers and employment gaps.",
+        "unlocks": ["E03"]
+    },
+    {
+     "id": "P03",
+    "name": "Connection Graph",
+    "type": "connection_graph",
+    "description": "Examine the available evidence and identify connections between Lena Hart, Daniel Cross, and Maria Bell.",
+    "unlocks": ["E04"] 
+    }
 ]
    
    
