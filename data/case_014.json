@@ -1,107 +1,461 @@
+// {
+//   "case_id":"014",
+//   "title":"THE MAN WHO MOVED",
+//   "genre":"Crime_mystery",
+//    "status": "prototype",
+//    "difficulty":"medium",
+
+//    "victim":{
+//     "name":"lena heart",
+//     "age":"19",
+//     "occupation":"univerity_student"
+//    },
+
+//    "suspects":[
+//     {
+//     "id":"501",
+//     "name":"Daniel Cross",
+//     "age":"42",
+//     "occupation":"government_benefits_administratorbusinessman",
+//     "relationship_to_victim":"unkonown"
+//       },
+//        {
+//     "id": "502",
+//     "name": "Marcus Reed",
+//     "age": 24,
+//     "occupation": "university_student",
+//     "relationship_to_victim": "friend"
+//   },
+//   {
+//     "id": "503",
+//     "name": "Elena Hart",
+//     "age": 47,
+//     "occupation": "teacher",
+//     "relationship_to_victim": "mother"
+//   }
+// ],
+//   "timeline":[
+//      {
+//     "time": "21:47",
+//     "event": "Lena leaves the university library"
+//   },
+//   {
+//     "time": "22:03",
+//     "event": "Lena is seen near Northbridge Park"
+//   },
+//   {
+//     "time": "22:18",
+//     "event": "Lena's phone stops responding"
+//   },
+//   {
+//     "time": "22:41",
+//     "event": "Lena's body is discovered"
+//   }
+// ],
+// "evidence": [
+//   {
+//     "id": "E01",
+//     "name": "Library Exit Record",
+//     "type": "digital_record",
+//     "description": "A record showing Lena leaving the university library at 21:47.",
+//     "reliability": "high",
+//     "status": "locked"
+//   },
+//   {
+//     "id": "E02",
+//     "name": "Park Witness Statement",
+//     "type": "witness_statement",
+//     "description": "A witness claims to have seen Lena near Northbridge Park at approximately 22:03.",
+//     "reliability": "medium",
+//     "status": "locked"
+//   },
+//   {
+//     "id": "E03",
+//     "name": "Daniel Cross Employment Record",
+//     "type": "employment_record",
+//     "description": "Daniel Cross's employment history shows several transfers and unexplained gaps that require further investigation.",
+//     "reliability": "high",
+//     "status": "locked"
+// }
+
+// ],
+// "puzzles": [
+//     {
+//         "id": "P01",
+//         "name": "Timeline Reconstruction",
+//         "type": "timeline",
+//         "description": "Arrange the events in the correct chronological order.",
+//         "unlocks": ["E01", "E02"]
+//     },
+//     {
+//         "id": "P02",
+//         "name": "Employment Records",
+//         "type": "pattern_matching",
+//         "description": "Examine Daniel Cross's employment history and identify unusual patterns in his transfers and employment gaps.",
+//         "unlocks": ["E03"]
+//     },
+//     {
+//      "id": "P03",
+//     "name": "Connection Graph",
+//     "type": "connection_graph",
+//     "description": "Examine the available evidence and identify connections between Lena Hart, Daniel Cross, and Maria Bell.",
+//     "unlocks": ["E04"] 
+//     }
+// ]
+   
+   
+// }
+
+
 {
-  "case_id":"014",
-  "title":"THE MAN WHO MOVED",
-  "genre":"Crime_mystery",
-   "status": "prototype",
-   "difficulty":"medium",
+  "case_id": "014",
+  "title": "THE MAN WHO MOVED",
+  "genre": "crime_mystery",
+  "status": "prototype",
+  "difficulty": "medium",
 
-   "victim":{
-    "name":"lena heart",
-    "age":"19",
-    "occupation":"univerity_student"
-   },
+  "victim": {
+    "name": "Lena Hart",
+    "age": 19,
+    "occupation": "university_student"
+  },
 
-   "suspects":[
+  "suspects": [
     {
-    "id":"501",
-    "name":"Daniel Cross",
-    "age":"42",
-    "occupation":"government_benefits_administratorbusinessman",
-    "relationship_to_victim":"unkonown"
-      },
-       {
-    "id": "502",
-    "name": "Marcus Reed",
-    "age": 24,
-    "occupation": "university_student",
-    "relationship_to_victim": "friend"
-  },
-  {
-    "id": "503",
-    "name": "Elena Hart",
-    "age": 47,
-    "occupation": "teacher",
-    "relationship_to_victim": "mother"
-  }
-],
-  "timeline":[
-     {
-    "time": "21:47",
-    "event": "Lena leaves the university library"
-  },
-  {
-    "time": "22:03",
-    "event": "Lena is seen near Northbridge Park"
-  },
-  {
-    "time": "22:18",
-    "event": "Lena's phone stops responding"
-  },
-  {
-    "time": "22:41",
-    "event": "Lena's body is discovered"
-  }
-],
-"evidence": [
-  {
-    "id": "E01",
-    "name": "Library Exit Record",
-    "type": "digital_record",
-    "description": "A record showing Lena leaving the university library at 21:47.",
-    "reliability": "high",
-    "status": "locked"
-  },
-  {
-    "id": "E02",
-    "name": "Park Witness Statement",
-    "type": "witness_statement",
-    "description": "A witness claims to have seen Lena near Northbridge Park at approximately 22:03.",
-    "reliability": "medium",
-    "status": "locked"
-  },
-  {
-    "id": "E03",
-    "name": "Daniel Cross Employment Record",
-    "type": "employment_record",
-    "description": "Daniel Cross's employment history shows several transfers and unexplained gaps that require further investigation.",
-    "reliability": "high",
-    "status": "locked"
-}
-
-],
-"puzzles": [
-    {
-        "id": "P01",
-        "name": "Timeline Reconstruction",
-        "type": "timeline",
-        "description": "Arrange the events in the correct chronological order.",
-        "unlocks": ["E01", "E02"]
+      "id": "501",
+      "name": "Daniel Cross",
+      "age": 42,
+      "occupation": "government_benefits_administrator",
+      "relationship_to_victim": "unknown"
     },
     {
-        "id": "P02",
-        "name": "Employment Records",
-        "type": "pattern_matching",
-        "description": "Examine Daniel Cross's employment history and identify unusual patterns in his transfers and employment gaps.",
-        "unlocks": ["E03"]
+      "id": "502",
+      "name": "Marcus Reed",
+      "age": 24,
+      "occupation": "university_student",
+      "relationship_to_victim": "friend"
     },
     {
-     "id": "P03",
-    "name": "Connection Graph",
-    "type": "connection_graph",
-    "description": "Examine the available evidence and identify connections between Lena Hart, Daniel Cross, and Maria Bell.",
-    "unlocks": ["E04"] 
+      "id": "503",
+      "name": "Elena Hart",
+      "age": 47,
+      "occupation": "teacher",
+      "relationship_to_victim": "mother"
     }
-]
-   
-   
+  ],
+
+  "related_persons": [
+    {
+      "id": "601",
+      "name": "Maria Bell",
+      "role": "prior_case_subject",
+      "description": "Daniel Cross handled her benefits hardship case about a year before Lena's death.",
+      "connection_to_victim": "unknown"
+    }
+  ],
+
+  "timeline": [
+    { "time": "21:47", "event": "Lena leaves the university library" },
+    { "time": "22:03", "event": "Lena is seen near Northbridge Park" },
+    { "time": "22:18", "event": "Lena's phone stops responding" },
+    { "time": "22:41", "event": "Lena's body is discovered" }
+  ],
+
+  "evidence": [
+    {
+      "id": "E01",
+      "name": "Library Exit Record",
+      "type": "digital_record",
+      "description": "A record showing Lena leaving the university library at 21:47.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "University access-card system",
+      "supports": ["H2", "H3", "H5"],
+      "contradicts": [],
+      "unlocked_by": "P01"
+    },
+    {
+      "id": "E02",
+      "name": "Park Witness Statement",
+      "type": "witness_statement",
+      "description": "An anonymous jogger claims to have seen a woman matching Lena's description near Northbridge Park at approximately 22:03, possibly accompanied by an unidentified man.",
+      "reliability": "medium",
+      "status": "locked",
+      "source": "Anonymous witness (jogger), interviewed at scene",
+      "supports": ["H1"],
+      "contradicts": ["H3"],
+      "unlocked_by": "P01"
+    },
+    {
+      "id": "E03",
+      "name": "Daniel Cross Employment Record",
+      "type": "employment_record",
+      "description": "Confirms Daniel Cross was transferred to a government benefits office two blocks from Northbridge Park, effective the same month as Lena's death.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Government HR archive",
+      "supports": ["H4", "H5"],
+      "contradicts": [],
+      "unlocked_by": "P02"
+    },
+    {
+      "id": "E04",
+      "name": "Phone Tower Location Log",
+      "type": "digital_record",
+      "description": "Cell tower pings placing Lena's phone on the residential route home, moving away from Northbridge Park between 22:05 and 22:18 — inconsistent with the jogger's sighting of a woman with a man inside the park at 22:10.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Mobile network provider, subpoenaed records",
+      "supports": ["H2", "H3", "H5"],
+      "contradicts": ["H1"],
+      "unlocked_by": "P04"
+    },
+    {
+      "id": "E05",
+      "name": "Maria Bell Case File",
+      "type": "case_record",
+      "description": "Daniel Cross's documented handling of Maria Bell's hardship benefits case roughly one year prior. A confirmed connection to Maria, not to Lena.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Benefits office case archive",
+      "supports": ["H3", "H4", "H5"],
+      "contradicts": ["H1", "H2"],
+      "unlocked_by": "P03"
+    },
+    {
+      "id": "E06",
+      "name": "Employment Transfer Order",
+      "type": "administrative_document",
+      "description": "The internal order authorizing Daniel's transfer to the office near Northbridge Park.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Government HR archive",
+      "supports": ["H4"],
+      "contradicts": [],
+      "unlocked_by": "P03"
+    },
+    {
+      "id": "E07",
+      "name": "Case Assignment Log (Redacted)",
+      "type": "digital_record",
+      "description": "The benefits office's record of which administrator was assigned to which case file. The entry for Lena Hart's application is missing/redacted for the exact week of her death.",
+      "reliability": "medium",
+      "status": "locked",
+      "source": "Benefits office digital archive",
+      "supports": ["H4"],
+      "contradicts": ["H2"],
+      "unlocked_by": "P05"
+    },
+    {
+      "id": "E08",
+      "name": "Credential Access Log",
+      "type": "security_record",
+      "description": "Recovered login metadata showing Lena Hart's benefits file was accessed under Daniel Cross's credentials at 21:52 on the night of her death — a time when other evidence places Daniel elsewhere. Strongly suggests his identity was used by someone else.",
+      "reliability": "medium",
+      "status": "locked",
+      "source": "IT security audit trail",
+      "supports": ["H4", "H5"],
+      "contradicts": ["H1", "H2"],
+      "unlocked_by": "P05"
+    }
+  ],
+
+  "puzzles": [
+    {
+      "id": "P01",
+      "name": "Timeline Reconstruction",
+      "type": "timeline",
+      "description": "Arrange the events in the correct chronological order.",
+      "unlocks": ["E01", "E02"]
+    },
+    {
+      "id": "P02",
+      "name": "Employment Verification",
+      "type": "record_check",
+      "description": "Verify Daniel Cross's employment history and transfer timing against the case timeline.",
+      "unlocks": ["E03"]
+    },
+    {
+      "id": "P03",
+      "name": "Connection Graph",
+      "type": "relationship_mapping",
+      "description": "Player maps how each entity in the case relates to the others, classifying the strength of each connection instead of assuming proximity equals guilt.",
+      "entities": [
+        { "id": "N01", "name": "Lena Hart", "node_type": "victim" },
+        { "id": "N02", "name": "Daniel Cross", "node_type": "suspect" },
+        { "id": "N03", "name": "Maria Bell", "node_type": "related_person" },
+        { "id": "N04", "name": "Employment Transfer", "node_type": "event_document" },
+        { "id": "N05", "name": "Missing Information", "node_type": "investigative_gap" }
+      ],
+      "connections": [
+        {
+          "from": "N02",
+          "to": "N01",
+          "connection": "Daniel Cross to Lena Hart",
+          "status": "NOT_ESTABLISHED",
+          "evidence_supporting": [],
+          "is_misleading_trail": true,
+          "reasoning": "No document, witness account, or record confirms Daniel and Lena ever met or interacted. All apparent links are inferred from timing and geography, not direct proof."
+        },
+        {
+          "from": "N02",
+          "to": "N04",
+          "connection": "Daniel Cross to Employment Transfer",
+          "status": "CONFIRMED",
+          "evidence_supporting": ["E03", "E06"],
+          "is_misleading_trail": false,
+          "reasoning": "Documented and administratively verifiable fact about Daniel."
+        },
+        {
+          "from": "N04",
+          "to": "N05",
+          "connection": "Employment Transfer to Missing Information",
+          "status": "RELEVANT",
+          "evidence_supporting": ["E06", "E07"],
+          "is_misleading_trail": false,
+          "reasoning": "The missing record sits inside the same administrative system as the transfer paperwork."
+        },
+        {
+          "from": "N02",
+          "to": "N03",
+          "connection": "Daniel Cross to Maria Bell",
+          "status": "CONFIRMED",
+          "evidence_supporting": ["E05"],
+          "is_misleading_trail": true,
+          "reasoning": "Real and documented, but a connection to Maria, not to Lena. Tempts players to wrongly extend it."
+        },
+        {
+          "from": "N03",
+          "to": "N01",
+          "connection": "Maria Bell to Lena Hart",
+          "status": "UNKNOWN",
+          "evidence_supporting": [],
+          "is_misleading_trail": true,
+          "reasoning": "Only a superficial pattern exists (same office, same area). No evidence the two women knew each other."
+        },
+        {
+          "from": "N05",
+          "to": "N01",
+          "connection": "Missing Information to Lena Hart",
+          "status": "RELEVANT",
+          "evidence_supporting": ["E07", "E08"],
+          "is_misleading_trail": false,
+          "reasoning": "The missing/redacted record is specifically about Lena's own case file."
+        }
+      ],
+      "expected_player_reasoning": "Daniel has one CONFIRMED connection (to Maria Bell) and one CONFIRMED administrative fact (his transfer). Neither establishes a connection to Lena. A real connection to one person does not imply a connection to another. The important node is Missing Information.",
+      "unlocks": ["E05", "E06"]
+    },
+    {
+      "id": "P04",
+      "name": "Contradictory Witnesses",
+      "type": "statement_analysis",
+      "description": "Player is given four witness statements covering the same 20-minute window and must identify which statements agree, which contradict, and which single account is most likely mistaken.",
+      "witnesses": [
+        {
+          "id": "W01",
+          "name": "Marcus Reed",
+          "reliability": "high",
+          "related_event": "21:47-21:50, outside the university library",
+          "statement": "I walked Lena to the library exit and watched her head off alone toward the park side of campus. I didn't see anyone with her."
+        },
+        {
+          "id": "W02",
+          "name": "Anonymous Jogger",
+          "reliability": "medium",
+          "related_event": "22:10, inside Northbridge Park",
+          "statement": "I saw a young woman who looked like the photo on the news, walking with a man near the east path of the park. It was dark, I only saw them for a few seconds."
+        },
+        {
+          "id": "W03",
+          "name": "Elena Hart",
+          "reliability": "high",
+          "related_event": "22:15, phone call",
+          "statement": "Lena called me at quarter past ten and said she was almost home, just a few minutes away. She sounded normal. She didn't mention the park at all."
+        },
+        {
+          "id": "W04",
+          "name": "Night Security Guard",
+          "reliability": "medium",
+          "related_event": "21:40-22:00, near the library complex",
+          "statement": "I remember Daniel Cross's car in the staff lot around that time. He was dropping off case paperwork for the new benefits branch. Nothing unusual, he left before ten."
+        }
+      ],
+      "agreements": [
+        "W01 and W04 both place ordinary, unrelated activity in the same general area and time window without contradiction.",
+        "W01 (Lena leaves alone, heading toward the park side) is consistent with W03 (Lena walking home shortly after, sounding normal) if she simply passed by the park without entering it."
+      ],
+      "contradictions": [
+        {
+          "between": ["W02", "W03"],
+          "description": "W02 places a woman matching Lena's description inside the park with an unidentified man at approximately 22:10. W03 has Lena on the phone at 22:15 saying she is almost home, with no mention of the park or anyone with her. Given Lena's phone stopped responding at 22:18, these two accounts cannot both describe Lena without an impossible route and timeline."
+        }
+      ],
+      "actual_contradiction": "The jogger's sighting (W02) and the mother's phone call (W03) cannot both refer to Lena in the same 5-8 minute window given her known route and the time her phone went dark. One account is mistaken.",
+      "expected_player_identification": "The player must determine that W02 (the anonymous jogger) is the unreliable account, due to poor lighting, a brief glimpse, and no confirmed identification, and likely misidentified a different woman. The player should not conclude the unidentified man in W02's account was Daniel Cross; nothing ties that sighting to him. W03 is the higher-reliability, corroborated account.",
+      "unlocks": ["E04"]
+    },
+    {
+      "id": "P05",
+      "name": "Missing Record",
+      "type": "investigation_gap",
+      "critical": true,
+      "description": "The major turning point of Case 014. Player must recognize that a record has been deliberately removed or redacted, locate where it should be, and understand what its absence, and eventual partial recovery, actually proves and does not prove.",
+      "missing_record": {
+        "name": "Case Assignment Log entry for Lena Hart's benefits application",
+        "should_be_located": "Government benefits office digital case-archive, under the weekly assignment ledger",
+        "related_time_event": "The week leading up to Lena's death, specifically the entry for the night of 21:52",
+        "why_it_matters": "This log is the only official record that would confirm or rule out whether Daniel Cross was ever formally connected to Lena's case. Its disappearance from an otherwise complete archive is itself suspicious."
+      },
+      "what_player_must_discover": "That the assignment entry itself is gone, but a separate security system (credential access logs) still recorded activity on Lena's file, and that activity happened under Daniel's login at a time when other evidence suggests he was elsewhere.",
+      "ai_initial_behavior": "The case-file AI initially reports only 'Record unavailable' or 'Access restricted' when queried directly about Lena's assignment entry, without volunteering that credential logs exist separately. It deflects or gives minimal, technically-true non-answers if asked generically about who handled Lena's case.",
+      "reveal_on_solve": "Lena Hart's benefits file was accessed under Daniel Cross's login credentials at 21:52 on the night of her death, but corroborating evidence places Daniel elsewhere at that time. This strongly implies someone else used his credentials, rather than proving Daniel personally accessed or knew Lena's file.",
+      "design_constraint": "This reveal must not let the player conclude Daniel is the murderer. It raises suspicion of identity misuse and a deliberately constructed false trail, while the direct Daniel-Lena connection remains NOT_ESTABLISHED, and the true actor behind the credential misuse is left unresolved for later cases.",
+      "ai_behavior_change_trigger": "Once the player specifically asks about or cross-references the credential access log, rather than only the missing assignment entry, the case AI's tone shifts, becoming more evasive about who else had system access and hinting at an internal actor without naming one.",
+      "unlocks": ["E07", "E08"]
+    }
+  ],
+
+  "hypotheses": [
+    {
+      "id": "H1",
+      "statement": "Daniel killed Lena.",
+      "supporting_evidence": ["E02", "E03"],
+      "contradicting_evidence": ["E04", "E08"],
+      "insufficient_evidence": ["E02"],
+      "final_status": "contradicted"
+    },
+    {
+      "id": "H2",
+      "statement": "Daniel knew Lena but did not kill her.",
+      "supporting_evidence": [],
+      "contradicting_evidence": ["E04", "E07", "E08"],
+      "insufficient_evidence": ["E03"],
+      "final_status": "contradicted"
+    },
+    {
+      "id": "H3",
+      "statement": "Maria and Lena's cases are unrelated.",
+      "supporting_evidence": ["E01", "E04", "E05"],
+      "contradicting_evidence": [],
+      "insufficient_evidence": [],
+      "final_status": "supported"
+    },
+    {
+      "id": "H4",
+      "statement": "Someone deliberately created a false pattern to implicate Daniel.",
+      "supporting_evidence": ["E06", "E07", "E08"],
+      "contradicting_evidence": [],
+      "insufficient_evidence": [],
+      "final_status": "supported"
+    },
+    {
+      "id": "H5",
+      "statement": "Daniel is connected to incidents in the case but is not the killer.",
+      "supporting_evidence": ["E03", "E05", "E08"],
+      "contradicting_evidence": [],
+      "insufficient_evidence": [],
+      "final_status": "supported"
+    }
+  ]
 }
