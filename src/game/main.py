@@ -165,4 +165,6 @@ if solved:
         print("First entity:", first)
         print("Second entity:", second)
         print("Connection status:", status)
+        print("Correct connections:", player.correct_connections)
+        print("Unsupported connections:", player.unsupported_connections)
         print("Solved puzzles:", game_state.solved_puzzles)
