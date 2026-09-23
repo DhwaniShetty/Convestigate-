@@ -4,18 +4,39 @@
   "genre": "multi_author_causal_mystery",
   "status": "prototype",
   "difficulty": "hard",
-
   "victim": {
     "name": "Ron",
     "occupation": "unknown",
     "status": "deceased"
   },
-
+  "suspects": [
+    {
+      "id": "501",
+      "name": "Massie",
+      "occupation": "unknown",
+      "relationship_to_victim": "connected via the affair referenced in the earliest letters",
+      "note": "Historically the initial focus of suspicion. The fictional reconstruction does not confirm guilt; kept as one of several distinct actors."
+    },
+    {
+      "id": "502",
+      "name": "Second Voice (Unidentified)",
+      "occupation": "unknown",
+      "relationship_to_victim": "unknown",
+      "note": "Fictional reconstruction: a separate person later writing under the original letter writer's identity."
+    },
+    {
+      "id": "503",
+      "name": "The Killer (Unidentified)",
+      "occupation": "unknown",
+      "relationship_to_victim": "unknown",
+      "note": "Fictional reconstruction: a separate individual exploiting the confusion created by the letters. Left unresolved by design."
+    }
+  ],
   "related_figures": [
     {
       "id": "601",
       "name": "Original Letter Writer",
-      "role": "fictional_exposé_author",
+      "role": "fictional_expos\u00e9_author",
       "description": "The first anonymous author, writing about a real affair, per the fictional reconstruction."
     },
     {
@@ -43,15 +64,28 @@
       "description": "One party in the relationship referenced in the earliest letters."
     }
   ],
-
   "timeline": [
-    { "time": "phase_1", "event": "First anonymous letters begin circulating, referencing the Massie/Mary relationship" },
-    { "time": "phase_2", "event": "Letters escalate in tone and specificity, diverging stylistically from the earliest batch" },
-    { "time": "phase_3", "event": "Threats and a booby-trap device appear, escalating beyond the original letters' content" },
-    { "time": "phase_4", "event": "Ron leaves on his final night, reportedly to confront the letter writer" },
-    { "time": "phase_5", "event": "Ron is found dead" }
+    {
+      "time": "phase_1",
+      "event": "First anonymous letters begin circulating, referencing the Massie/Mary relationship"
+    },
+    {
+      "time": "phase_2",
+      "event": "Letters escalate in tone and specificity, diverging stylistically from the earliest batch"
+    },
+    {
+      "time": "phase_3",
+      "event": "Threats and a booby-trap device appear, escalating beyond the original letters' content"
+    },
+    {
+      "time": "phase_4",
+      "event": "Ron leaves on his final night, reportedly to confront the letter writer"
+    },
+    {
+      "time": "phase_5",
+      "event": "Ron is found dead"
+    }
   ],
-
   "evidence": [
     {
       "id": "E01",
@@ -61,7 +95,10 @@
       "reliability": "medium",
       "status": "locked",
       "source": "Recovered correspondence",
-      "supports": ["H1", "H4"],
+      "supports": [
+        "H1",
+        "H4"
+      ],
       "contradicts": [],
       "unlocked_by": "P01"
     },
@@ -73,7 +110,9 @@
       "reliability": "medium",
       "status": "locked",
       "source": "Witness interviews",
-      "supports": ["H1"],
+      "supports": [
+        "H1"
+      ],
       "contradicts": [],
       "unlocked_by": "P02"
     },
@@ -85,8 +124,12 @@
       "reliability": "medium",
       "status": "locked",
       "source": "Forensic document examination",
-      "supports": ["H4"],
-      "contradicts": ["H2"],
+      "supports": [
+        "H4"
+      ],
+      "contradicts": [
+        "H2"
+      ],
       "unlocked_by": "P03"
     },
     {
@@ -97,7 +140,9 @@
       "reliability": "medium",
       "status": "locked",
       "source": "Cross-referenced witness and record data",
-      "supports": ["H4"],
+      "supports": [
+        "H4"
+      ],
       "contradicts": [],
       "unlocked_by": "P04"
     },
@@ -109,7 +154,10 @@
       "reliability": "medium",
       "status": "locked",
       "source": "Witness accounts, scene evidence",
-      "supports": ["H2", "H3"],
+      "supports": [
+        "H2",
+        "H3"
+      ],
       "contradicts": [],
       "unlocked_by": "P05"
     },
@@ -122,7 +170,9 @@
       "status": "locked",
       "source": "Toxicology report",
       "supports": [],
-      "contradicts": ["H2"],
+      "contradicts": [
+        "H2"
+      ],
       "unlocked_by": "P06"
     },
     {
@@ -133,7 +183,9 @@
       "reliability": "high",
       "status": "locked",
       "source": "Forensic device examination",
-      "supports": ["H3"],
+      "supports": [
+        "H3"
+      ],
       "contradicts": [],
       "unlocked_by": "P07"
     },
@@ -145,7 +197,10 @@
       "reliability": "medium",
       "status": "locked",
       "source": "Scene and document cross-analysis",
-      "supports": ["H3", "H4"],
+      "supports": [
+        "H3",
+        "H4"
+      ],
       "contradicts": [],
       "unlocked_by": "P08"
     },
@@ -157,8 +212,12 @@
       "reliability": "high",
       "status": "locked",
       "source": "Archived case file",
-      "supports": ["H2"],
-      "contradicts": ["H4"],
+      "supports": [
+        "H2"
+      ],
+      "contradicts": [
+        "H4"
+      ],
       "unlocked_by": "P09"
     },
     {
@@ -169,8 +228,12 @@
       "reliability": "medium",
       "status": "locked",
       "source": "Forensic document examination",
-      "supports": ["H4"],
-      "contradicts": ["H2"],
+      "supports": [
+        "H4"
+      ],
+      "contradicts": [
+        "H2"
+      ],
       "unlocked_by": "P10"
     },
     {
@@ -181,24 +244,116 @@
       "reliability": "medium",
       "status": "locked",
       "source": "Case review",
-      "supports": ["H3", "H4"],
-      "contradicts": ["H2"],
+      "supports": [
+        "H3",
+        "H4"
+      ],
+      "contradicts": [
+        "H2"
+      ],
       "unlocked_by": "P11"
     }
   ],
-
   "puzzles": [
-    { "id": "P01", "name": "First Letter", "type": "document_analysis", "description": "Establish what the earliest letters actually claim.", "unlocks": ["E01"] },
-    { "id": "P02", "name": "The Affair", "type": "relationship_reconstruction", "description": "Reconstruct the Massie/Mary relationship referenced in the earliest letters.", "unlocks": ["E02"] },
-    { "id": "P03", "name": "Second Voice", "type": "comparative_document_analysis", "description": "Compare the earliest letters against the later, escalated letters.", "unlocks": ["E03"] },
-    { "id": "P04", "name": "Information Graph", "type": "relationship_mapping", "description": "Determine who could plausibly know the specific details referenced in the letters.", "unlocks": ["E04"] },
-    { "id": "P05", "name": "Ron's Final Night", "type": "timeline_reconstruction", "description": "Reconstruct Ron's movements and decisions on his last night.", "unlocks": ["E05"] },
-    { "id": "P06", "name": "Alcohol Evidence", "type": "evidentiary_limits", "description": "Determine what the alcohol evidence does and does not prove about Ron's final behavior.", "unlocks": ["E06"] },
-    { "id": "P07", "name": "Gun Trap", "type": "physical_evidence_analysis", "description": "Examine the trap device as a distinct piece of evidence, not automatically tied to the letters.", "unlocks": ["E07"] },
-    { "id": "P08", "name": "Frame-Up Audit", "type": "investigative_analysis", "description": "Assess whether the trap and letters were arranged to implicate someone specific.", "unlocks": ["E08"] },
-    { "id": "P09", "name": "Investigation Record", "type": "case_review", "description": "Review the original investigation's own assumptions about letter-writer and killer being the same person.", "unlocks": ["E09"] },
-    { "id": "P10", "name": "Letter Fingerprint", "type": "forensic_comparison", "description": "Compare the full letter set for consistency with single authorship.", "unlocks": ["E10"] },
-    { "id": "P11", "name": "False Connection", "type": "causal_analysis", "description": "Identify where sequence was mistaken for causation in the case's history.", "unlocks": ["E11"] },
+    {
+      "id": "P01",
+      "name": "First Letter",
+      "type": "document_analysis",
+      "description": "Establish what the earliest letters actually claim.",
+      "unlocks": [
+        "E01"
+      ]
+    },
+    {
+      "id": "P02",
+      "name": "The Affair",
+      "type": "relationship_reconstruction",
+      "description": "Reconstruct the Massie/Mary relationship referenced in the earliest letters.",
+      "unlocks": [
+        "E02"
+      ]
+    },
+    {
+      "id": "P03",
+      "name": "Second Voice",
+      "type": "comparative_document_analysis",
+      "description": "Compare the earliest letters against the later, escalated letters.",
+      "unlocks": [
+        "E03"
+      ]
+    },
+    {
+      "id": "P04",
+      "name": "Information Graph",
+      "type": "relationship_mapping",
+      "description": "Determine who could plausibly know the specific details referenced in the letters.",
+      "unlocks": [
+        "E04"
+      ]
+    },
+    {
+      "id": "P05",
+      "name": "Ron's Final Night",
+      "type": "timeline_reconstruction",
+      "description": "Reconstruct Ron's movements and decisions on his last night.",
+      "unlocks": [
+        "E05"
+      ]
+    },
+    {
+      "id": "P06",
+      "name": "Alcohol Evidence",
+      "type": "evidentiary_limits",
+      "description": "Determine what the alcohol evidence does and does not prove about Ron's final behavior.",
+      "unlocks": [
+        "E06"
+      ]
+    },
+    {
+      "id": "P07",
+      "name": "Gun Trap",
+      "type": "physical_evidence_analysis",
+      "description": "Examine the trap device as a distinct piece of evidence, not automatically tied to the letters.",
+      "unlocks": [
+        "E07"
+      ]
+    },
+    {
+      "id": "P08",
+      "name": "Frame-Up Audit",
+      "type": "investigative_analysis",
+      "description": "Assess whether the trap and letters were arranged to implicate someone specific.",
+      "unlocks": [
+        "E08"
+      ]
+    },
+    {
+      "id": "P09",
+      "name": "Investigation Record",
+      "type": "case_review",
+      "description": "Review the original investigation's own assumptions about letter-writer and killer being the same person.",
+      "unlocks": [
+        "E09"
+      ]
+    },
+    {
+      "id": "P10",
+      "name": "Letter Fingerprint",
+      "type": "forensic_comparison",
+      "description": "Compare the full letter set for consistency with single authorship.",
+      "unlocks": [
+        "E10"
+      ]
+    },
+    {
+      "id": "P11",
+      "name": "False Connection",
+      "type": "causal_analysis",
+      "description": "Identify where sequence was mistaken for causation in the case's history.",
+      "unlocks": [
+        "E11"
+      ]
+    },
     {
       "id": "P12",
       "name": "Final Causal Graph",
@@ -210,12 +365,14 @@
       "unlocks": []
     }
   ],
-
   "hypotheses": [
     {
       "id": "H1",
-      "statement": "The earliest letters were a genuine, single-author exposé about the Massie/Mary relationship.",
-      "supporting_evidence": ["E01", "E02"],
+      "statement": "The earliest letters were a genuine, single-author expos\u00e9 about the Massie/Mary relationship.",
+      "supporting_evidence": [
+        "E01",
+        "E02"
+      ],
       "contradicting_evidence": [],
       "insufficient_evidence": [],
       "final_status": "supported"
@@ -223,25 +380,54 @@
     {
       "id": "H2",
       "statement": "The original letter writer and Ron's killer were the same person.",
-      "supporting_evidence": ["E05", "E09"],
-      "contradicting_evidence": ["E03", "E06", "E10", "E11"],
-      "insufficient_evidence": ["E05"],
+      "supporting_evidence": [
+        "E05",
+        "E09"
+      ],
+      "contradicting_evidence": [
+        "E03",
+        "E06",
+        "E10",
+        "E11"
+      ],
+      "insufficient_evidence": [
+        "E05"
+      ],
       "final_status": "contradicted"
     },
     {
       "id": "H3",
       "statement": "A separate individual exploited the confusion created by the letters to kill Ron and frame the letter writer.",
-      "supporting_evidence": ["E05", "E07", "E08", "E11"],
+      "supporting_evidence": [
+        "E05",
+        "E07",
+        "E08",
+        "E11"
+      ],
       "contradicting_evidence": [],
-      "insufficient_evidence": ["E05", "E08"],
+      "insufficient_evidence": [
+        "E05",
+        "E08"
+      ],
       "final_status": "unresolved"
     },
     {
       "id": "H4",
       "statement": "A second, distinct voice began writing under the original letter writer's identity, escalating the threats beyond the original author's intent.",
-      "supporting_evidence": ["E01", "E03", "E04", "E08", "E10", "E11"],
-      "contradicting_evidence": ["E09"],
-      "insufficient_evidence": ["E04"],
+      "supporting_evidence": [
+        "E01",
+        "E03",
+        "E04",
+        "E08",
+        "E10",
+        "E11"
+      ],
+      "contradicting_evidence": [
+        "E09"
+      ],
+      "insufficient_evidence": [
+        "E04"
+      ],
       "final_status": "supported"
     }
   ]

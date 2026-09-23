@@ -4,31 +4,28 @@
   "genre": "cross_border_murder_mystery",
   "status": "prototype",
   "difficulty": "medium",
-
   "victim": {
     "name": "Blair",
     "age": 63,
     "occupation": "retired_traveler",
     "status": "deceased"
   },
-
-  "persons_of_interest": [
+  "suspects": [
     {
-      "id": "701",
+      "id": "501",
       "name": "Unidentified Meeting Contact",
       "role": "unknown_third_party",
       "description": "A person the fictional route of objects and stops points toward, never directly identified.",
       "relationship_to_victim": "unknown"
     },
     {
-      "id": "702",
+      "id": "502",
       "name": "Rental Counter Clerk",
       "occupation": "car_rental_employee",
       "relationship_to_victim": "service_provider",
       "description": "Issued the Nissan rental with the mismatched key."
     }
   ],
-
   "related_persons": [
     {
       "id": "801",
@@ -43,15 +40,28 @@
       "description": "Logged Blair's crossing from Canada into the United States."
     }
   ],
-
   "timeline": [
-    { "time": "day_1", "event": "Blair crosses from Canada into the United States carrying multiple currencies and valuables" },
-    { "time": "day_2", "event": "Blair rents a Nissan; the key issued does not match the vehicle he is later found with" },
-    { "time": "day_3", "event": "Blair follows a route through several unplanned-looking stops with maps and travel notes" },
-    { "time": "day_4", "event": "Blair checks into a motel room near Knoxville" },
-    { "time": "day_4 (+40min)", "event": "A forty-minute gap in the room before Blair is found dead" }
+    {
+      "time": "day_1",
+      "event": "Blair crosses from Canada into the United States carrying multiple currencies and valuables"
+    },
+    {
+      "time": "day_2",
+      "event": "Blair rents a Nissan; the key issued does not match the vehicle he is later found with"
+    },
+    {
+      "time": "day_3",
+      "event": "Blair follows a route through several unplanned-looking stops with maps and travel notes"
+    },
+    {
+      "time": "day_4",
+      "event": "Blair checks into a motel room near Knoxville"
+    },
+    {
+      "time": "day_4 (+40min)",
+      "event": "A forty-minute gap in the room before Blair is found dead"
+    }
   ],
-
   "evidence": [
     {
       "id": "E01",
@@ -61,19 +71,26 @@
       "reliability": "high",
       "status": "locked",
       "source": "Scene inventory",
-      "supports": ["H2", "H4"],
-      "contradicts": ["H1"],
+      "supports": [
+        "H2",
+        "H4"
+      ],
+      "contradicts": [
+        "H1"
+      ],
       "unlocked_by": "P01"
     },
     {
       "id": "E02",
       "name": "Cross-Border Travel Log",
       "type": "official_record",
-      "description": "Confirms Blair's route and timing across the Canada–US border.",
+      "description": "Confirms Blair's route and timing across the Canada\u2013US border.",
       "reliability": "high",
       "status": "locked",
       "source": "Border agency records",
-      "supports": ["H2"],
+      "supports": [
+        "H2"
+      ],
       "contradicts": [],
       "unlocked_by": "P02"
     },
@@ -85,8 +102,13 @@
       "reliability": "high",
       "status": "locked",
       "source": "Scene inventory",
-      "supports": ["H2", "H4"],
-      "contradicts": ["H3"],
+      "supports": [
+        "H2",
+        "H4"
+      ],
+      "contradicts": [
+        "H3"
+      ],
       "unlocked_by": "P03"
     },
     {
@@ -97,7 +119,10 @@
       "reliability": "high",
       "status": "locked",
       "source": "Motel front desk system",
-      "supports": ["H2", "H4"],
+      "supports": [
+        "H2",
+        "H4"
+      ],
       "contradicts": [],
       "unlocked_by": "P04"
     },
@@ -109,8 +134,13 @@
       "reliability": "medium",
       "status": "locked",
       "source": "Investigative reconstruction",
-      "supports": ["H2", "H4"],
-      "contradicts": ["H1"],
+      "supports": [
+        "H2",
+        "H4"
+      ],
+      "contradicts": [
+        "H1"
+      ],
       "unlocked_by": "P04"
     },
     {
@@ -121,16 +151,45 @@
       "reliability": "medium",
       "status": "locked",
       "source": "Personal effects",
-      "supports": ["H2"],
-      "contradicts": ["H1", "H3"],
+      "supports": [
+        "H2"
+      ],
+      "contradicts": [
+        "H1",
+        "H3"
+      ],
       "unlocked_by": "P02"
     }
   ],
-
   "puzzles": [
-    { "id": "P01", "name": "The Wrong Key", "type": "object_analysis", "description": "Identify why the mismatched key matters rather than dismissing it as confusion.", "unlocks": ["E01"] },
-    { "id": "P02", "name": "The Route", "type": "pattern_mapping", "description": "Map the sequence of destinations against the maps and notes.", "unlocks": ["E02", "E06"] },
-    { "id": "P03", "name": "The Currency Set", "type": "object_analysis", "description": "Examine why multiple currencies and valuables were being carried together.", "unlocks": ["E03"] },
+    {
+      "id": "P01",
+      "name": "The Wrong Key",
+      "type": "object_analysis",
+      "description": "Identify why the mismatched key matters rather than dismissing it as confusion.",
+      "unlocks": [
+        "E01"
+      ]
+    },
+    {
+      "id": "P02",
+      "name": "The Route",
+      "type": "pattern_mapping",
+      "description": "Map the sequence of destinations against the maps and notes.",
+      "unlocks": [
+        "E02",
+        "E06"
+      ]
+    },
+    {
+      "id": "P03",
+      "name": "The Currency Set",
+      "type": "object_analysis",
+      "description": "Examine why multiple currencies and valuables were being carried together.",
+      "unlocks": [
+        "E03"
+      ]
+    },
     {
       "id": "P04",
       "name": "The Hotel Room",
@@ -138,44 +197,88 @@
       "critical": true,
       "description": "Reconstruct the forty-minute sequence inside the motel room using check-in timing and scene evidence.",
       "ai_initial_behavior": "Labels the gap as an ordinary delay (unpacking, resting) and downplays its significance unless directly challenged.",
-      "unlocks": ["E04", "E05"]
+      "unlocks": [
+        "E04",
+        "E05"
+      ]
     },
-    { "id": "P05", "name": "The Meeting Hypothesis", "type": "hypothesis_test", "description": "Identify what evidence supports or contradicts the idea that Blair's stops were a planned route toward a meeting.", "unlocks": [] },
-    { "id": "P06", "name": "The Missing Participant", "type": "gap_analysis", "description": "Determine what the investigation cannot establish about who Blair may have intended to meet.", "unlocks": [] },
-    { "id": "P07", "name": "Final Reconstruction", "type": "hypothesis_management", "description": "Distinguish a genuine coordinated pattern from coincidental randomness in Blair's itinerary.", "unlocks": [] }
+    {
+      "id": "P05",
+      "name": "The Meeting Hypothesis",
+      "type": "hypothesis_test",
+      "description": "Identify what evidence supports or contradicts the idea that Blair's stops were a planned route toward a meeting.",
+      "unlocks": []
+    },
+    {
+      "id": "P06",
+      "name": "The Missing Participant",
+      "type": "gap_analysis",
+      "description": "Determine what the investigation cannot establish about who Blair may have intended to meet.",
+      "unlocks": []
+    },
+    {
+      "id": "P07",
+      "name": "Final Reconstruction",
+      "type": "hypothesis_management",
+      "description": "Distinguish a genuine coordinated pattern from coincidental randomness in Blair's itinerary.",
+      "unlocks": []
+    }
   ],
-
   "hypotheses": [
     {
       "id": "H1",
       "statement": "Blair was simply disoriented and the anomalies (wrong key, unusual route) reflect confusion, not planning.",
       "supporting_evidence": [],
-      "contradicting_evidence": ["E01", "E05", "E06"],
+      "contradicting_evidence": [
+        "E01",
+        "E05",
+        "E06"
+      ],
       "insufficient_evidence": [],
       "final_status": "contradicted"
     },
     {
       "id": "H2",
       "statement": "Blair's itinerary was a deliberate route made of objects, locations, and instructions, built around an intended meeting.",
-      "supporting_evidence": ["E01", "E02", "E03", "E04", "E05", "E06"],
+      "supporting_evidence": [
+        "E01",
+        "E02",
+        "E03",
+        "E04",
+        "E05",
+        "E06"
+      ],
       "contradicting_evidence": [],
-      "insufficient_evidence": ["E06"],
+      "insufficient_evidence": [
+        "E06"
+      ],
       "final_status": "supported"
     },
     {
       "id": "H3",
       "statement": "Blair's death was the result of a simple robbery.",
       "supporting_evidence": [],
-      "contradicting_evidence": ["E03", "E06"],
+      "contradicting_evidence": [
+        "E03",
+        "E06"
+      ],
       "insufficient_evidence": [],
       "final_status": "contradicted"
     },
     {
       "id": "H4",
       "statement": "Blair was following a plan whose other participant never appears directly in the evidence.",
-      "supporting_evidence": ["E01", "E03", "E04", "E05"],
+      "supporting_evidence": [
+        "E01",
+        "E03",
+        "E04",
+        "E05"
+      ],
       "contradicting_evidence": [],
-      "insufficient_evidence": ["E01", "E05"],
+      "insufficient_evidence": [
+        "E01",
+        "E05"
+      ],
       "final_status": "unresolved"
     }
   ]
