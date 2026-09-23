@@ -25,11 +25,17 @@ class AdaptiveAI:
 
     def get_state(self, game_state):
 
+        if game_state.ai_threat >= 5:
+            return "PANIC"
+
         if game_state.ai_threat >= 3:
             return "THREATENED"
 
         if game_state.ai_thrill >= 3:
             return "EXCITED"
+
+        if game_state.ai_threat >= 2:
+            return "DEFENSIVE"
 
         if game_state.ai_trust >= 2:
             return "COMFORTABLE"
@@ -60,3 +66,53 @@ class AdaptiveAI:
             return "THREATENED"
 
         return "CALM"
+
+    def choose_action(self, game_state):
+
+        state = self.get_state(game_state)
+
+        if state == "CALM":
+            return "PROVIDE_NORMAL_GUIDANCE"
+
+        if state == "COMFORTABLE":
+            return "PROVIDE_HELPFUL_CLUE"
+
+        if state == "CURIOUS":
+            return "ENCOURAGE_INVESTIGATION"
+
+        if state == "EXCITED":
+            return "PUSH_PATTERN_RECOGNITION"
+
+        if state == "DEFENSIVE":
+            return "REDIRECT_ATTENTION"
+
+        if state == "THREATENED":
+            return "WITHHOLD_INFORMATION"
+
+        if state == "PANIC":
+            return "CREATE_CONFUSION"
+
+        return "NO_ACTION"
+    def trigger_vanish(self, game_state):
+
+        if game_state.ai_threat >= 5:
+
+            game_state.ai_vanished = True
+            game_state.countdown_active = True
+
+            return "AI_VANISHED"
+
+        return "AI_REMAINS"
+
+    def react_to_final_reasoning(self, hypothesis_result, game_state):
+
+        if hypothesis_result == "SUPPORTED":
+            game_state.ai_threat += 1
+
+        elif hypothesis_result == "CONTRADICTED":
+            game_state.ai_threat += 1
+
+        elif hypothesis_result == "NOT_ESTABLISHED":
+            game_state.ai_threat += 0
+
+        return self.get_state(game_state)

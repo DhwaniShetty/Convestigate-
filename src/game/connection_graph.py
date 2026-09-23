@@ -1,34 +1,16 @@
 class ConnectionGraphPuzzle:
     def __init__(self, puzzle_data):
         self.puzzle_data = puzzle_data
-
+        self.connections = puzzle_data.get("connections", [])
+        self.unlocks = puzzle_data.get("unlocks", [])
     def play(self):
         print("\n--- CONNECTION GRAPH ---")
         print(self.puzzle_data["description"])
 
         print("\nAvailable entities:")
-        print("1. Lena Hart")
-        print("2. Daniel Cross")
-        print("3. Maria Bell")
-        print("4. Employment Transfer")
-        print("5. Missing Information")
 
-        connections = {
-            ("2", "4"): "CONFIRMED",
-            ("4", "2"): "CONFIRMED",
-
-            ("2", "3"): "CONFIRMED",
-            ("3", "2"): "CONFIRMED",
-
-            ("1", "2"): "NOT_ESTABLISHED",
-            ("2", "1"): "NOT_ESTABLISHED",
-
-            ("1", "3"): "NOT_ESTABLISHED",
-            ("3", "1"): "NOT_ESTABLISHED",
-
-            ("2", "5"): "RELEVANT",
-            ("5", "2"): "RELEVANT"
-        }
+        for entity in self.puzzle_data.get("entities", []):
+            print(f'{entity["id"]}: {entity["name"]}')
 
         print("\nIdentify a connection between two entities.")
 
@@ -39,12 +21,29 @@ class ConnectionGraphPuzzle:
             print("\nNo connection entered.")
             return False, "", "", ""
 
-        status = connections.get(
-            (first, second),
-            "UNKNOWN"
-        )
+        status = "UNKNOWN"
+        reasoning = ""
+        is_misleading = False
+        evidence_supporting = []
+
+
+        for connection in self.connections:
+            if (
+                connection["from"] == first
+                and connection["to"] == second
+            ):
+                status = connection["status"]
+                reasoning = connection.get("reasoning", "")
+                is_misleading = connection.get("is_misleading_trail", False)
+                evidence_supporting = connection.get("evidence_supporting", [])
+                break
 
         print("\nConnection recorded.")
         print("Connection status:", status)
+        print("Is misleading trail:", is_misleading)
+        print("Supporting evidence:", evidence_supporting)
+        print("Reasoning:", reasoning)
 
-        return True, first, second, status
+        return True, first, second, status, reasoning , is_misleading , evidence_supporting
+    
+   

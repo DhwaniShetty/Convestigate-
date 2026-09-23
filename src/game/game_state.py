@@ -15,6 +15,8 @@ class GameState:
         self.ai_trust = 0
         self.ai_thrill = 0
         self.ai_threat = 0
+        self.ai_vanished = False
+        self.countdown_active = False
 
         self.game_over = False
         self.player_observations = []
