@@ -114,7 +114,7 @@
         "H1"
       ],
       "contradicts": [],
-      "unlocked_by": "P02"
+      "unlocked_by": "P01"
     },
     {
       "id": "E03",
@@ -130,7 +130,7 @@
       "contradicts": [
         "H2"
       ],
-      "unlocked_by": "P03"
+      "unlocked_by": "P01"
     },
     {
       "id": "E04",
@@ -144,7 +144,7 @@
         "H4"
       ],
       "contradicts": [],
-      "unlocked_by": "P04"
+      "unlocked_by": "P02"
     },
     {
       "id": "E05",
@@ -159,7 +159,7 @@
         "H3"
       ],
       "contradicts": [],
-      "unlocked_by": "P05"
+      "unlocked_by": "P03"
     },
     {
       "id": "E06",
@@ -173,7 +173,7 @@
       "contradicts": [
         "H2"
       ],
-      "unlocked_by": "P06"
+      "unlocked_by": "P03"
     },
     {
       "id": "E07",
@@ -187,7 +187,7 @@
         "H3"
       ],
       "contradicts": [],
-      "unlocked_by": "P07"
+      "unlocked_by": "P04"
     },
     {
       "id": "E08",
@@ -202,7 +202,7 @@
         "H4"
       ],
       "contradicts": [],
-      "unlocked_by": "P08"
+      "unlocked_by": "P04"
     },
     {
       "id": "E09",
@@ -218,7 +218,7 @@
       "contradicts": [
         "H4"
       ],
-      "unlocked_by": "P09"
+      "unlocked_by": "P04"
     },
     {
       "id": "E10",
@@ -234,7 +234,7 @@
       "contradicts": [
         "H2"
       ],
-      "unlocked_by": "P10"
+      "unlocked_by": "P02"
     },
     {
       "id": "E11",
@@ -251,7 +251,7 @@
       "contradicts": [
         "H2"
       ],
-      "unlocked_by": "P11"
+      "unlocked_by": "P05"
     }
   ],
   "puzzles": [
@@ -259,110 +259,55 @@
       "id": "P01",
       "name": "First Letter",
       "type": "document_analysis",
-      "description": "Establish what the earliest letters actually claim.",
+      "description": "Establish what the earliest letters actually claim, reconstruct the Massie/Mary relationship they reference, then compare those early letters against the later, escalated ones.",
       "unlocks": [
-        "E01"
-      ]
-    },
-    {
-      "id": "P02",
-      "name": "The Affair",
-      "type": "relationship_reconstruction",
-      "description": "Reconstruct the Massie/Mary relationship referenced in the earliest letters.",
-      "unlocks": [
-        "E02"
-      ]
-    },
-    {
-      "id": "P03",
-      "name": "Second Voice",
-      "type": "comparative_document_analysis",
-      "description": "Compare the earliest letters against the later, escalated letters.",
-      "unlocks": [
+        "E01",
+        "E02",
         "E03"
       ]
     },
     {
-      "id": "P04",
+      "id": "P02",
       "name": "Information Graph",
       "type": "relationship_mapping",
-      "description": "Determine who could plausibly know the specific details referenced in the letters.",
+      "description": "Determine who could plausibly know the specific details referenced in the letters, then compare the full letter set for consistency with single authorship.",
       "unlocks": [
-        "E04"
-      ]
-    },
-    {
-      "id": "P05",
-      "name": "Ron's Final Night",
-      "type": "timeline_reconstruction",
-      "description": "Reconstruct Ron's movements and decisions on his last night.",
-      "unlocks": [
-        "E05"
-      ]
-    },
-    {
-      "id": "P06",
-      "name": "Alcohol Evidence",
-      "type": "evidentiary_limits",
-      "description": "Determine what the alcohol evidence does and does not prove about Ron's final behavior.",
-      "unlocks": [
-        "E06"
-      ]
-    },
-    {
-      "id": "P07",
-      "name": "Gun Trap",
-      "type": "physical_evidence_analysis",
-      "description": "Examine the trap device as a distinct piece of evidence, not automatically tied to the letters.",
-      "unlocks": [
-        "E07"
-      ]
-    },
-    {
-      "id": "P08",
-      "name": "Frame-Up Audit",
-      "type": "investigative_analysis",
-      "description": "Assess whether the trap and letters were arranged to implicate someone specific.",
-      "unlocks": [
-        "E08"
-      ]
-    },
-    {
-      "id": "P09",
-      "name": "Investigation Record",
-      "type": "case_review",
-      "description": "Review the original investigation's own assumptions about letter-writer and killer being the same person.",
-      "unlocks": [
-        "E09"
-      ]
-    },
-    {
-      "id": "P10",
-      "name": "Letter Fingerprint",
-      "type": "forensic_comparison",
-      "description": "Compare the full letter set for consistency with single authorship.",
-      "unlocks": [
+        "E04",
         "E10"
       ]
     },
     {
-      "id": "P11",
-      "name": "False Connection",
-      "type": "causal_analysis",
-      "description": "Identify where sequence was mistaken for causation in the case's history.",
+      "id": "P03",
+      "name": "Ron's Final Night",
+      "type": "timeline_reconstruction",
+      "description": "Reconstruct Ron's movements and decisions on his last night, and determine what the alcohol evidence does and does not prove about his final behavior.",
       "unlocks": [
-        "E11"
+        "E05",
+        "E06"
       ]
     },
     {
-      "id": "P12",
+      "id": "P04",
+      "name": "Gun Trap and Frame-Up",
+      "type": "physical_evidence_analysis",
+      "description": "Examine the trap device as a distinct piece of evidence, assess whether it and the letters were arranged to implicate someone specific, and review the original investigation's own assumptions about the letter-writer and killer being the same person.",
+      "unlocks": [
+        "E07",
+        "E08",
+        "E09"
+      ]
+    },
+    {
+      "id": "P05",
       "name": "Final Causal Graph",
       "type": "hypothesis_management",
       "critical": true,
-      "description": "Assemble a causal graph that keeps the letter writer(s), the trap-setter, and the killer as potentially distinct actors rather than one default identity.",
+      "description": "Identify where sequence was mistaken for causation, then assemble a causal graph that keeps the letter writer(s), the trap-setter, and the killer as potentially distinct actors rather than one default identity.",
       "ai_initial_behavior": "Arranges the true underlying events into one continuous, single-actor story and pressures the player to treat the sequence as proof of a single cause.",
       "design_constraint": "The final reconstruction must not force identification of the real killer; it should let the player conclude who created the surrounding narrative confusion versus who is actually responsible, while leaving some elements genuinely unresolved.",
-      "unlocks": []
+      "unlocks": [
+        "E11"
+      ]
     }
   ],
   "hypotheses": [

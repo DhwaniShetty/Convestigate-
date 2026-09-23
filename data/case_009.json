@@ -109,7 +109,7 @@
       "contradicts": [
         "H3"
       ],
-      "unlocked_by": "P03"
+      "unlocked_by": "P02"
     },
     {
       "id": "E04",
@@ -124,7 +124,7 @@
         "H4"
       ],
       "contradicts": [],
-      "unlocked_by": "P04"
+      "unlocked_by": "P03"
     },
     {
       "id": "E05",
@@ -141,7 +141,7 @@
       "contradicts": [
         "H1"
       ],
-      "unlocked_by": "P04"
+      "unlocked_by": "P03"
     },
     {
       "id": "E06",
@@ -175,23 +175,15 @@
       "id": "P02",
       "name": "The Route",
       "type": "pattern_mapping",
-      "description": "Map the sequence of destinations against the maps and notes.",
+      "description": "Map the sequence of destinations against the maps and notes, and examine why multiple currencies and valuables were being carried together.",
       "unlocks": [
         "E02",
+        "E03",
         "E06"
       ]
     },
     {
       "id": "P03",
-      "name": "The Currency Set",
-      "type": "object_analysis",
-      "description": "Examine why multiple currencies and valuables were being carried together.",
-      "unlocks": [
-        "E03"
-      ]
-    },
-    {
-      "id": "P04",
       "name": "The Hotel Room",
       "type": "timeline_reconstruction",
       "critical": true,
@@ -203,21 +195,14 @@
       ]
     },
     {
-      "id": "P05",
+      "id": "P04",
       "name": "The Meeting Hypothesis",
       "type": "hypothesis_test",
-      "description": "Identify what evidence supports or contradicts the idea that Blair's stops were a planned route toward a meeting.",
+      "description": "Identify what evidence supports or contradicts the idea that Blair's stops were a planned route toward a meeting, and what the investigation cannot establish about who he intended to meet.",
       "unlocks": []
     },
     {
-      "id": "P06",
-      "name": "The Missing Participant",
-      "type": "gap_analysis",
-      "description": "Determine what the investigation cannot establish about who Blair may have intended to meet.",
-      "unlocks": []
-    },
-    {
-      "id": "P07",
+      "id": "P05",
       "name": "Final Reconstruction",
       "type": "hypothesis_management",
       "description": "Distinguish a genuine coordinated pattern from coincidental randomness in Blair's itinerary.",

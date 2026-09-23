@@ -105,7 +105,7 @@
       "contradicts": [
         "H4"
       ],
-      "unlocked_by": "P03"
+      "unlocked_by": "P02"
     },
     {
       "id": "E03",
@@ -137,7 +137,7 @@
       "contradicts": [
         "H1"
       ],
-      "unlocked_by": "P05"
+      "unlocked_by": "P03"
     },
     {
       "id": "E05",
@@ -154,7 +154,7 @@
       "contradicts": [
         "H2"
       ],
-      "unlocked_by": "P06"
+      "unlocked_by": "P04"
     },
     {
       "id": "E06",
@@ -171,7 +171,7 @@
         "H1",
         "H2"
       ],
-      "unlocked_by": "P06"
+      "unlocked_by": "P04"
     },
     {
       "id": "E07",
@@ -185,7 +185,7 @@
         "H1"
       ],
       "contradicts": [],
-      "unlocked_by": "P02"
+      "unlocked_by": "P01"
     }
   ],
   "puzzles": [
@@ -193,26 +193,18 @@
       "id": "P01",
       "name": "Last Six Hours",
       "type": "timeline",
-      "description": "Reconstruct the final sequence of calls, stops, and contacts.",
+      "description": "Reconstruct the final sequence of calls, stops, and contacts, and separate verified observations of Bryce's state from after-the-fact interpretation.",
       "unlocks": [
         "E01",
-        "E03"
-      ]
-    },
-    {
-      "id": "P02",
-      "name": "Roadside Stop",
-      "type": "evidence_classification",
-      "description": "Separate verified observations of Bryce's state from after-the-fact interpretation.",
-      "unlocks": [
+        "E03",
         "E07"
       ]
     },
     {
-      "id": "P03",
+      "id": "P02",
       "name": "Police Encounter",
       "type": "behavior_comparison",
-      "description": "Compare what Trooper Daniels actually observed against the narrative that was built afterward.",
+      "description": "Compare what Trooper Daniels actually observed against the narrative built afterward, then identify the unexplained gap in movement before the crash.",
       "observed_vs_narrative": {
         "directly_observed": [
           "Bryce was upright, ambulatory, and verbally responsive",
@@ -224,17 +216,12 @@
         ],
         "reasoning": "The report itself is narrow and behavioral. Its later use as proof of a specific motive is an interpretive leap, not a fact in the record."
       },
-      "unlocks": []
+      "unlocks": [
+        "E02"
+      ]
     },
     {
-      "id": "P04",
-      "name": "Route Gap",
-      "type": "spatial_reasoning",
-      "description": "Identify the unexplained stretch of time and movement between the roadside stop and the crash.",
-      "unlocks": []
-    },
-    {
-      "id": "P05",
+      "id": "P03",
       "name": "Crash Scene",
       "type": "forensic_analysis",
       "description": "Determine precisely what the vehicle evidence establishes, and what it leaves open.",
@@ -243,7 +230,7 @@
       ]
     },
     {
-      "id": "P06",
+      "id": "P04",
       "name": "Scent Trail",
       "type": "field_evidence_analysis",
       "description": "Examine the significance and the limitations of where the scent trail ends.",
@@ -253,13 +240,13 @@
       ]
     },
     {
-      "id": "P07",
+      "id": "P05",
       "name": "Final Reconstruction",
       "type": "hypothesis_management",
       "critical": true,
       "description": "The player must hold multiple competing hypotheses simultaneously rather than collapsing to the AI-favored explanation.",
       "ai_initial_behavior": "Repeatedly resurfaces Bryce's substance use and emotional state as the simplest explanation, discouraging further inquiry into the unmatched tire impressions.",
-      "design_constraint": "The puzzle must not force a single resolution. The case remains genuinely open: voluntary disappearance, undiscovered self-harm, and third-party intervention must all remain live possibilities that the evidence does not fully close off.",
+      "design_constraint": "The puzzle must not force a single resolution. Voluntary disappearance, undiscovered self-harm, and third-party intervention must all remain live possibilities that the evidence does not fully close off.",
       "unlocks": []
     }
   ],

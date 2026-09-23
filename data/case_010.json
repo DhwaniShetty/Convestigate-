@@ -223,16 +223,9 @@
     },
     {
       "id": "P05",
-      "name": "Single-Offender Test",
-      "type": "evidentiary_standard",
-      "description": "List what would actually be required to establish that one offender committed all the cases.",
-      "unlocks": []
-    },
-    {
-      "id": "P06",
       "name": "Final Evidence Report",
       "type": "conclusion_writing",
-      "description": "State plainly what is proven and what remains unresolved across the case set.",
+      "description": "List what would actually be required to establish a single offender, then state plainly what is proven and what remains unresolved across the case set.",
       "unlocks": []
     }
   ],

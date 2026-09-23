@@ -214,17 +214,10 @@
       "id": "P05",
       "name": "Public Panic",
       "type": "social_dynamics_model",
-      "description": "Model how the threat reshaped public behavior, and consider whether that response itself obscures the truth.",
+      "description": "Model how the threat reshaped public behavior, consider whether that response obscures the truth, and compare the attacker-hypothesis and letter-writer-hypothesis directly.",
       "unlocks": [
         "E05"
       ]
-    },
-    {
-      "id": "P06",
-      "name": "Final Reconstruction",
-      "type": "hypothesis_management",
-      "description": "Compare the attacker-hypothesis and the letter-writer-hypothesis directly.",
-      "unlocks": []
     }
   ],
   "hypotheses": [
