@@ -1,0 +1,168 @@
+{
+  "case_id": "012",
+  "title": "THE CLIENT WHO NEVER EXISTED",
+  "genre": "identity_reconstruction_murder_mystery",
+  "status": "prototype",
+  "difficulty": "medium",
+
+  "victim": {
+    "name": "Mike Mercer",
+    "age": 38,
+    "occupation": "freelance_contractor",
+    "status": "deceased"
+  },
+
+  "suspects": [
+    {
+      "id": "501",
+      "name": "\"Steven\"",
+      "occupation": "unknown",
+      "relationship_to_victim": "claimed_client",
+      "note": "Existence as an independent real person is not established."
+    },
+    {
+      "id": "502",
+      "name": "Priya Okafor",
+      "age": 35,
+      "occupation": "business_partner",
+      "relationship_to_victim": "professional_associate"
+    }
+  ],
+
+  "related_persons": [
+    {
+      "id": "601",
+      "name": "Isolated Property Owner",
+      "role": "location_contact",
+      "description": "Owner of the remote property tied to Mike's final job for 'Steven'."
+    }
+  ],
+
+  "timeline": [
+    { "time": "week_-4", "event": "Mike takes on a new client contract, communicating only as 'Steven'" },
+    { "time": "week_-2", "event": "First payment received from an account later found difficult to trace to a person" },
+    { "time": "week_0, day_1", "event": "Mike travels to an isolated property for the job" },
+    { "time": "week_0, day_2", "event": "Mike's body is discovered at the property" },
+    { "time": "week_0, day_3", "event": "Activity on Mike's accounts and phone continues after his death" }
+  ],
+
+  "evidence": [
+    {
+      "id": "E01",
+      "name": "Client Communication Log",
+      "type": "digital_record",
+      "description": "Messages exchanged with 'Steven'; consistent in tone but never independently verified against a real identity.",
+      "reliability": "medium",
+      "status": "locked",
+      "source": "Recovered phone/email records",
+      "supports": ["H1", "H2"],
+      "contradicts": [],
+      "unlocked_by": "P01"
+    },
+    {
+      "id": "E02",
+      "name": "Contact Graph",
+      "type": "digital_record",
+      "description": "Phone, message, and meeting connections attributed to 'Steven', all routing through untraceable or shared devices.",
+      "reliability": "medium",
+      "status": "locked",
+      "source": "Carrier and platform records",
+      "supports": ["H1", "H3"],
+      "contradicts": [],
+      "unlocked_by": "P02"
+    },
+    {
+      "id": "E03",
+      "name": "Identity Audit Findings",
+      "type": "investigative_record",
+      "description": "No government record, financial account, or independent witness confirms 'Steven' exists as a distinct person.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Investigative cross-reference",
+      "supports": ["H1", "H3"],
+      "contradicts": ["H2"],
+      "unlocked_by": "P03"
+    },
+    {
+      "id": "E04",
+      "name": "Isolated Property Trail",
+      "type": "field_record",
+      "description": "Records tying the job site to the account associated with 'Steven'.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Property records, booking history",
+      "supports": ["H1"],
+      "contradicts": [],
+      "unlocked_by": "P04"
+    },
+    {
+      "id": "E05",
+      "name": "Post-Mortem Account Activity",
+      "type": "digital_record",
+      "description": "Mike's accounts and phone show activity after his time of death, inconsistent with him personally using them.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Device and account logs",
+      "supports": ["H1", "H3"],
+      "contradicts": ["H2"],
+      "unlocked_by": "P05"
+    },
+    {
+      "id": "E06",
+      "name": "Beneficiary/Access Trail",
+      "type": "financial_record",
+      "description": "Identifies who gained practical access or benefit from Mike's affairs after his death.",
+      "reliability": "medium",
+      "status": "locked",
+      "source": "Financial and account audit",
+      "supports": ["H3"],
+      "contradicts": [],
+      "unlocked_by": "P06"
+    }
+  ],
+
+  "puzzles": [
+    { "id": "P01", "name": "Client Profile", "type": "fact_listing", "description": "List every fact actually attributed to 'Steven', separating claims from confirmation.", "unlocks": ["E01"] },
+    { "id": "P02", "name": "Contact Graph", "type": "relationship_mapping", "description": "Connect the phones, messages, and meetings attributed to 'Steven'.", "unlocks": ["E02"] },
+    {
+      "id": "P03",
+      "name": "Identity Audit",
+      "type": "identity_verification",
+      "critical": true,
+      "description": "Test whether 'Steven' exists as an independent, verifiable person.",
+      "ai_initial_behavior": "Refers to Steven consistently as a stable individual throughout prior evidence summaries, encouraging the player to accept the identity before it is actually proven.",
+      "unlocks": ["E03"]
+    },
+    { "id": "P04", "name": "Property Trail", "type": "field_investigation", "description": "Follow the isolated-location evidence tied to the final job.", "unlocks": ["E04"] },
+    { "id": "P05", "name": "Post-Mortem Trail", "type": "digital_forensics", "description": "Examine account and device activity occurring after Mike's death.", "unlocks": ["E05"] },
+    { "id": "P06", "name": "False Suspect", "type": "motive_analysis", "description": "Identify who actually benefits from the fabricated 'Steven' identity.", "unlocks": ["E06"] },
+    { "id": "P07", "name": "Final Identity Reconstruction", "type": "hypothesis_management", "description": "State clearly which participants are real, which are aliases, and which exist only because the evidence implies them.", "unlocks": [] }
+  ],
+
+  "hypotheses": [
+    {
+      "id": "H1",
+      "statement": "'Steven' is a fabricated persona used to draw Mike to the isolated property.",
+      "supporting_evidence": ["E01", "E02", "E03", "E04", "E05"],
+      "contradicting_evidence": [],
+      "insufficient_evidence": ["E01"],
+      "final_status": "supported"
+    },
+    {
+      "id": "H2",
+      "statement": "'Steven' is a real, independent client unconnected to the death.",
+      "supporting_evidence": ["E01"],
+      "contradicting_evidence": ["E03", "E05"],
+      "insufficient_evidence": [],
+      "final_status": "contradicted"
+    },
+    {
+      "id": "H3",
+      "statement": "Someone used the fabricated identity to create a false trail and personally benefited from Mike's death.",
+      "supporting_evidence": ["E02", "E03", "E05", "E06"],
+      "contradicting_evidence": [],
+      "insufficient_evidence": ["E06"],
+      "final_status": "unresolved"
+    }
+  ]
+}

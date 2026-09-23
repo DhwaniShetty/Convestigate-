@@ -1,0 +1,154 @@
+{
+  "case_id": "013",
+  "title": "THE OFFICER WITH TWO LIVES",
+  "genre": "hidden_life_murder_mystery",
+  "status": "prototype",
+  "difficulty": "medium",
+
+  "victim": {
+    "name": "Daniel Mercer",
+    "age": 44,
+    "occupation": "police_officer",
+    "status": "deceased"
+  },
+
+  "suspects": [
+    {
+      "id": "501",
+      "name": "Private-Life Contact",
+      "occupation": "unknown",
+      "relationship_to_victim": "connected_to_concealed_life",
+      "note": "Initial AI-favored suspect based on secrecy, not direct evidence."
+    },
+    {
+      "id": "502",
+      "name": "Fellow Officer",
+      "occupation": "police_officer",
+      "relationship_to_victim": "colleague"
+    }
+  ],
+
+  "related_persons": [
+    {
+      "id": "601",
+      "name": "Pawnbroker",
+      "role": "transaction_witness",
+      "description": "Accepted the pawned service radio, unaware of its origin."
+    }
+  ],
+
+  "timeline": [
+    { "time": "month_-3", "event": "Daniel's service weapon is reported missing from a locked locker" },
+    { "time": "month_-2", "event": "A radio matching department issue is pawned under a name later linked to Daniel's private life" },
+    { "time": "week_-1", "event": "Daniel's public professional schedule and private-life activity begin to overlap in unusual ways" },
+    { "time": "day_0", "event": "Daniel is found dead" }
+  ],
+
+  "evidence": [
+    {
+      "id": "E01",
+      "name": "Public Duty Log",
+      "type": "official_record",
+      "description": "Daniel's official on-duty schedule and assignments.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Department records",
+      "supports": ["H1", "H2"],
+      "contradicts": [],
+      "unlocked_by": "P01"
+    },
+    {
+      "id": "E02",
+      "name": "Private Life Reconstruction",
+      "type": "investigative_record",
+      "description": "Documents a concealed personal life kept separate from Daniel's professional identity.",
+      "reliability": "medium",
+      "status": "locked",
+      "source": "Financial, communication, and witness records",
+      "supports": ["H1"],
+      "contradicts": [],
+      "unlocked_by": "P02"
+    },
+    {
+      "id": "E03",
+      "name": "Weapon and Radio Audit",
+      "type": "asset_record",
+      "description": "Confirms the service weapon and radio are both unaccounted for through official channels and trace back to the same period.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Department inventory audit, pawn records",
+      "supports": ["H2", "H3"],
+      "contradicts": [],
+      "unlocked_by": "P03"
+    },
+    {
+      "id": "E04",
+      "name": "Financial/Contact Overlap",
+      "type": "financial_record",
+      "description": "Shows financial and contact connections that bridge Daniel's public and private timelines.",
+      "reliability": "medium",
+      "status": "locked",
+      "source": "Bank and communication records",
+      "supports": ["H2", "H3"],
+      "contradicts": [],
+      "unlocked_by": "P04"
+    },
+    {
+      "id": "E05",
+      "name": "Motive Attribution Notes",
+      "type": "investigative_notes",
+      "description": "Prior investigative notes that treat every private-life discovery as evidence of motive, without separately testing responsibility.",
+      "reliability": "low",
+      "status": "locked",
+      "source": "Case file annotations",
+      "supports": ["H1"],
+      "contradicts": ["H3"],
+      "unlocked_by": "P05"
+    }
+  ],
+
+  "puzzles": [
+    { "id": "P01", "name": "Public Timeline", "type": "timeline", "description": "Establish Daniel's official professional schedule and activity.", "unlocks": ["E01"] },
+    { "id": "P02", "name": "Private Timeline", "type": "timeline", "description": "Reconstruct Daniel's concealed personal life and activity.", "unlocks": ["E02"] },
+    { "id": "P03", "name": "Weapon and Radio Audit", "type": "asset_tracing", "description": "Trace the missing service weapon and pawned radio to their origin point.", "unlocks": ["E03"] },
+    { "id": "P04", "name": "Financial/Contact Connections", "type": "relationship_mapping", "description": "Map financial and contact links that bridge the two timelines.", "unlocks": ["E04"] },
+    { "id": "P05", "name": "Secret-Life Reconstruction", "type": "narrative_synthesis", "description": "Assemble what Daniel was actually concealing.", "unlocks": ["E05"] },
+    {
+      "id": "P06",
+      "name": "Motive-vs-Responsibility Test",
+      "type": "hypothesis_management",
+      "critical": true,
+      "description": "Separate the question of who had a motive-shaped secret from the question of who is actually responsible for Daniel's death.",
+      "ai_initial_behavior": "Frames each new private-life discovery as fresh motive, nudging the player toward treating secrecy itself as guilt.",
+      "unlocks": []
+    },
+    { "id": "P07", "name": "Final Reconstruction", "type": "conclusion_writing", "description": "State what Daniel hid, and which parts of it actually connect to the crime versus remain separate.", "unlocks": [] }
+  ],
+
+  "hypotheses": [
+    {
+      "id": "H1",
+      "statement": "Daniel's concealed private life directly caused his death.",
+      "supporting_evidence": ["E02", "E05"],
+      "contradicting_evidence": [],
+      "insufficient_evidence": ["E02", "E05"],
+      "final_status": "unresolved"
+    },
+    {
+      "id": "H2",
+      "statement": "The missing weapon and radio are connected to Daniel's death independent of his private life.",
+      "supporting_evidence": ["E01", "E03"],
+      "contradicting_evidence": [],
+      "insufficient_evidence": ["E03"],
+      "final_status": "unresolved"
+    },
+    {
+      "id": "H3",
+      "statement": "Secrecy and responsibility are separate questions; Daniel's hidden life explains some anomalies but does not by itself establish who killed him.",
+      "supporting_evidence": ["E03", "E04"],
+      "contradicting_evidence": ["E05"],
+      "insufficient_evidence": ["E04"],
+      "final_status": "supported"
+    }
+  ]
+}
