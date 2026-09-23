@@ -13,10 +13,31 @@ from src.game.missing_record_puzzle import MissingRecordPuzzle
 
 app = FastAPI(title="Convestigate API")
 
+# Puzzle progression
+PUZZLE_ORDER = [
+    "timeline",
+    "employment",
+    "connection",
+    "contradictory",
+    "missing_record"
+]
 
 # Temporary in-memory session storage
 sessions = {}
 
+def is_puzzle_unlocked(game_state, puzzle_name):
+    if puzzle_name not in PUZZLE_ORDER:
+        return False
+
+    puzzle_index = PUZZLE_ORDER.index(puzzle_name)
+
+    # First puzzle is always available
+    if puzzle_index == 0:
+        return True
+
+    previous_puzzle = PUZZLE_ORDER[puzzle_index - 1]
+
+    return previous_puzzle in game_state.solved_puzzles
 
 class CreateSessionRequest(BaseModel):
     case_id: str
@@ -26,16 +47,29 @@ class TimelineAnswer(BaseModel):
     order: list[str]
 
 class EmploymentAnswer(BaseModel):
-    answer: str
+    employment_verified: bool
+    transfer_verified: bool
+
+class ConnectionItem(BaseModel):
+    from_node: str
+    to_node: str
+    status: str
+
 
 class ConnectionAnswer(BaseModel):
-    answer: str
+    case_id: str
+    connections: list[ConnectionItem]
 
 class ContradictoryAnswer(BaseModel):
-    answer: str
+    case_id: str
+    unreliable_witness: str
 
 class MissingRecordAnswer(BaseModel):
-    answer: str
+    case_id: str
+    missing_record: str
+    location: str
+    credential_use: bool
+    avoids_direct_accusation: bool
 
 @app.get("/")
 def home():
@@ -227,6 +261,12 @@ def solve_employment(session_id: str, answer: EmploymentAnswer):
     session = sessions[session_id]
     game_state = session["game_state"]
 
+    if not is_puzzle_unlocked(game_state, "employment"):
+        raise HTTPException(
+            status_code=403,
+            detail="Employment puzzle is locked. Solve the timeline puzzle first."
+        )
+
     # Load case
     case = load_case()
 
@@ -248,7 +288,12 @@ def solve_employment(session_id: str, answer: EmploymentAnswer):
     puzzle = EmploymentPuzzle(puzzle_data)
 
     # Check player's answer
-    correct = puzzle.check_answer(answer.answer)
+    correct = puzzle.check_answer(
+    {
+        "employment_verified": answer.employment_verified,
+        "transfer_verified": answer.transfer_verified
+    }
+    )
 
     if correct:
 
@@ -290,6 +335,12 @@ def solve_connection(session_id: str, answer: ConnectionAnswer):
     session = sessions[session_id]
     game_state = session["game_state"]
 
+    if not is_puzzle_unlocked(game_state, "connection"):
+        raise HTTPException(
+            status_code=403,
+            detail="Connection puzzle is locked. Solve the employment puzzle first."
+        )
+
     # Load case
     case = load_case()
 
@@ -311,7 +362,16 @@ def solve_connection(session_id: str, answer: ConnectionAnswer):
     puzzle = ConnectionPuzzle(puzzle_data)
 
     # Check player's answer
-    correct = puzzle.check_answer(answer.answer)
+    correct = puzzle.check_answer(
+    [
+        {
+            "from": connection.from_node,
+            "to": connection.to_node,
+            "status": connection.status
+        }
+        for connection in answer.connections
+    ]
+)
 
     if correct:
 
@@ -353,6 +413,12 @@ def solve_contradictory(session_id: str, answer: ContradictoryAnswer):
     session = sessions[session_id]
     game_state = session["game_state"]
 
+    if not is_puzzle_unlocked(game_state, "contradictory"):
+        raise HTTPException(
+            status_code=403,
+            detail="Contradictory witness puzzle is locked. Solve the connection puzzle first."
+        )
+
     # Load case
     case = load_case()
 
@@ -374,7 +440,11 @@ def solve_contradictory(session_id: str, answer: ContradictoryAnswer):
     puzzle = ContradictoryPuzzle(puzzle_data)
 
     # Check player's answer
-    correct = puzzle.check_answer(answer.answer)
+    correct = puzzle.check_answer(
+    {
+        "unreliable_witness": answer.unreliable_witness
+    }
+)
 
     if correct:
 
@@ -447,6 +517,12 @@ def solve_missing_record(
     session = sessions[session_id]
     game_state = session["game_state"]
 
+    if not is_puzzle_unlocked(game_state, "missing_record"):
+        raise HTTPException(
+            status_code=403,
+            detail="Missing record puzzle is locked. Solve the contradictory witness puzzle first."
+        )
+
     # Load case
     case = load_case()
 
@@ -468,7 +544,14 @@ def solve_missing_record(
     puzzle = MissingRecordPuzzle(puzzle_data)
 
     # Check player's answer
-    correct = puzzle.check_answer(answer.answer)
+    correct = puzzle.check_answer(
+    {
+        "missing_record": answer.missing_record,
+        "location": answer.location,
+        "credential_use": answer.credential_use,
+        "avoids_direct_accusation": answer.avoids_direct_accusation
+    }
+)
 
     if correct:
 
