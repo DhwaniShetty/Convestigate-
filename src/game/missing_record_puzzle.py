@@ -6,7 +6,6 @@ class MissingRecordPuzzle:
         self.unlocks = puzzle_data.get("unlocks", [])
 
     def play(self):
-
         print("\n--- MISSING RECORD ---")
         print(self.puzzle_data["description"])
 
@@ -26,5 +25,10 @@ class MissingRecordPuzzle:
             return False, ""
 
         print("\nInvestigation answer recorded.")
-
         return True, answer
+
+    def check_answer(self, answer):
+        return answer == "confirmed"
+
+    def get_unlocked_evidence(self):
+        return self.unlocks
