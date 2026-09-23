@@ -4,6 +4,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
 from src.case.case_loader import load_case
+from src.game import game_state
 from src.game.game_state import GameState
 from src.game.timeline_puzzle import TimelinePuzzle
 from src.game.employment_puzzle import EmploymentPuzzle
@@ -230,7 +231,7 @@ def solve_timeline(session_id: str, answer: TimelineAnswer):
             if evidence_id not in game_state.unlocked_evidence:
                 game_state.unlocked_evidence.append(evidence_id)
 
-        game_state.current_puzzle = None
+        game_state.current_puzzle = "employment"
 
         return {
             "correct": True,
@@ -305,6 +306,9 @@ def solve_employment(session_id: str, answer: EmploymentAnswer):
 
             if evidence_id not in game_state.unlocked_evidence:
                 game_state.unlocked_evidence.append(evidence_id)
+
+        # Move to next puzzle
+        game_state.current_puzzle = "connection"
 
         return {
             "correct": True,
@@ -384,6 +388,9 @@ def solve_connection(session_id: str, answer: ConnectionAnswer):
             if evidence_id not in game_state.unlocked_evidence:
                 game_state.unlocked_evidence.append(evidence_id)
 
+            # Move to next puzzle
+            game_state.current_puzzle = "contradictory"
+
         return {
             "correct": True,
             "message": "Correct! Connection established.",
@@ -456,6 +463,9 @@ def solve_contradictory(session_id: str, answer: ContradictoryAnswer):
 
             if evidence_id not in game_state.unlocked_evidence:
                 game_state.unlocked_evidence.append(evidence_id)
+
+        # Move to next puzzle
+        game_state.current_puzzle = "missing_record"    
 
         return {
             "correct": True,
@@ -563,6 +573,10 @@ def solve_missing_record(
 
             if evidence_id not in game_state.unlocked_evidence:
                 game_state.unlocked_evidence.append(evidence_id)
+
+        # Investigation completed
+        game_state.current_puzzle = None
+        game_state.game_over = True
 
         return {
             "correct": True,
