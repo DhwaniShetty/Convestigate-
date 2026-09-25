@@ -49,6 +49,21 @@ def add_player_to_session(session_id, player_id):
     connection.commit()
     connection.close()
 
+def get_game_session(session_id):
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    cursor.execute("""
+        SELECT session_id, case_id, started_at, ended_at, current_stage, status
+        FROM game_sessions
+        WHERE session_id = ?
+    """, (session_id,))
+
+    session = cursor.fetchone()
+    connection.close()
+
+    return session
+
 
 if __name__ == "__main__":
 
