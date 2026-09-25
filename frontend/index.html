@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CONVESTIGATE // Investigation Consoln intere</title>
+  <meta name="description"
+    content="Aactive murder-investigation deduction game. Reconstruct timelines, audit evidence provenance, and reason through deception.">
+
+  <!-- Design System CSS (Strict Black / White / Blood Red) -->
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/board.css">
+</head>
+
+<body>
+  <div id="app-root">
+    <!-- Top HUD Navigation -->
+    <div id="hud-nav-root"></div>
+
+    <!-- Main Screens Container -->
+    <main class="main-content">
+      <!-- 1. Landing Screen -->
+      <section id="screen-landing" class="screen-view active"></section>
+
+      <!-- 2. Multiplayer Lobby -->
+      <section id="screen-lobby" class="screen-view"></section>
+
+      <!-- 3. Case Briefing -->
+      <section id="screen-briefing" class="screen-view"></section>
+
+      <!-- 4. Main Investigation Dashboard -->
+      <section id="screen-dashboard" class="screen-view"></section>
+
+      <!-- 5. Final Investigation Review -->
+      <section id="screen-final-investigation" class="screen-view"></section>
+
+      <!-- 6. Final Answer / Verdict -->
+      <section id="screen-final-answer" class="screen-view"></section>
+
+      <!-- 7. Evaluation & Results -->
+      <section id="screen-results" class="screen-view"></section>
+    </main>
+  </div>
+
+  <!-- Application Bundle -->
+  <script type="module" src="js/app.js"></script>
+</body>
+
+</html>
