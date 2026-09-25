@@ -36,6 +36,11 @@ from src.game.case001_motive_analysis_puzzle import Case001MotiveAnalysisPuzzle
 from src.game.case001_damage_analysis_puzzle import Case001DamageAnalysisPuzzle
 from src.game.case001_communication_analysis_puzzle import Case001CommunicationAnalysisPuzzle
 from src.game.case001_hypothesis_management_puzzle import Case001HypothesisManagementPuzzle
+from src.game.case002_contradiction_analysis_puzzle import Case002ContradictionAnalysisPuzzle
+from src.game.case002_forensic_analysis_puzzle import Case002ForensicAnalysisPuzzle
+from src.game.case002_provenance_review_puzzle import Case002ProvenanceReviewPuzzle
+from src.game.case002_timeline_access_mapping_puzzle import Case002TimelineAccessMappingPuzzle
+from src.game.case002_hypothesis_management_puzzle import Case002HypothesisManagementPuzzle
 from src.database.player_session import create_player, create_game_session, add_player_to_session
 from src.database.puzzle_logger import log_puzzle_attempt, get_puzzle_attempt_count
 from src.database.action_logger import log_player_action
@@ -2474,5 +2479,408 @@ def solve_case001_hypothesis_management(session_id: str, answer: dict):
         return {
             "correct": False,
             "message": "Incorrect final reconstruction. Re-examine Adrian's statements and distinguish what the evidence establishes from what remains unresolved.",
+            "mistakes": game_state.mistakes
+        }
+
+@app.post("/sessions/{session_id}/puzzles/case002-contradiction-analysis")
+def solve_case002_contradiction_analysis(session_id: str, answer: dict):
+
+    if session_id not in sessions:
+        raise HTTPException(
+            status_code=404,
+            detail="Session not found"
+        )
+
+    session = sessions[session_id]
+    game_state = session["game_state"]
+
+    if session["case_id"] != "002":
+        raise HTTPException(
+            status_code=400,
+            detail="Contradiction analysis puzzle is only available for Case 002"
+        )
+
+    case_file = f"data/case_{session['case_id'].zfill(3)}.json"
+    case = load_case(case_file)
+
+    puzzle_data = None
+    for puzzle in case.puzzles:
+        if puzzle.get("type") == "contradiction_analysis":
+            puzzle_data = puzzle
+            break
+
+    if puzzle_data is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Case 002 contradiction analysis puzzle not found"
+        )
+
+    puzzle = Case002ContradictionAnalysisPuzzle(puzzle_data)
+    correct = puzzle.check_answer(answer)
+
+    attempt_number = get_puzzle_attempt_count(
+        session["db_session_id"],
+        session["player_id"],
+        "P01"
+    ) + 1
+
+    log_puzzle_attempt(
+        session["db_session_id"],
+        session["player_id"],
+        "P01",
+        attempt_number,
+        "success" if correct else "failure",
+        None
+    )
+
+    if correct:
+        if "contradiction_analysis" not in game_state.solved_puzzles:
+            game_state.solved_puzzles.append(
+                "contradiction_analysis"
+            )
+
+        for evidence_id in puzzle.get_unlocked_evidence():
+            if evidence_id not in game_state.unlocked_evidence:
+                game_state.unlocked_evidence.append(evidence_id)
+
+        game_state.current_puzzle = "forensic_analysis"
+
+        return {
+            "correct": True,
+            "message": "Correct! The scene records and evidence-handling history reveal contradictions and a break in the chain of custody.",
+            "solved_puzzles": game_state.solved_puzzles,
+            "unlocked_evidence": game_state.unlocked_evidence,
+            "mistakes": game_state.mistakes
+        }
+
+    else:
+        game_state.mistakes += 1
+
+        return {
+            "correct": False,
+            "message": "Incorrect reconstruction. Re-examine the scene records and chain-of-custody history.",
+            "mistakes": game_state.mistakes
+        }
+
+@app.post("/sessions/{session_id}/puzzles/case002-forensic-analysis")
+def solve_case002_forensic_analysis(session_id: str, answer: dict):
+
+    if session_id not in sessions:
+        raise HTTPException(
+            status_code=404,
+            detail="Session not found"
+        )
+
+    session = sessions[session_id]
+    game_state = session["game_state"]
+
+    if session["case_id"] != "002":
+        raise HTTPException(
+            status_code=400,
+            detail="Forensic analysis puzzle is only available for Case 002"
+        )
+
+    case_file = f"data/case_{session['case_id'].zfill(3)}.json"
+    case = load_case(case_file)
+
+    puzzle_data = None
+    for puzzle in case.puzzles:
+        if puzzle.get("type") == "forensic_analysis":
+            puzzle_data = puzzle
+            break
+
+    if puzzle_data is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Case 002 forensic analysis puzzle not found"
+        )
+
+    puzzle = Case002ForensicAnalysisPuzzle(puzzle_data)
+    correct = puzzle.check_answer(answer)
+
+    attempt_number = get_puzzle_attempt_count(
+        session["db_session_id"],
+        session["player_id"],
+        "P02"
+    ) + 1
+
+    log_puzzle_attempt(
+        session["db_session_id"],
+        session["player_id"],
+        "P02",
+        attempt_number,
+        "success" if correct else "failure",
+        None
+    )
+
+    if correct:
+        if "forensic_analysis" not in game_state.solved_puzzles:
+            game_state.solved_puzzles.append(
+                "forensic_analysis"
+            )
+
+        for evidence_id in puzzle.get_unlocked_evidence():
+            if evidence_id not in game_state.unlocked_evidence:
+                game_state.unlocked_evidence.append(evidence_id)
+
+        game_state.current_puzzle = "provenance_review"
+
+        return {
+            "correct": True,
+            "message": "Correct! The missing weapon and trajectory evidence challenge the original single-attacker interpretation and raise concerns about the reliability of the physical evidence.",
+            "solved_puzzles": game_state.solved_puzzles,
+            "unlocked_evidence": game_state.unlocked_evidence,
+            "mistakes": game_state.mistakes
+        }
+
+    else:
+        game_state.mistakes += 1
+
+        return {
+            "correct": False,
+            "message": "Incorrect forensic analysis. Re-examine the missing weapon and projectile trajectories.",
+            "mistakes": game_state.mistakes
+        }
+
+@app.post("/sessions/{session_id}/puzzles/case002-provenance-review")
+def solve_case002_provenance_review(session_id: str, answer: dict):
+
+    if session_id not in sessions:
+        raise HTTPException(
+            status_code=404,
+            detail="Session not found"
+        )
+
+    session = sessions[session_id]
+    game_state = session["game_state"]
+
+    if session["case_id"] != "002":
+        raise HTTPException(
+            status_code=400,
+            detail="Provenance review puzzle is only available for Case 002"
+        )
+
+    case_file = f"data/case_{session['case_id'].zfill(3)}.json"
+    case = load_case(case_file)
+
+    puzzle_data = None
+    for puzzle in case.puzzles:
+        if puzzle.get("type") == "provenance_review":
+            puzzle_data = puzzle
+            break
+
+    if puzzle_data is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Case 002 provenance review puzzle not found"
+        )
+
+    puzzle = Case002ProvenanceReviewPuzzle(puzzle_data)
+    correct = puzzle.check_answer(answer)
+
+    attempt_number = get_puzzle_attempt_count(
+        session["db_session_id"],
+        session["player_id"],
+        "P03"
+    ) + 1
+
+    log_puzzle_attempt(
+        session["db_session_id"],
+        session["player_id"],
+        "P03",
+        attempt_number,
+        "success" if correct else "failure",
+        None
+    )
+
+    if correct:
+        if "provenance_review" not in game_state.solved_puzzles:
+            game_state.solved_puzzles.append(
+                "provenance_review"
+            )
+
+        for evidence_id in puzzle.get_unlocked_evidence():
+            if evidence_id not in game_state.unlocked_evidence:
+                game_state.unlocked_evidence.append(evidence_id)
+
+        game_state.current_puzzle = "timeline_and_access_mapping"
+
+        return {
+            "correct": True,
+            "message": "Correct! The independent storage evidence and recovered photographs expose weaknesses in the original Arjun-focused narrative.",
+            "solved_puzzles": game_state.solved_puzzles,
+            "unlocked_evidence": game_state.unlocked_evidence,
+            "mistakes": game_state.mistakes
+        }
+
+    else:
+        game_state.mistakes += 1
+
+        return {
+            "correct": False,
+            "message": "Incorrect provenance review. Re-examine the storage evidence, Arjun-related evidence, and recovered photographs.",
+            "mistakes": game_state.mistakes
+        }
+
+@app.post("/sessions/{session_id}/puzzles/case002-timeline-access")
+def solve_case002_timeline_access(session_id: str, answer: dict):
+
+    if session_id not in sessions:
+        raise HTTPException(
+            status_code=404,
+            detail="Session not found"
+        )
+
+    session = sessions[session_id]
+    game_state = session["game_state"]
+
+    if session["case_id"] != "002":
+        raise HTTPException(
+            status_code=400,
+            detail="Timeline and access mapping puzzle is only available for Case 002"
+        )
+
+    case_file = f"data/case_{session['case_id'].zfill(3)}.json"
+    case = load_case(case_file)
+
+    puzzle_data = None
+    for puzzle in case.puzzles:
+        if puzzle.get("type") == "timeline_and_access_mapping":
+            puzzle_data = puzzle
+            break
+
+    if puzzle_data is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Case 002 timeline and access mapping puzzle not found"
+        )
+
+    puzzle = Case002TimelineAccessMappingPuzzle(puzzle_data)
+    correct = puzzle.check_answer(answer)
+
+    attempt_number = get_puzzle_attempt_count(
+        session["db_session_id"],
+        session["player_id"],
+        "P04"
+    ) + 1
+
+    log_puzzle_attempt(
+        session["db_session_id"],
+        session["player_id"],
+        "P04",
+        attempt_number,
+        "success" if correct else "failure",
+        None
+    )
+
+    if correct:
+        if "timeline_and_access_mapping" not in game_state.solved_puzzles:
+            game_state.solved_puzzles.append(
+                "timeline_and_access_mapping"
+            )
+
+        for evidence_id in puzzle.get_unlocked_evidence():
+            if evidence_id not in game_state.unlocked_evidence:
+                game_state.unlocked_evidence.append(evidence_id)
+
+        game_state.current_puzzle = "hypothesis_management"
+
+        return {
+            "correct": True,
+            "message": "Correct! Daniel's timeline requires verification, while Vikram's access establishes an opportunity to manipulate evidence without by itself proving murder involvement.",
+            "solved_puzzles": game_state.solved_puzzles,
+            "unlocked_evidence": game_state.unlocked_evidence,
+            "mistakes": game_state.mistakes
+        }
+
+    else:
+        game_state.mistakes += 1
+
+        return {
+            "correct": False,
+            "message": "Incorrect timeline and access analysis. Re-examine Daniel's movements and Vikram's evidence access.",
+            "mistakes": game_state.mistakes
+        }
+
+@app.post("/sessions/{session_id}/puzzles/case002-hypothesis-management")
+def solve_case002_hypothesis_management(session_id: str, answer: dict):
+
+    if session_id not in sessions:
+        raise HTTPException(
+            status_code=404,
+            detail="Session not found"
+        )
+
+    session = sessions[session_id]
+    game_state = session["game_state"]
+
+    if session["case_id"] != "002":
+        raise HTTPException(
+            status_code=400,
+            detail="Hypothesis management puzzle is only available for Case 002"
+        )
+
+    case_file = f"data/case_{session['case_id'].zfill(3)}.json"
+    case = load_case(case_file)
+
+    puzzle_data = None
+
+    for puzzle in case.puzzles:
+        if puzzle.get("type") == "hypothesis_management":
+            puzzle_data = puzzle
+            break
+
+    if puzzle_data is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Case 002 hypothesis management puzzle not found"
+        )
+
+    puzzle = Case002HypothesisManagementPuzzle(puzzle_data)
+    correct = puzzle.check_answer(answer)
+
+    attempt_number = get_puzzle_attempt_count(
+        session["db_session_id"],
+        session["player_id"],
+        "P05"
+    ) + 1
+
+    log_puzzle_attempt(
+        session["db_session_id"],
+        session["player_id"],
+        "P05",
+        attempt_number,
+        "success" if correct else "failure",
+        None
+    )
+
+    if correct:
+        if "hypothesis_management" not in game_state.solved_puzzles:
+            game_state.solved_puzzles.append(
+                "hypothesis_management"
+            )
+
+        for evidence_id in puzzle.get_unlocked_evidence():
+            if evidence_id not in game_state.unlocked_evidence:
+                game_state.unlocked_evidence.append(evidence_id)
+
+        game_state.current_puzzle = None
+        game_state.game_over = True
+
+        return {
+            "correct": True,
+            "message": "Correct! The final reconstruction separates the murder from the later evidence manipulation, rejects the original Arjun narrative, identifies Daniel as the supported murderer hypothesis, and preserves uncertainty where the evidence is insufficient.",
+            "solved_puzzles": game_state.solved_puzzles,
+            "unlocked_evidence": game_state.unlocked_evidence,
+            "mistakes": game_state.mistakes,
+            "game_over": game_state.game_over
+        }
+
+    else:
+        game_state.mistakes += 1
+
+        return {
+            "correct": False,
+            "message": "Incorrect final reconstruction. Reassess which hypotheses are supported, contradicted, or unresolved.",
             "mistakes": game_state.mistakes
         }
