@@ -1,0 +1,182 @@
+:root {
+  /* Strict Noir Palette: ONLY Black, White, Blood Red */
+  --bg-darkest: #050507;
+  --bg-dark: #0a0a0f;
+  --bg-card: #111116;
+  --bg-card-hover: #181822;
+  --bg-paper: #f4f3ef;
+  --bg-paper-line: #dcd8cf;
+  --bg-paper-dark: #121218;
+
+  --text-primary: #ffffff;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
+  --text-dark: #0a0a0e;
+
+  /* Blood Red Spectrum */
+  --blood-red: #c01515;
+  --blood-red-deep: #7f1212;
+  --blood-red-bright: #e52525;
+  --blood-red-dim: rgba(192, 21, 21, 0.18);
+  --blood-red-glow: rgba(229, 37, 37, 0.4);
+
+  /* Comic Noir Borders & Shadows */
+  --border-subtle: #27272a;
+  --border-medium: #3f3f46;
+  --border-heavy: #ffffff;
+  --border-alert: 2px solid var(--blood-red);
+
+  /* Typography */
+  --font-headline: 'Impact', 'Franklin Gothic Bold', 'Arial Black', sans-serif;
+  --font-mono: 'Courier New', Courier, 'Special Elite', monospace;
+  --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+  --transition-fast: 0.15s ease;
+  --transition-smooth: 0.25s ease-out;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-darkest);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  line-height: 1.5;
+  overflow-x: hidden;
+  min-height: 100vh;
+  /* Gritty Comic Halftone Texture */
+  background-image: 
+    radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.05) 1px, transparent 0);
+  background-size: 14px 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-dark);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-medium);
+  border-radius: 1px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--blood-red-bright);
+}
+
+/* Stencil & Stamp Badges */
+.stamp {
+  display: inline-block;
+  font-family: var(--font-headline);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  padding: 3px 8px;
+  border: 2px solid currentColor;
+  font-weight: 800;
+  font-size: 0.75rem;
+}
+
+.stamp-red {
+  color: var(--blood-red-bright);
+  border-color: var(--blood-red);
+  background: var(--blood-red-dim);
+  box-shadow: 0 0 10px rgba(192, 21, 21, 0.3);
+}
+
+.stamp-white {
+  color: var(--text-primary);
+  border-color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 18px;
+  font-family: var(--font-headline);
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-weight: bold;
+  cursor: pointer;
+  border: 2px solid var(--border-medium);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  transition: all var(--transition-fast);
+  user-select: none;
+}
+
+.btn:hover {
+  border-color: var(--text-primary);
+  background: var(--bg-card-hover);
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn-primary {
+  background: var(--blood-red);
+  border-color: var(--blood-red-bright);
+  color: #ffffff;
+}
+
+.btn-primary:hover {
+  background: var(--blood-red-bright);
+  box-shadow: 0 0 14px var(--blood-red-glow);
+}
+
+.btn-outline-red {
+  background: transparent;
+  border-color: var(--blood-red);
+  color: var(--blood-red-bright);
+}
+
+.btn-outline-red:hover {
+  background: var(--blood-red-dim);
+  border-color: var(--blood-red-bright);
+  color: #ffffff;
+}
+
+.btn-disabled, .btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Status Indicators */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 3px 8px;
+  border: 1px solid var(--border-medium);
+  background: var(--bg-dark);
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-muted);
+}
+
+.status-dot.active {
+  background: var(--blood-red-bright);
+  box-shadow: 0 0 6px var(--blood-red);
+}
