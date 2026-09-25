@@ -8,13 +8,18 @@ from src.game import game_state
 from src.game.game_state import GameState
 from src.game.timeline_puzzle import TimelinePuzzle
 from src.game.employment_puzzle import EmploymentPuzzle
+from src.game.document_analysis_puzzle import DocumentAnalysisPuzzle
 from src.game.behavior_comparison_puzzle import BehaviorComparisonPuzzle
 from src.game.connection_puzzle import ConnectionPuzzle
+from src.game.relationship_mapping_puzzle import RelationshipMappingPuzzle
 from src.game.forensic_analysis_puzzle import ForensicAnalysisPuzzle
 from src.game.field_evidence_analysis_puzzle import FieldEvidenceAnalysisPuzzle
 from src.game.contradictory_puzzle import ContradictoryPuzzle
 from src.game.missing_record_puzzle import MissingRecordPuzzle
 from src.game.hypothesis_management_puzzle import HypothesisManagementPuzzle
+from src.game.timeline_reconstruction_puzzle import TimelineReconstructionPuzzle
+from src.game.physical_evidence_analysis_puzzle import PhysicalEvidenceAnalysisPuzzle
+from src.game.case015_hypothesis_puzzle import Case015HypothesisPuzzle
 from src.database.player_session import create_player, create_game_session, add_player_to_session
 from src.database.puzzle_logger import log_puzzle_attempt, get_puzzle_attempt_count
 from src.database.action_logger import log_player_action
@@ -301,6 +306,93 @@ def solve_timeline(session_id: str, answer: TimelineAnswer):
             "message": "Incorrect order. Try again.",
             "mistakes": game_state.mistakes
         }
+
+@app.post("/sessions/{session_id}/puzzles/document-analysis")
+def solve_document_analysis(
+    session_id: str,
+    answer: dict
+    ):
+
+        if session_id not in sessions:
+            raise HTTPException(
+                status_code=404,
+                detail="Session not found"
+            )
+
+        session = sessions[session_id]
+        game_state = session["game_state"]
+
+        # Load the case selected for this session
+        case_file = f"data/case_{session['case_id'].zfill(3)}.json"
+        case = load_case(case_file)
+
+        # Get document analysis puzzle data
+        puzzle_data = None
+
+        for puzzle in case.puzzles:
+            if puzzle.get("type") == "document_analysis":
+                puzzle_data = puzzle
+                break
+
+        if puzzle_data is None:
+            raise HTTPException(
+                status_code=404,
+                detail="Document analysis puzzle not found"
+            )
+
+        # Create puzzle
+        puzzle = DocumentAnalysisPuzzle(puzzle_data)
+
+        # Check player's answer
+        correct = puzzle.check_answer(answer)
+
+        attempt_number = get_puzzle_attempt_count(
+            session["db_session_id"],
+            session["player_id"],
+            "P01"
+        ) + 1
+
+        log_puzzle_attempt(
+            session["db_session_id"],
+            session["player_id"],
+            "P01",
+            attempt_number,
+            "success" if correct else "failure",
+            None
+        )
+
+        if correct:
+
+            # Save puzzle as solved
+            if "document_analysis" not in game_state.solved_puzzles:
+                game_state.solved_puzzles.append("document_analysis")
+
+            # Unlock evidence
+            for evidence_id in puzzle.get_unlocked_evidence():
+
+                if evidence_id not in game_state.unlocked_evidence:
+                    game_state.unlocked_evidence.append(evidence_id)
+
+            game_state.current_puzzle = "relationship_mapping"
+
+            return {
+                "correct": True,
+                "message": "Correct! Document analysis completed.",
+                "solved_puzzles": game_state.solved_puzzles,
+                "unlocked_evidence": game_state.unlocked_evidence,
+                "mistakes": game_state.mistakes
+            }
+
+        else:
+
+            game_state.mistakes += 1
+
+            return {
+                "correct": False,
+                "message": "Incorrect analysis. Try again.",
+                "mistakes": game_state.mistakes
+            }
+    
 @app.post("/sessions/{session_id}/puzzles/employment")
 def solve_employment(
     session_id: str,
@@ -808,3 +900,348 @@ def get_player_behaviour(session_id: str):
     return {
         "message": "Player behaviour calculated successfully."
     }
+
+@app.post("/sessions/{session_id}/puzzles/relationship-mapping")
+def solve_relationship_mapping(
+    session_id: str,
+    answer: dict
+):
+
+    if session_id not in sessions:
+        raise HTTPException(
+            status_code=404,
+            detail="Session not found"
+        )
+
+    session = sessions[session_id]
+    game_state = session["game_state"]
+
+    # Load the case selected for this session
+    case_file = f"data/case_{session['case_id'].zfill(3)}.json"
+    case = load_case(case_file)
+
+    # Get relationship mapping puzzle data
+    puzzle_data = None
+
+    for puzzle_data_item in case.puzzles:
+        if puzzle_data_item.get("type") == "relationship_mapping":
+            puzzle_data = puzzle_data_item
+            break
+
+    if puzzle_data is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Relationship mapping puzzle not found"
+        )
+
+    # Create puzzle
+    puzzle = RelationshipMappingPuzzle(puzzle_data)
+
+    # Check player's answer
+    correct = puzzle.check_answer(answer)
+
+    attempt_number = get_puzzle_attempt_count(
+        session["db_session_id"],
+        session["player_id"],
+        "P02"
+    ) + 1
+
+    log_puzzle_attempt(
+        session["db_session_id"],
+        session["player_id"],
+        "P02",
+        attempt_number,
+        "success" if correct else "failure",
+        None
+    )
+
+    if correct:
+
+        # Save puzzle as solved
+        if "relationship_mapping" not in game_state.solved_puzzles:
+            game_state.solved_puzzles.append("relationship_mapping")
+
+        # Unlock evidence
+        for evidence_id in puzzle.get_unlocked_evidence():
+
+            if evidence_id not in game_state.unlocked_evidence:
+                game_state.unlocked_evidence.append(evidence_id)
+
+        game_state.current_puzzle = "timeline_reconstruction"
+
+        return {
+            "correct": True,
+            "message": "Correct! Relationship mapping completed.",
+            "solved_puzzles": game_state.solved_puzzles,
+            "unlocked_evidence": game_state.unlocked_evidence,
+            "mistakes": game_state.mistakes
+        }
+
+    else:
+
+        game_state.mistakes += 1
+
+        return {
+            "correct": False,
+            "message": "Incorrect relationship analysis. Try again.",
+            "mistakes": game_state.mistakes
+        }
+
+@app.post("/sessions/{session_id}/puzzles/timeline-reconstruction")
+def solve_timeline_reconstruction(
+    session_id: str,
+    answer: dict
+):
+
+    if session_id not in sessions:
+        raise HTTPException(
+            status_code=404,
+            detail="Session not found"
+        )
+
+    session = sessions[session_id]
+    game_state = session["game_state"]
+
+    # Load the case selected for this session
+    case_file = f"data/case_{session['case_id'].zfill(3)}.json"
+    case = load_case(case_file)
+
+    # Get timeline reconstruction puzzle data
+    puzzle_data = None
+
+    for puzzle_data_item in case.puzzles:
+        if puzzle_data_item.get("type") == "timeline_reconstruction":
+            puzzle_data = puzzle_data_item
+            break
+
+    if puzzle_data is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Timeline reconstruction puzzle not found"
+        )
+
+    # Create puzzle
+    puzzle = TimelineReconstructionPuzzle(puzzle_data)
+
+    # Check player's answer
+    correct = puzzle.check_answer(answer)
+
+    attempt_number = get_puzzle_attempt_count(
+        session["db_session_id"],
+        session["player_id"],
+        "P03"
+    ) + 1
+
+    log_puzzle_attempt(
+        session["db_session_id"],
+        session["player_id"],
+        "P03",
+        attempt_number,
+        "success" if correct else "failure",
+        None
+    )
+
+    if correct:
+
+        if "timeline_reconstruction" not in game_state.solved_puzzles:
+            game_state.solved_puzzles.append("timeline_reconstruction")
+
+        # Unlock evidence
+        for evidence_id in puzzle.get_unlocked_evidence():
+
+            if evidence_id not in game_state.unlocked_evidence:
+                game_state.unlocked_evidence.append(evidence_id)
+
+        game_state.current_puzzle = "physical_evidence_analysis"
+
+        return {
+            "correct": True,
+            "message": "Correct! Timeline reconstruction completed.",
+            "solved_puzzles": game_state.solved_puzzles,
+            "unlocked_evidence": game_state.unlocked_evidence,
+            "mistakes": game_state.mistakes
+        }
+
+    else:
+
+        game_state.mistakes += 1
+
+        return {
+            "correct": False,
+            "message": "Incorrect timeline reconstruction. Try again.",
+            "mistakes": game_state.mistakes
+        }
+
+@app.post("/sessions/{session_id}/puzzles/physical-evidence-analysis")
+def solve_physical_evidence_analysis(
+    session_id: str,
+    answer: dict
+):
+
+    if session_id not in sessions:
+        raise HTTPException(
+            status_code=404,
+            detail="Session not found"
+        )
+
+    session = sessions[session_id]
+    game_state = session["game_state"]
+
+    # Load the case selected for this session
+    case_file = f"data/case_{session['case_id'].zfill(3)}.json"
+    case = load_case(case_file)
+
+    # Get physical evidence analysis puzzle data
+    puzzle_data = None
+
+    for puzzle_data_item in case.puzzles:
+        if puzzle_data_item.get("type") == "physical_evidence_analysis":
+            puzzle_data = puzzle_data_item
+            break
+
+    if puzzle_data is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Physical evidence analysis puzzle not found"
+        )
+
+    # Create puzzle
+    puzzle = PhysicalEvidenceAnalysisPuzzle(puzzle_data)
+
+    # Check player's answer
+    correct = puzzle.check_answer(answer)
+
+    attempt_number = get_puzzle_attempt_count(
+        session["db_session_id"],
+        session["player_id"],
+        "P04"
+    ) + 1
+
+    log_puzzle_attempt(
+        session["db_session_id"],
+        session["player_id"],
+        "P04",
+        attempt_number,
+        "success" if correct else "failure",
+        None
+    )
+
+    if correct:
+
+        if "physical_evidence_analysis" not in game_state.solved_puzzles:
+            game_state.solved_puzzles.append("physical_evidence_analysis")
+
+        # Unlock evidence
+        for evidence_id in puzzle.get_unlocked_evidence():
+
+            if evidence_id not in game_state.unlocked_evidence:
+                game_state.unlocked_evidence.append(evidence_id)
+
+        game_state.current_puzzle = "hypothesis_management"
+
+        return {
+            "correct": True,
+            "message": "Correct! Physical evidence analysis completed.",
+            "solved_puzzles": game_state.solved_puzzles,
+            "unlocked_evidence": game_state.unlocked_evidence,
+            "mistakes": game_state.mistakes
+        }
+
+    else:
+
+        game_state.mistakes += 1
+
+        return {
+            "correct": False,
+            "message": "Incorrect physical evidence analysis. Try again.",
+            "mistakes": game_state.mistakes
+        }
+
+@app.post("/sessions/{session_id}/puzzles/case015-hypothesis")
+def solve_case015_hypothesis(
+    session_id: str,
+    answer: dict
+):
+    if session_id not in sessions:
+        raise HTTPException(
+            status_code=404,
+            detail="Session not found"
+        )
+
+    session = sessions[session_id]
+    game_state = session["game_state"]
+
+    # Load the case
+    case_file = f"data/case_{session['case_id'].zfill(3)}.json"
+    case = load_case(case_file)
+
+    # Make sure this endpoint is only used for Case 015
+    if session["case_id"] != "015":
+        raise HTTPException(
+            status_code=400,
+            detail="This puzzle is only available for Case 015"
+        )
+
+    puzzle_data = None
+
+    for puzzle_data_item in case.puzzles:
+        if puzzle_data_item.get("type") == "hypothesis_management":
+            puzzle_data = puzzle_data_item
+            break
+
+    if puzzle_data is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Hypothesis management puzzle not found"
+        )
+
+    puzzle = Case015HypothesisPuzzle(puzzle_data)
+
+    correct = puzzle.check_answer(answer)
+
+    attempt_number = get_puzzle_attempt_count(
+        session["db_session_id"],
+        session["player_id"],
+        "P05"
+    ) + 1
+
+    log_puzzle_attempt(
+        session["db_session_id"],
+        session["player_id"],
+        "P05",
+        attempt_number,
+        "success" if correct else "failure",
+        None
+    )
+
+    if correct:
+
+        if "hypothesis_management" not in game_state.solved_puzzles:
+            game_state.solved_puzzles.append("hypothesis_management")
+
+        for evidence_id in puzzle.get_unlocked_evidence():
+
+            if evidence_id not in game_state.unlocked_evidence:
+                game_state.unlocked_evidence.append(evidence_id)
+
+        game_state.game_over = True
+
+        return {
+            "correct": True,
+            "message": "Correct! Final causal graph completed.",
+            "solved_puzzles": game_state.solved_puzzles,
+            "unlocked_evidence": game_state.unlocked_evidence,
+            "mistakes": game_state.mistakes,
+            "game_over": game_state.game_over
+        }
+
+    else:
+
+        game_state.mistakes += 1
+
+        return {
+            "correct": False,
+            "message": "Incorrect final causal graph. Try again.",
+            "mistakes": game_state.mistakes,
+            "game_over": game_state.game_over
+        }
