@@ -343,7 +343,7 @@ def solve_employment(
     # Choose the puzzle implementation based on the JSON type
     puzzle_type = puzzle_data.get("type")
 
-    if puzzle_type == "employment":
+    if puzzle_type == "employment" or puzzle_type == "record_check":
         puzzle = EmploymentPuzzle(puzzle_data)
 
     elif puzzle_type == "behavior_comparison":
@@ -450,7 +450,7 @@ def solve_connection(
     if puzzle_type == "forensic_analysis":
         puzzle = ForensicAnalysisPuzzle(puzzle_data)
 
-    elif puzzle_type == "connection":
+    elif puzzle_type == "connection" or puzzle_type == "relationship_mapping":
         puzzle = ConnectionPuzzle(puzzle_data)
 
     else:
@@ -562,10 +562,8 @@ def solve_contradictory(session_id: str, answer: ContradictoryAnswer):
 
     if puzzle_type == "field_evidence_analysis":
         puzzle = FieldEvidenceAnalysisPuzzle(puzzle_data)
-
-    elif puzzle_type == "contradictory":
+    elif puzzle_type == "contradictory" or puzzle_type == "statement_analysis":
         puzzle = ContradictoryPuzzle(puzzle_data)
-
     else:
         raise HTTPException(
             status_code=400,
@@ -715,10 +713,8 @@ def solve_missing_record(
 
     if puzzle_type == "hypothesis_management":
         puzzle = HypothesisManagementPuzzle(puzzle_data)
-
-    elif puzzle_type == "missing_record":
+    elif puzzle_type == "missing_record" or puzzle_type == "investigation_gap":
         puzzle = MissingRecordPuzzle(puzzle_data)
-
     else:
         raise HTTPException(
             status_code=400,
