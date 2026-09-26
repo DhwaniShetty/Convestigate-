@@ -10,6 +10,8 @@ import { renderFinalAnswer } from './components/finalAnswer.js';
 import { renderResultsScreen } from './components/resultsScreen.js';
 import { cinematic } from './effects/cinematic.js';
 
+import { playBootSplash } from './effects/bootSplash.js';
+
 class App {
   constructor() {
     this.navContainer = document.getElementById('hud-nav-root');
@@ -95,6 +97,11 @@ class App {
 }
 
 // Bootstrap application on DOM ready
+// document.addEventListener('DOMContentLoaded', () => {
+//   window.convestigateApp = new App();
+// });
+
 document.addEventListener('DOMContentLoaded', () => {
   window.convestigateApp = new App();
+  playBootSplash();
 });
