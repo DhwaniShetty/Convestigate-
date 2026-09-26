@@ -1,0 +1,444 @@
+{
+  "case_id": "002",
+  "title": "THE EVIDENCE ROOM",
+  "genre": "murder_mystery_cover_up",
+  "status": "prototype",
+  "difficulty": "hard",
+  "victim": {
+    "name": "Maya Rao",
+    "age": 22,
+    "occupation": "law_student",
+    "status": "deceased",
+    "note": "Single mother; murdered inside the family home. Her infant daughter is found alive."
+  },
+  "suspects": [
+    {
+      "id": "501",
+      "name": "Arjun Rao",
+      "occupation": "unknown",
+      "relationship_to_victim": "brother",
+      "note": "Officially blamed early in the investigation. Physical evidence against him is weak and becomes increasingly questionable."
+    },
+    {
+      "id": "502",
+      "name": "Daniel Mehta",
+      "occupation": "unknown",
+      "relationship_to_victim": "father of Maya's daughter",
+      "note": "Had access to Maya and potential motive. His timeline contains contradictions that become important later."
+    },
+    {
+      "id": "503",
+      "name": "Vikram Sethi",
+      "occupation": "investigating_officer",
+      "relationship_to_victim": "case investigator",
+      "note": "Had access to evidence and case records. Possible corruption, protection, investigative failure, or participation in the cover-up must be considered."
+    }
+  ],
+  "timeline": [
+    {
+      "time": "day_0",
+      "event": "Maya is found dead inside the family home, concealed under a bed; her infant daughter is found alive"
+    },
+    {
+      "time": "day_0",
+      "event": "Initial scene evidence appears to implicate Arjun"
+    },
+    {
+      "time": "day_1",
+      "event": "The official investigation develops around Arjun as the primary suspect"
+    },
+    {
+      "time": "week_1",
+      "event": "Scene documentation is found not to perfectly agree with later-recovered information"
+    },
+    {
+      "time": "week_2",
+      "event": "Chain-of-custody records are found to contain gaps; a case-connected weapon is discovered missing"
+    },
+    {
+      "time": "week_3",
+      "event": "A storage-unit recovery produces evidence not properly reflected in the original investigation"
+    },
+    {
+      "time": "week_4",
+      "event": "Forensic reconstruction suggests the official version of the scene is incomplete"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "E01",
+      "name": "Original Scene Photographs",
+      "type": "photographic_record",
+      "description": "Establishes the initial physical scene. True but incomplete.",
+      "reliability": "medium",
+      "status": "locked",
+      "source": "Initial crime-scene unit",
+      "supports": [
+        "H1"
+      ],
+      "contradicts": [],
+      "unlocked_by": "P01"
+    },
+    {
+      "id": "E02",
+      "name": "Initial Police Scene Report",
+      "type": "official_record",
+      "description": "Compromised \u2014 contains information that conflicts with later material.",
+      "reliability": "low",
+      "status": "locked",
+      "source": "First responding officers",
+      "supports": [
+        "H1",
+        "H6"
+      ],
+      "contradicts": [],
+      "unlocked_by": "P01"
+    },
+    {
+      "id": "E04",
+      "name": "Chain-of-Custody Log",
+      "type": "official_record",
+      "description": "Compromised \u2014 contains unexplained evidence-handling gaps.",
+      "reliability": "low",
+      "status": "locked",
+      "source": "Evidence room records",
+      "supports": [
+        "H4",
+        "H5"
+      ],
+      "contradicts": [],
+      "unlocked_by": "P01"
+    },
+    {
+      "id": "E11",
+      "name": "Evidence Transfer Discrepancy",
+      "type": "official_record",
+      "description": "Links a missing item to a break in the evidence chain.",
+      "reliability": "medium",
+      "status": "locked",
+      "source": "Evidence room records",
+      "supports": [
+        "H4",
+        "H5"
+      ],
+      "contradicts": [],
+      "unlocked_by": "P01"
+    },
+    {
+      "id": "E05",
+      "name": "Missing Weapon Record",
+      "type": "official_record",
+      "description": "Shows that an expected evidence item is absent from the trail.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Evidence inventory audit",
+      "supports": [
+        "H4",
+        "H5"
+      ],
+      "contradicts": [],
+      "unlocked_by": "P02"
+    },
+    {
+      "id": "E07",
+      "name": "Projectile / Trajectory Analysis",
+      "type": "forensic_record",
+      "description": "Challenges the single-attacker interpretation; suggests multiple positions and potentially multiple contributors to the scene.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Forensic reconstruction unit",
+      "supports": [
+        "H2",
+        "H3",
+        "H6"
+      ],
+      "contradicts": [
+        "H1"
+      ],
+      "unlocked_by": "P02"
+    },
+    {
+      "id": "E12",
+      "name": "Recovered Forensic Material",
+      "type": "forensic_record",
+      "description": "Provides evidence not represented correctly in the original case.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Storage-unit recovery, forensic review",
+      "supports": [
+        "H2",
+        "H6"
+      ],
+      "contradicts": [
+        "H1"
+      ],
+      "unlocked_by": "P02"
+    },
+    {
+      "id": "E06",
+      "name": "Storage-Unit Evidence",
+      "type": "physical_evidence",
+      "description": "Introduces an independent evidence trail outside the original case record.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Storage-unit recovery",
+      "supports": [
+        "H2",
+        "H6"
+      ],
+      "contradicts": [
+        "H1"
+      ],
+      "unlocked_by": "P03"
+    },
+    {
+      "id": "E03",
+      "name": "Arjun-Related Physical Evidence",
+      "type": "physical_evidence",
+      "description": "Weak / questionable \u2014 creates the original suspect narrative but weakens on provenance review.",
+      "reliability": "low",
+      "status": "locked",
+      "source": "Original crime-scene collection",
+      "supports": [
+        "H1"
+      ],
+      "contradicts": [
+        "H1"
+      ],
+      "unlocked_by": "P03"
+    },
+    {
+      "id": "E08",
+      "name": "Second Scene-Photo Set",
+      "type": "photographic_record",
+      "description": "Reveals contradictions with the official record.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Later-recovered photographic material",
+      "supports": [
+        "H6"
+      ],
+      "contradicts": [
+        "H1"
+      ],
+      "unlocked_by": "P03"
+    },
+    {
+      "id": "E09",
+      "name": "Daniel's Timeline",
+      "type": "witness_statement",
+      "description": "Partially reliable \u2014 contains contradictions requiring verification.",
+      "reliability": "medium",
+      "status": "locked",
+      "source": "Investigative interviews",
+      "supports": [
+        "H2"
+      ],
+      "contradicts": [],
+      "unlocked_by": "P04"
+    },
+    {
+      "id": "E10",
+      "name": "Vikram's Evidence-Access Record",
+      "type": "official_record",
+      "description": "Establishes opportunity to manipulate records.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Department access logs",
+      "supports": [
+        "H4",
+        "H5"
+      ],
+      "contradicts": [],
+      "unlocked_by": "P04"
+    },
+    {
+      "id": "E13",
+      "name": "Investigation Notes",
+      "type": "official_record",
+      "description": "Compromised / incomplete \u2014 shows how the original narrative developed.",
+      "reliability": "low",
+      "status": "locked",
+      "source": "Case file annotations",
+      "supports": [
+        "H4"
+      ],
+      "contradicts": [],
+      "unlocked_by": "P04"
+    },
+    {
+      "id": "E14",
+      "name": "Final Reconstructed Scene",
+      "type": "forensic_synthesis",
+      "description": "Allows the player to separate murder evidence from investigation manipulation.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Final forensic reconciliation",
+      "supports": [
+        "H2",
+        "H4",
+        "H6"
+      ],
+      "contradicts": [
+        "H1",
+        "H5"
+      ],
+      "unlocked_by": "P05"
+    }
+  ],
+  "puzzles": [
+    {
+      "id": "P01",
+      "name": "Crime Scene Reconstruction & Chain of Custody",
+      "type": "contradiction_analysis",
+      "description": "Compare scene photographs, reports, and physical descriptions to identify contradictions, then reconstruct who handled each evidence item and locate unexplained gaps.",
+      "unlocks": [
+        "E01",
+        "E02",
+        "E04",
+        "E11"
+      ]
+    },
+    {
+      "id": "P02",
+      "name": "Missing Weapon & Trajectory Reconstruction",
+      "type": "forensic_analysis",
+      "description": "Determine when the weapon disappeared from the evidence trail and who had access, then use projectile paths and positions to test whether one attacker could explain the scene.",
+      "unlocks": [
+        "E05",
+        "E07",
+        "E12"
+      ]
+    },
+    {
+      "id": "P03",
+      "name": "Storage Unit & Arjun Evidence Audit",
+      "type": "provenance_review",
+      "description": "Investigate recovered material and determine whether it contradicts the official case narrative, then test every item used against Arjun for provenance, reliability, and alternative explanations.",
+      "unlocks": [
+        "E06",
+        "E03",
+        "E08"
+      ]
+    },
+    {
+      "id": "P04",
+      "name": "Daniel Timeline & Investigator Access",
+      "type": "timeline_and_access_mapping",
+      "description": "Compare Daniel's stated movements with independent records, then map Vikram's access to evidence and case records without automatically equating access with guilt.",
+      "unlocks": [
+        "E09",
+        "E10",
+        "E13"
+      ]
+    },
+    {
+      "id": "P05",
+      "name": "Final Reconstruction",
+      "type": "hypothesis_management",
+      "critical": true,
+      "description": "Separate what happened during the murder from what happened during the investigation. A strong solution reconstructs the murder, identifies compromised evidence, explains the investigation's failures or manipulation, and distinguishes what is proven from what remains uncertain.",
+      "ai_initial_behavior": "Initially steers the player toward Arjun because that is the official narrative; if the player starts auditing evidence sources, the AI becomes less cooperative and presents more ambiguous framing.",
+      "design_constraint": "The murderer and the cover-up participant do not have to be the same person. The AI should never randomly change the underlying truth of evidence \u2014 adaptation controls access, timing, framing, and hints only.",
+      "unlocks": [
+        "E14"
+      ]
+    }
+  ],
+  "hypotheses": [
+    {
+      "id": "H1",
+      "statement": "Arjun killed Maya and the original investigation is substantially correct.",
+      "supporting_evidence": [
+        "E01",
+        "E02",
+        "E03"
+      ],
+      "contradicting_evidence": [
+        "E03",
+        "E07",
+        "E12",
+        "E06",
+        "E08",
+        "E14"
+      ],
+      "insufficient_evidence": [
+        "E03"
+      ],
+      "final_status": "contradicted"
+    },
+    {
+      "id": "H2",
+      "statement": "Daniel killed Maya and the investigation incorrectly focused on Arjun.",
+      "supporting_evidence": [
+        "E07",
+        "E09",
+        "E12",
+        "E06",
+        "E14"
+      ],
+      "contradicting_evidence": [],
+      "insufficient_evidence": [
+        "E09"
+      ],
+      "final_status": "supported"
+    },
+    {
+      "id": "H3",
+      "statement": "Multiple attackers were involved in the original crime.",
+      "supporting_evidence": [
+        "E07"
+      ],
+      "contradicting_evidence": [],
+      "insufficient_evidence": [
+        "E07"
+      ],
+      "final_status": "unresolved"
+    },
+    {
+      "id": "H4",
+      "statement": "The murder and the later evidence manipulation were carried out by different people.",
+      "supporting_evidence": [
+        "E04",
+        "E05",
+        "E10",
+        "E11",
+        "E13",
+        "E14"
+      ],
+      "contradicting_evidence": [],
+      "insufficient_evidence": [],
+      "final_status": "supported"
+    },
+    {
+      "id": "H5",
+      "statement": "Vikram Sethi was directly involved in the murder rather than merely the investigation.",
+      "supporting_evidence": [
+        "E04",
+        "E10"
+      ],
+      "contradicting_evidence": [
+        "E14"
+      ],
+      "insufficient_evidence": [
+        "E04",
+        "E10"
+      ],
+      "final_status": "contradicted"
+    },
+    {
+      "id": "H6",
+      "statement": "The physical evidence was altered enough that some original conclusions can no longer be treated as reliable.",
+      "supporting_evidence": [
+        "E06",
+        "E07",
+        "E08",
+        "E12",
+        "E14"
+      ],
+      "contradicting_evidence": [],
+      "insufficient_evidence": [],
+      "final_status": "supported"
+    }
+  ]
+}

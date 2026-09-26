@@ -1,6 +1,5 @@
 import json
-from db import get_connection
-
+from src.database.db import get_connection
 
 def load_case_to_database(json_file):
     # Read JSON file

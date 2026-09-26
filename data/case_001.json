@@ -1,0 +1,393 @@
+{
+  "case_id": "001",
+  "title": "THE LAST VOYAGE",
+  "genre": "murder_mystery",
+  "status": "prototype",
+  "difficulty": "medium",
+  "victim": {
+    "name": "Eleanor Voss",
+    "age": 58,
+    "occupation": "businesswoman",
+    "status": "missing_presumed_deceased",
+    "note": "Disappeared at sea; body never recovered."
+  },
+  "suspects": [
+    {
+      "id": "501",
+      "name": "Adrian Voss",
+      "age": 31,
+      "occupation": "unknown",
+      "relationship_to_victim": "son",
+      "note": "Survives the voyage; last known person with Eleanor; stands to benefit financially from her death."
+    },
+    {
+      "id": "502",
+      "name": "Marcus Voss",
+      "age": 62,
+      "occupation": "unknown",
+      "relationship_to_victim": "brother",
+      "note": "Complicated relationship with Eleanor; disputed parts of the family estate."
+    },
+    {
+      "id": "503",
+      "name": "Daniel Mercer",
+      "age": 46,
+      "occupation": "boat_mechanic",
+      "relationship_to_victim": "service_provider",
+      "note": "Performed maintenance before the voyage; claims everything was properly repaired."
+    }
+  ],
+  "timeline": [
+    {
+      "time": "08:10",
+      "event": "Eleanor and Adrian leave harbor"
+    },
+    {
+      "time": "11:40",
+      "event": "Weather begins deteriorating"
+    },
+    {
+      "time": "13:15",
+      "event": "Adrian reports engine trouble"
+    },
+    {
+      "time": "14:02",
+      "event": "Emergency communication sent"
+    },
+    {
+      "time": "14:20",
+      "event": "Adrian enters the life raft"
+    },
+    {
+      "time": "15:05",
+      "event": "Rescue vessel finds Adrian"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "E01",
+      "name": "Harbor Departure Record",
+      "type": "official_record",
+      "description": "Establishes the voyage's departure time and passengers.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Harbor authority log",
+      "supports": [
+        "H1"
+      ],
+      "contradicts": [],
+      "unlocked_by": "P01"
+    },
+    {
+      "id": "E02",
+      "name": "Weather Report",
+      "type": "official_record",
+      "description": "Confirms deteriorating conditions during the voyage; supports the accident theory on its own.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Meteorological service",
+      "supports": [
+        "H1"
+      ],
+      "contradicts": [],
+      "unlocked_by": "P01"
+    },
+    {
+      "id": "E04",
+      "name": "Repair Records",
+      "type": "maintenance_record",
+      "description": "Establishes boat maintenance performed before the voyage.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Marina service records",
+      "supports": [
+        "H1",
+        "H2"
+      ],
+      "contradicts": [],
+      "unlocked_by": "P01"
+    },
+    {
+      "id": "E08",
+      "name": "Mechanic Statement",
+      "type": "witness_statement",
+      "description": "Daniel Mercer's account of the repair; introduces a contradiction with the recorded work.",
+      "reliability": "medium",
+      "status": "locked",
+      "source": "Investigative interview",
+      "supports": [],
+      "contradicts": [
+        "H1"
+      ],
+      "unlocked_by": "P01"
+    },
+    {
+      "id": "E05",
+      "name": "Financial Records",
+      "type": "financial_record",
+      "description": "Establishes possible motive tied to Adrian's account access.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Bank records",
+      "supports": [
+        "H3"
+      ],
+      "contradicts": [],
+      "unlocked_by": "P02"
+    },
+    {
+      "id": "E06",
+      "name": "Estate Document",
+      "type": "legal_record",
+      "description": "Shows inheritance changes Eleanor was preparing before the voyage.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Estate attorney records",
+      "supports": [
+        "H3"
+      ],
+      "contradicts": [],
+      "unlocked_by": "P02"
+    },
+    {
+      "id": "E11",
+      "name": "Account-Access Records",
+      "type": "financial_record",
+      "description": "Links Adrian directly to the financial motive.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Bank access logs",
+      "supports": [
+        "H3"
+      ],
+      "contradicts": [],
+      "unlocked_by": "P02"
+    },
+    {
+      "id": "E10",
+      "name": "Family History",
+      "type": "background_record",
+      "description": "Eleanor's father died years earlier under natural circumstances; Adrian had previously asked about that estate. A deliberate red herring tempting the player toward an unsupported pattern.",
+      "reliability": "medium",
+      "status": "locked",
+      "source": "Family records, prior investigation notes",
+      "supports": [],
+      "contradicts": [],
+      "unlocked_by": "P02"
+    },
+    {
+      "id": "E07",
+      "name": "Damage Pattern",
+      "type": "forensic_record",
+      "description": "Physical damage inconsistent with simple mechanical failure; challenges the accident theory.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Marine forensic examination",
+      "supports": [
+        "H3"
+      ],
+      "contradicts": [
+        "H1"
+      ],
+      "unlocked_by": "P03"
+    },
+    {
+      "id": "E12",
+      "name": "Original Repair Documentation",
+      "type": "maintenance_record",
+      "description": "Reveals the opportunity window for sabotage.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Marina service archive",
+      "supports": [
+        "H3"
+      ],
+      "contradicts": [],
+      "unlocked_by": "P03"
+    },
+    {
+      "id": "E09",
+      "name": "Emergency Communication Log",
+      "type": "digital_record",
+      "description": "Contradicts the timing in Adrian's account.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Coast guard communication log",
+      "supports": [
+        "H3"
+      ],
+      "contradicts": [],
+      "unlocked_by": "P04"
+    },
+    {
+      "id": "E13",
+      "name": "Eleanor's Private Note",
+      "type": "personal_document",
+      "description": "Shows Eleanor suspected Adrian of financial irregularities before the voyage.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Personal effects",
+      "supports": [
+        "H3"
+      ],
+      "contradicts": [],
+      "unlocked_by": "P04"
+    },
+    {
+      "id": "E03",
+      "name": "Adrian's Rescue Statement",
+      "type": "witness_statement",
+      "description": "Adrian's initial account of the sinking; true but incomplete.",
+      "reliability": "medium",
+      "status": "locked",
+      "source": "Rescue debrief",
+      "supports": [
+        "H1"
+      ],
+      "contradicts": [],
+      "unlocked_by": "P05"
+    },
+    {
+      "id": "E14",
+      "name": "Adrian's Revised Statement",
+      "type": "witness_statement",
+      "description": "A later, deceptive revision that provides the final contradiction against Adrian's original account.",
+      "reliability": "low",
+      "status": "locked",
+      "source": "Follow-up interview",
+      "supports": [
+        "H3"
+      ],
+      "contradicts": [
+        "H1"
+      ],
+      "unlocked_by": "P05"
+    }
+  ],
+  "puzzles": [
+    {
+      "id": "P01",
+      "name": "Voyage Timeline & Repair Reconstruction",
+      "type": "timeline_and_maintenance_analysis",
+      "description": "Reconstruct the sequence of departure, weather deterioration, engine trouble, emergency communication, evacuation, and rescue, then determine who repaired what, when, and why \u2014 the records contain an inconsistency between recorded and actual work.",
+      "unlocks": [
+        "E01",
+        "E02",
+        "E04",
+        "E08"
+      ]
+    },
+    {
+      "id": "P02",
+      "name": "Financial Investigation & Family History",
+      "type": "motive_analysis",
+      "description": "Examine financial records, estate changes, and account-access history to establish possible motive, then investigate the grandfather/estate pattern \u2014 this is designed to tempt the player toward an unsupported conclusion.",
+      "unlocks": [
+        "E05",
+        "E06",
+        "E11",
+        "E10"
+      ]
+    },
+    {
+      "id": "P03",
+      "name": "Damage Analysis",
+      "type": "forensic_analysis",
+      "description": "Examine the damage pattern and determine whether it is consistent with a simple mechanical failure.",
+      "unlocks": [
+        "E07",
+        "E12"
+      ]
+    },
+    {
+      "id": "P04",
+      "name": "Communication Timeline & Eleanor's Hidden Information",
+      "type": "timeline_and_document_analysis",
+      "description": "Compare Adrian's emergency communication timing with his account, then discover information indicating Eleanor suspected Adrian of financial irregularities.",
+      "unlocks": [
+        "E09",
+        "E13"
+      ]
+    },
+    {
+      "id": "P05",
+      "name": "Adrian's Contradictions & Final Reconstruction",
+      "type": "hypothesis_management",
+      "critical": true,
+      "description": "Compare Adrian's initial and revised statements, identify inconsistencies, and assemble the final reasoning.",
+      "ai_initial_behavior": "If the player quickly identifies Adrian as suspicious, the AI can encourage examination of the family-history pattern, creating a confirmation-bias trap.",
+      "design_constraint": "The player may identify the correct suspect but should still receive a weaker reasoning score if the explanation is unsupported; conversely, credit should be given for correctly identifying what the evidence cannot establish (the exact mechanism/moment of Eleanor's death).",
+      "unlocks": [
+        "E03",
+        "E14"
+      ]
+    }
+  ],
+  "hypotheses": [
+    {
+      "id": "H1",
+      "statement": "The boat suffered an accident and Eleanor died as a result.",
+      "supporting_evidence": [
+        "E01",
+        "E02",
+        "E04"
+      ],
+      "contradicting_evidence": [
+        "E07",
+        "E14",
+        "E08"
+      ],
+      "insufficient_evidence": [
+        "E02"
+      ],
+      "final_status": "contradicted"
+    },
+    {
+      "id": "H2",
+      "statement": "Someone other than Adrian deliberately damaged the boat.",
+      "supporting_evidence": [
+        "E04"
+      ],
+      "contradicting_evidence": [
+        "E05",
+        "E06",
+        "E11",
+        "E12"
+      ],
+      "insufficient_evidence": [],
+      "final_status": "contradicted"
+    },
+    {
+      "id": "H3",
+      "statement": "Adrian deliberately sabotaged the boat to make Eleanor's disappearance look accidental.",
+      "supporting_evidence": [
+        "E05",
+        "E06",
+        "E11",
+        "E07",
+        "E12",
+        "E09",
+        "E13",
+        "E14"
+      ],
+      "contradicting_evidence": [],
+      "insufficient_evidence": [
+        "E14"
+      ],
+      "final_status": "supported"
+    },
+    {
+      "id": "H4",
+      "statement": "Someone else manipulated the boat and Adrian is being framed.",
+      "supporting_evidence": [],
+      "contradicting_evidence": [
+        "E05",
+        "E06",
+        "E11",
+        "E13"
+      ],
+      "insufficient_evidence": [],
+      "final_status": "contradicted"
+    }
+  ]
+}

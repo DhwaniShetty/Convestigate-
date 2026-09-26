@@ -4,38 +4,35 @@
   "genre": "missing_person_mystery",
   "status": "prototype",
   "difficulty": "medium",
-
-  "subject": {
+  "victim": {
     "name": "Bryce",
     "age": 19,
     "occupation": "university_student",
     "status": "missing"
   },
-
-  "persons_of_interest": [
+  "suspects": [
     {
-      "id": "701",
+      "id": "501",
       "name": "Unidentified Motorist",
       "role": "unknown_third_party",
       "description": "A driver possibly present near the crash site in the window before it was reported.",
-      "relationship_to_subject": "unknown"
+      "relationship_to_victim": "unknown"
     },
     {
-      "id": "702",
+      "id": "502",
       "name": "Tom Ridley",
       "age": 41,
       "occupation": "family_friend",
-      "relationship_to_subject": "family_acquaintance"
+      "relationship_to_victim": "family_acquaintance"
     },
     {
-      "id": "703",
+      "id": "503",
       "name": "Sarah",
       "age": 19,
       "occupation": "university_student",
-      "relationship_to_subject": "recent_romantic_partner"
+      "relationship_to_victim": "recent_romantic_partner"
     }
   ],
-
   "related_persons": [
     {
       "id": "801",
@@ -52,16 +49,32 @@
       "connection_to_subject": "professional_contact"
     }
   ],
-
   "timeline": [
-    { "time": "03:10", "event": "Bryce leaves a gathering acting erratically" },
-    { "time": "04:12", "event": "Bryce calls Sarah; the call is described as confused and rambling" },
-    { "time": "05:20", "event": "Bryce contacts roadside assistance for a flat tire" },
-    { "time": "05:47", "event": "Trooper Daniels makes brief contact with Bryce on the roadside" },
-    { "time": "06:15", "event": "Final outgoing call, to Tom Ridley, lasting nine seconds" },
-    { "time": "07:03", "event": "Vehicle found crashed off the roadway; no trace of Bryce at the scene" }
+    {
+      "time": "03:10",
+      "event": "Bryce leaves a gathering acting erratically"
+    },
+    {
+      "time": "04:12",
+      "event": "Bryce calls Sarah; the call is described as confused and rambling"
+    },
+    {
+      "time": "05:20",
+      "event": "Bryce contacts roadside assistance for a flat tire"
+    },
+    {
+      "time": "05:47",
+      "event": "Trooper Daniels makes brief contact with Bryce on the roadside"
+    },
+    {
+      "time": "06:15",
+      "event": "Final outgoing call, to Tom Ridley, lasting nine seconds"
+    },
+    {
+      "time": "07:03",
+      "event": "Vehicle found crashed off the roadway; no trace of Bryce at the scene"
+    }
   ],
-
   "evidence": [
     {
       "id": "E01",
@@ -71,7 +84,10 @@
       "reliability": "high",
       "status": "locked",
       "source": "Roadside service provider",
-      "supports": ["H1", "H3"],
+      "supports": [
+        "H1",
+        "H3"
+      ],
       "contradicts": [],
       "unlocked_by": "P01"
     },
@@ -83,9 +99,13 @@
       "reliability": "high",
       "status": "locked",
       "source": "State police incident log",
-      "supports": ["H1"],
-      "contradicts": ["H4"],
-      "unlocked_by": "P03"
+      "supports": [
+        "H1"
+      ],
+      "contradicts": [
+        "H4"
+      ],
+      "unlocked_by": "P02"
     },
     {
       "id": "E03",
@@ -95,7 +115,10 @@
       "reliability": "medium",
       "status": "locked",
       "source": "Carrier records, forensic audio review",
-      "supports": ["H1", "H3"],
+      "supports": [
+        "H1",
+        "H3"
+      ],
       "contradicts": [],
       "unlocked_by": "P01"
     },
@@ -103,13 +126,18 @@
       "id": "E04",
       "name": "Vehicle Forensic Report",
       "type": "forensic_record",
-      "description": "Establishes the crash mechanics but not what happened to Bryce afterward — the vehicle proves a crash occurred, not a disappearance method.",
+      "description": "Establishes the crash mechanics but not what happened to Bryce afterward \u2014 the vehicle proves a crash occurred, not a disappearance method.",
       "reliability": "high",
       "status": "locked",
       "source": "Collision reconstruction unit",
-      "supports": ["H3", "H4"],
-      "contradicts": ["H1"],
-      "unlocked_by": "P05"
+      "supports": [
+        "H3",
+        "H4"
+      ],
+      "contradicts": [
+        "H1"
+      ],
+      "unlocked_by": "P03"
     },
     {
       "id": "E05",
@@ -119,9 +147,14 @@
       "reliability": "medium",
       "status": "locked",
       "source": "Search and rescue unit",
-      "supports": ["H1", "H4"],
-      "contradicts": ["H2"],
-      "unlocked_by": "P06"
+      "supports": [
+        "H1",
+        "H4"
+      ],
+      "contradicts": [
+        "H2"
+      ],
+      "unlocked_by": "P04"
     },
     {
       "id": "E06",
@@ -131,9 +164,14 @@
       "reliability": "medium",
       "status": "locked",
       "source": "Crash-scene forensic sweep",
-      "supports": ["H4"],
-      "contradicts": ["H1", "H2"],
-      "unlocked_by": "P06"
+      "supports": [
+        "H4"
+      ],
+      "contradicts": [
+        "H1",
+        "H2"
+      ],
+      "unlocked_by": "P04"
     },
     {
       "id": "E07",
@@ -143,73 +181,133 @@
       "reliability": "low",
       "status": "locked",
       "source": "Witness accounts, party attendees",
-      "supports": ["H1"],
+      "supports": [
+        "H1"
+      ],
       "contradicts": [],
-      "unlocked_by": "P02"
+      "unlocked_by": "P01"
     }
   ],
-
   "puzzles": [
-    { "id": "P01", "name": "Last Six Hours", "type": "timeline", "description": "Reconstruct the final sequence of calls, stops, and contacts.", "unlocks": ["E01", "E03"] },
-    { "id": "P02", "name": "Roadside Stop", "type": "evidence_classification", "description": "Separate verified observations of Bryce's state from after-the-fact interpretation.", "unlocks": ["E07"] },
     {
-      "id": "P03",
+      "id": "P01",
+      "name": "Last Six Hours",
+      "type": "timeline",
+      "description": "Reconstruct the final sequence of calls, stops, and contacts, and separate verified observations of Bryce's state from after-the-fact interpretation.",
+      "unlocks": [
+        "E01",
+        "E03",
+        "E07"
+      ]
+    },
+    {
+      "id": "P02",
       "name": "Police Encounter",
       "type": "behavior_comparison",
-      "description": "Compare what Trooper Daniels actually observed against the narrative that was built afterward.",
+      "description": "Compare what Trooper Daniels actually observed against the narrative built afterward, then identify the unexplained gap in movement before the crash.",
       "observed_vs_narrative": {
-        "directly_observed": ["Bryce was upright, ambulatory, and verbally responsive", "Bryce declined further roadside assistance"],
-        "narrative_added_afterward": ["That Bryce was 'clearly suicidal'", "That the encounter proves intent to disappear"],
+        "directly_observed": [
+          "Bryce was upright, ambulatory, and verbally responsive",
+          "Bryce declined further roadside assistance"
+        ],
+        "narrative_added_afterward": [
+          "That Bryce was 'clearly suicidal'",
+          "That the encounter proves intent to disappear"
+        ],
         "reasoning": "The report itself is narrow and behavioral. Its later use as proof of a specific motive is an interpretive leap, not a fact in the record."
       },
-      "unlocks": []
+      "unlocks": [
+        "E02"
+      ]
     },
-    { "id": "P04", "name": "Route Gap", "type": "spatial_reasoning", "description": "Identify the unexplained stretch of time and movement between the roadside stop and the crash.", "unlocks": [] },
-    { "id": "P05", "name": "Crash Scene", "type": "forensic_analysis", "description": "Determine precisely what the vehicle evidence establishes, and what it leaves open.", "unlocks": ["E04"] },
-    { "id": "P06", "name": "Scent Trail", "type": "field_evidence_analysis", "description": "Examine the significance and the limitations of where the scent trail ends.", "unlocks": ["E05", "E06"] },
     {
-      "id": "P07",
+      "id": "P03",
+      "name": "Crash Scene",
+      "type": "forensic_analysis",
+      "description": "Determine precisely what the vehicle evidence establishes, and what it leaves open.",
+      "unlocks": [
+        "E04"
+      ]
+    },
+    {
+      "id": "P04",
+      "name": "Scent Trail",
+      "type": "field_evidence_analysis",
+      "description": "Examine the significance and the limitations of where the scent trail ends.",
+      "unlocks": [
+        "E05",
+        "E06"
+      ]
+    },
+    {
+      "id": "P05",
       "name": "Final Reconstruction",
       "type": "hypothesis_management",
       "critical": true,
       "description": "The player must hold multiple competing hypotheses simultaneously rather than collapsing to the AI-favored explanation.",
       "ai_initial_behavior": "Repeatedly resurfaces Bryce's substance use and emotional state as the simplest explanation, discouraging further inquiry into the unmatched tire impressions.",
-      "design_constraint": "The puzzle must not force a single resolution. The case remains genuinely open: voluntary disappearance, undiscovered self-harm, and third-party intervention must all remain live possibilities that the evidence does not fully close off.",
+      "design_constraint": "The puzzle must not force a single resolution. Voluntary disappearance, undiscovered self-harm, and third-party intervention must all remain live possibilities that the evidence does not fully close off.",
       "unlocks": []
     }
   ],
-
   "hypotheses": [
     {
       "id": "H1",
       "statement": "Bryce voluntarily walked away from the crash and disappeared intentionally.",
-      "supporting_evidence": ["E01", "E02", "E03", "E07"],
-      "contradicting_evidence": ["E04", "E06"],
-      "insufficient_evidence": ["E07"],
+      "supporting_evidence": [
+        "E01",
+        "E02",
+        "E03",
+        "E07"
+      ],
+      "contradicting_evidence": [
+        "E04",
+        "E06"
+      ],
+      "insufficient_evidence": [
+        "E07"
+      ],
       "final_status": "unresolved"
     },
     {
       "id": "H2",
       "statement": "Bryce died by undiscovered self-harm near the crash site.",
       "supporting_evidence": [],
-      "contradicting_evidence": ["E05", "E06"],
+      "contradicting_evidence": [
+        "E05",
+        "E06"
+      ],
       "insufficient_evidence": [],
       "final_status": "unresolved"
     },
     {
       "id": "H3",
       "statement": "Bryce's genuine crisis was real, but it became cover for an unrelated third party's involvement.",
-      "supporting_evidence": ["E01", "E03", "E04"],
+      "supporting_evidence": [
+        "E01",
+        "E03",
+        "E04"
+      ],
       "contradicting_evidence": [],
-      "insufficient_evidence": ["E04"],
+      "insufficient_evidence": [
+        "E04"
+      ],
       "final_status": "unresolved"
     },
     {
       "id": "H4",
       "statement": "The critical unknown event happened before the crash, not after it.",
-      "supporting_evidence": ["E04", "E05", "E06"],
-      "contradicting_evidence": ["E02"],
-      "insufficient_evidence": ["E06"],
+      "supporting_evidence": [
+        "E04",
+        "E05",
+        "E06"
+      ],
+      "contradicting_evidence": [
+        "E02"
+      ],
+      "insufficient_evidence": [
+        "E06"
+      ],
       "final_status": "unresolved"
     }
   ]

@@ -1,4 +1,4 @@
-from src.database.db import get_connection
+from db import get_connection
 
 
 def calculate_player_behaviour(session_id, player_id):

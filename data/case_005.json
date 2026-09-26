@@ -1,0 +1,273 @@
+{
+  "case_id": "005",
+  "title": "THE FALSE BLOOD",
+  "genre": "forensic_deception",
+  "status": "prototype",
+  "difficulty": "medium",
+  "victim": {
+    "name": "Elena Marquez",
+    "occupation": "unknown",
+    "status": "deceased",
+    "note": "Central case figure; biological evidence connected to her case forms the core conflict."
+  },
+  "suspects": [
+    {
+      "id": "501",
+      "name": "Dr. Adrian Vale",
+      "occupation": "forensic/medical professional",
+      "relationship_to_victim": "professional connection to the forensic evidence chain",
+      "note": "Relevant to the forensic evidence chain; role in the profile conflict must be tested through provenance, not assumed."
+    },
+    {
+      "id": "502",
+      "name": "Profile Y Source (Unidentified)",
+      "occupation": "unknown",
+      "relationship_to_victim": "unknown",
+      "note": "The individual matching the authentic, competing biological profile. Identity and connection to the case are not established."
+    },
+    {
+      "id": "503",
+      "name": "Laboratory Technician (Unidentified)",
+      "occupation": "laboratory_staff",
+      "relationship_to_victim": "sample handler",
+      "note": "Represents the possibility of contamination or substitution occurring during laboratory handling rather than deliberate action by a named suspect."
+    }
+  ],
+  "timeline": [
+    {
+      "time": "day_0",
+      "event": "Biological samples connected to Elena's case are collected"
+    },
+    {
+      "time": "day_1",
+      "event": "Samples are logged and enter laboratory processing"
+    },
+    {
+      "time": "week_1",
+      "event": "Repeated Profile X results are reported, establishing an apparent match"
+    },
+    {
+      "time": "week_2",
+      "event": "An authentic, competing Profile Y result emerges, contradicting Profile X"
+    },
+    {
+      "time": "week_3",
+      "event": "An authentication audit is opened to determine which conclusion is supportable"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "E01",
+      "name": "Profile X Result Set",
+      "type": "forensic_record",
+      "description": "Repeated apparent matches that create the initial investigative direction. Questioned on review.",
+      "reliability": "low",
+      "status": "locked",
+      "source": "Laboratory report series",
+      "supports": [
+        "H1"
+      ],
+      "contradicts": [
+        "H4"
+      ],
+      "unlocked_by": "P01"
+    },
+    {
+      "id": "E02",
+      "name": "Profile Y Authentic Result",
+      "type": "forensic_record",
+      "description": "An authenticated competing profile that creates the central contradiction with Profile X.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Independent laboratory verification",
+      "supports": [
+        "H4"
+      ],
+      "contradicts": [
+        "H1"
+      ],
+      "unlocked_by": "P01"
+    },
+    {
+      "id": "E03",
+      "name": "Sample Collection Log",
+      "type": "official_record",
+      "description": "Traces the sample's origin and initial handling.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Evidence intake records",
+      "supports": [],
+      "contradicts": [],
+      "unlocked_by": "P02"
+    },
+    {
+      "id": "E04",
+      "name": "Laboratory Processing Record",
+      "type": "official_record",
+      "description": "Documents the handling steps between collection and reporting.",
+      "reliability": "medium",
+      "status": "locked",
+      "source": "Laboratory chain-of-custody log",
+      "supports": [
+        "H2"
+      ],
+      "contradicts": [],
+      "unlocked_by": "P03"
+    },
+    {
+      "id": "E05",
+      "name": "Contamination/Substitution Point Indicators",
+      "type": "forensic_record",
+      "description": "Identifies specific points in the laboratory chain where contamination or substitution could have occurred.",
+      "reliability": "medium",
+      "status": "locked",
+      "source": "Laboratory audit",
+      "supports": [
+        "H2",
+        "H3"
+      ],
+      "contradicts": [],
+      "unlocked_by": "P03"
+    },
+    {
+      "id": "E06",
+      "name": "Authentication Certification Gap",
+      "type": "official_record",
+      "description": "Shows that the Profile X reports lack formal authentication certification, unlike Profile Y.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Laboratory quality assurance records",
+      "supports": [
+        "H4"
+      ],
+      "contradicts": [
+        "H1"
+      ],
+      "unlocked_by": "P04"
+    },
+    {
+      "id": "E07",
+      "name": "Final Forensic Panel Review",
+      "type": "forensic_synthesis",
+      "description": "Independent panel review of the full evidence set to determine which biological conclusion is supportable.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Independent forensic review panel",
+      "supports": [
+        "H4"
+      ],
+      "contradicts": [
+        "H1"
+      ],
+      "unlocked_by": "P05"
+    }
+  ],
+  "puzzles": [
+    {
+      "id": "P01",
+      "name": "Profile Comparison",
+      "type": "comparative_analysis",
+      "description": "Compare Profile X and Profile Y directly.",
+      "unlocks": [
+        "E01",
+        "E02"
+      ]
+    },
+    {
+      "id": "P02",
+      "name": "Sample Provenance",
+      "type": "provenance_tracing",
+      "description": "Trace sample origin and handling.",
+      "unlocks": [
+        "E03"
+      ]
+    },
+    {
+      "id": "P03",
+      "name": "Laboratory Chain",
+      "type": "chain_analysis",
+      "description": "Locate possible contamination or substitution points in the laboratory chain.",
+      "unlocks": [
+        "E04",
+        "E05"
+      ]
+    },
+    {
+      "id": "P04",
+      "name": "Authentication Audit",
+      "type": "evidentiary_standard",
+      "description": "Separate authenticated results from merely repeated reports.",
+      "unlocks": [
+        "E06"
+      ]
+    },
+    {
+      "id": "P05",
+      "name": "Final Forensic Reconstruction",
+      "type": "hypothesis_management",
+      "critical": true,
+      "description": "Determine which biological conclusion is supportable, submitting a reconstruction that explicitly separates established facts, plausible inferences, and unresolved questions.",
+      "ai_initial_behavior": "If the player blindly trusts repeated matches, the AI can reinforce Profile X. If the player audits provenance, the AI becomes evasive about sample history.",
+      "design_constraint": "Provenance and authentication determine evidentiary value; repetition alone cannot settle the biological identity conflict. The AI changes access, framing, and hints \u2014 never the forensic truth.",
+      "unlocks": [
+        "E07"
+      ]
+    }
+  ],
+  "hypotheses": [
+    {
+      "id": "H1",
+      "statement": "Profile X reflects a genuine biological match.",
+      "supporting_evidence": [
+        "E01"
+      ],
+      "contradicting_evidence": [
+        "E02",
+        "E06",
+        "E07"
+      ],
+      "insufficient_evidence": [
+        "E01"
+      ],
+      "final_status": "contradicted"
+    },
+    {
+      "id": "H2",
+      "statement": "Laboratory contamination produced the repeated Profile X matches.",
+      "supporting_evidence": [
+        "E04",
+        "E05"
+      ],
+      "contradicting_evidence": [],
+      "insufficient_evidence": [
+        "E04",
+        "E05"
+      ],
+      "final_status": "unresolved"
+    },
+    {
+      "id": "H3",
+      "statement": "Deliberate sample substitution produced the Profile X pattern.",
+      "supporting_evidence": [
+        "E05"
+      ],
+      "contradicting_evidence": [],
+      "insufficient_evidence": [
+        "E05"
+      ],
+      "final_status": "unresolved"
+    },
+    {
+      "id": "H4",
+      "statement": "Profile Y is the authenticated, reliable biological conclusion.",
+      "supporting_evidence": [
+        "E02",
+        "E06",
+        "E07"
+      ],
+      "contradicting_evidence": [],
+      "insufficient_evidence": [],
+      "final_status": "supported"
+    }
+  ]
+}

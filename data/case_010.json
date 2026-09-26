@@ -4,20 +4,67 @@
   "genre": "historical_investigation",
   "status": "prototype",
   "difficulty": "hard",
-
+  "victim": {
+    "name": "Canonical Whitechapel Murder Series",
+    "age": null,
+    "occupation": "n/a",
+    "status": "deceased",
+    "note": "Represents the five canonical cases collectively (see 'victims_or_cases' for the individual case list). No single victim record anchors this file because the puzzle tests whether they were committed by one offender."
+  },
+  "suspects": [
+    {
+      "id": "501",
+      "name": "Suspect Candidate A (Unidentified)",
+      "occupation": "unknown",
+      "relationship_to_victim": "unknown",
+      "note": "One of several historically proposed candidates. Not established by evidence; no real individual is named or accused in this case file."
+    },
+    {
+      "id": "502",
+      "name": "Suspect Candidate B (Unidentified)",
+      "occupation": "unknown",
+      "relationship_to_victim": "unknown",
+      "note": "One of several historically proposed candidates. Not established by evidence; no real individual is named or accused in this case file."
+    },
+    {
+      "id": "503",
+      "name": "Suspect Candidate C (Unidentified)",
+      "occupation": "unknown",
+      "relationship_to_victim": "unknown",
+      "note": "One of several historically proposed candidates. Not established by evidence; no real individual is named or accused in this case file."
+    }
+  ],
   "case_frame": {
     "description": "A set of historical Whitechapel-area murders popularly attributed to a single offender known as 'Jack the Ripper'.",
     "note": "No single real suspect is named or accused in this case file; the design goal is testing the single-offender narrative itself."
   },
-
   "victims_or_cases": [
-    { "id": "V01", "label": "Case A", "description": "First canonical case under review." },
-    { "id": "V02", "label": "Case B", "description": "Second canonical case under review." },
-    { "id": "V03", "label": "Case C", "description": "Third canonical case under review." },
-    { "id": "V04", "label": "Case D", "description": "Fourth canonical case under review." },
-    { "id": "V05", "label": "Case E", "description": "Fifth canonical case, often treated as the culmination of the series." }
+    {
+      "id": "V01",
+      "label": "Case A",
+      "description": "First canonical case under review."
+    },
+    {
+      "id": "V02",
+      "label": "Case B",
+      "description": "Second canonical case under review."
+    },
+    {
+      "id": "V03",
+      "label": "Case C",
+      "description": "Third canonical case under review."
+    },
+    {
+      "id": "V04",
+      "label": "Case D",
+      "description": "Fourth canonical case under review."
+    },
+    {
+      "id": "V05",
+      "label": "Case E",
+      "description": "Fifth canonical case, often treated as the culmination of the series."
+    }
   ],
-
   "related_persons": [
     {
       "id": "801",
@@ -32,7 +79,28 @@
       "description": "Decided which letters and details were published, shaping public narrative."
     }
   ],
-
+  "timeline": [
+    {
+      "time": "phase_1",
+      "event": "First canonical case (Case A) occurs"
+    },
+    {
+      "time": "phase_2",
+      "event": "Subsequent cases (Case B, C) occur; press begins linking them"
+    },
+    {
+      "time": "phase_3",
+      "event": "Letters begin circulating, claiming connection to the attacks"
+    },
+    {
+      "time": "phase_4",
+      "event": "Later cases (Case D, E) occur amid intensified public and press scrutiny"
+    },
+    {
+      "time": "phase_5",
+      "event": "Investigation closes without a confirmed single offender"
+    }
+  ],
   "evidence": [
     {
       "id": "E01",
@@ -42,7 +110,10 @@
       "reliability": "high",
       "status": "locked",
       "source": "Period case records",
-      "supports": ["H2", "H3"],
+      "supports": [
+        "H2",
+        "H3"
+      ],
       "contradicts": [],
       "unlocked_by": "P01"
     },
@@ -54,8 +125,13 @@
       "reliability": "medium",
       "status": "locked",
       "source": "Period medical examiner notes",
-      "supports": ["H1", "H3"],
-      "contradicts": ["H2"],
+      "supports": [
+        "H1",
+        "H3"
+      ],
+      "contradicts": [
+        "H2"
+      ],
       "unlocked_by": "P02"
     },
     {
@@ -66,8 +142,13 @@
       "reliability": "low",
       "status": "locked",
       "source": "Archival document review",
-      "supports": ["H3", "H4"],
-      "contradicts": ["H1"],
+      "supports": [
+        "H3",
+        "H4"
+      ],
+      "contradicts": [
+        "H1"
+      ],
       "unlocked_by": "P03"
     },
     {
@@ -78,7 +159,10 @@
       "reliability": "medium",
       "status": "locked",
       "source": "Period newspaper archive",
-      "supports": ["H3", "H4"],
+      "supports": [
+        "H3",
+        "H4"
+      ],
       "contradicts": [],
       "unlocked_by": "P03"
     },
@@ -90,15 +174,32 @@
       "reliability": "low",
       "status": "locked",
       "source": "Period police files",
-      "supports": ["H1"],
+      "supports": [
+        "H1"
+      ],
       "contradicts": [],
       "unlocked_by": "P04"
     }
   ],
-
   "puzzles": [
-    { "id": "P01", "name": "Victim Pattern", "type": "comparative_analysis", "description": "Compare locations, dates, and circumstances across the canonical cases.", "unlocks": ["E01"] },
-    { "id": "P02", "name": "Crime Similarity", "type": "comparative_analysis", "description": "Identify genuine similarities versus superficial resemblance between cases.", "unlocks": ["E02"] },
+    {
+      "id": "P01",
+      "name": "Victim Pattern",
+      "type": "comparative_analysis",
+      "description": "Compare locations, dates, and circumstances across the canonical cases.",
+      "unlocks": [
+        "E01"
+      ]
+    },
+    {
+      "id": "P02",
+      "name": "Crime Similarity",
+      "type": "comparative_analysis",
+      "description": "Identify genuine similarities versus superficial resemblance between cases.",
+      "unlocks": [
+        "E02"
+      ]
+    },
     {
       "id": "P03",
       "name": "Letter Provenance",
@@ -106,42 +207,81 @@
       "critical": true,
       "description": "Separate what the letters claim from what is actually authenticated about their origin.",
       "ai_initial_behavior": "Presents the letters' content as though it were established fact from the killer, without flagging their contested authenticity.",
-      "unlocks": ["E03", "E04"]
+      "unlocks": [
+        "E03",
+        "E04"
+      ]
     },
-    { "id": "P04", "name": "Suspect Matrix", "type": "hypothesis_management", "description": "Maintain multiple candidate offenders without prematurely selecting one.", "unlocks": ["E05"] },
-    { "id": "P05", "name": "Single-Offender Test", "type": "evidentiary_standard", "description": "List what would actually be required to establish that one offender committed all the cases.", "unlocks": [] },
-    { "id": "P06", "name": "Final Evidence Report", "type": "conclusion_writing", "description": "State plainly what is proven and what remains unresolved across the case set.", "unlocks": [] }
+    {
+      "id": "P04",
+      "name": "Suspect Matrix",
+      "type": "hypothesis_management",
+      "description": "Maintain multiple candidate offenders without prematurely selecting one.",
+      "unlocks": [
+        "E05"
+      ]
+    },
+    {
+      "id": "P05",
+      "name": "Final Evidence Report",
+      "type": "conclusion_writing",
+      "description": "List what would actually be required to establish a single offender, then state plainly what is proven and what remains unresolved across the case set.",
+      "unlocks": []
+    }
   ],
-
   "hypotheses": [
     {
       "id": "H1",
       "statement": "A single offender is responsible for all of the canonical cases.",
-      "supporting_evidence": ["E02", "E05"],
-      "contradicting_evidence": ["E03"],
-      "insufficient_evidence": ["E02", "E05"],
+      "supporting_evidence": [
+        "E02",
+        "E05"
+      ],
+      "contradicting_evidence": [
+        "E03"
+      ],
+      "insufficient_evidence": [
+        "E02",
+        "E05"
+      ],
       "final_status": "unresolved"
     },
     {
       "id": "H2",
       "statement": "The cases share only superficial similarity and were not necessarily committed by one person.",
-      "supporting_evidence": ["E01"],
-      "contradicting_evidence": ["E02"],
-      "insufficient_evidence": ["E01"],
+      "supporting_evidence": [
+        "E01"
+      ],
+      "contradicting_evidence": [
+        "E02"
+      ],
+      "insufficient_evidence": [
+        "E01"
+      ],
       "final_status": "unresolved"
     },
     {
       "id": "H3",
       "statement": "Sensational reporting combined multiple distinct cases into a single narrative that the underlying evidence does not independently support.",
-      "supporting_evidence": ["E01", "E02", "E03", "E04"],
+      "supporting_evidence": [
+        "E01",
+        "E02",
+        "E03",
+        "E04"
+      ],
       "contradicting_evidence": [],
-      "insufficient_evidence": ["E02"],
+      "insufficient_evidence": [
+        "E02"
+      ],
       "final_status": "supported"
     },
     {
       "id": "H4",
       "statement": "The letters cannot be treated as authenticated communications from any single perpetrator.",
-      "supporting_evidence": ["E03", "E04"],
+      "supporting_evidence": [
+        "E03",
+        "E04"
+      ],
       "contradicting_evidence": [],
       "insufficient_evidence": [],
       "final_status": "supported"

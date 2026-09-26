@@ -1,4 +1,4 @@
-from src.database.db import get_connection
+from db import get_connection
 
 
 def log_puzzle_attempt(
@@ -48,3 +48,20 @@ if __name__ == "__main__":
     )
 
     print("Puzzle attempt logged successfully!")
+
+def get_puzzle_attempt_count(session_id, player_id, puzzle_id):
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    cursor.execute("""
+        SELECT COUNT(*)
+        FROM puzzle_logs
+        WHERE session_id = ?
+        AND player_id = ?
+        AND puzzle_id = ?
+    """, (session_id, player_id, puzzle_id))
+
+    count = cursor.fetchone()[0]
+    connection.close()
+
+    return count
