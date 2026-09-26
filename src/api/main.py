@@ -46,6 +46,11 @@ from src.game.case003_evidence_classification_puzzle import Case003EvidenceClass
 from src.game.case003_field_investigation_puzzle import Case003FieldInvestigationPuzzle
 from src.game.case003_institutional_review_puzzle import Case003InstitutionalReviewPuzzle
 from src.game.case003_hypothesis_management_puzzle import Case003HypothesisManagementPuzzle
+from src.game.case005_comparative_analysis_puzzle import Case005ComparativeAnalysisPuzzle
+from src.game.case005_provenance_tracing_puzzle import Case005ProvenanceTracingPuzzle
+from src.game.case005_chain_analysis_puzzle import Case005ChainAnalysisPuzzle
+from src.game.case005_evidentiary_standard_puzzle import Case005EvidentiaryStandardPuzzle
+from src.game.case005_hypothesis_management_puzzle import Case005HypothesisManagementPuzzle
 from src.database.player_session import create_player, create_game_session, add_player_to_session
 from src.database.puzzle_logger import log_puzzle_attempt, get_puzzle_attempt_count
 from src.database.action_logger import log_player_action
@@ -3208,6 +3213,309 @@ def solve_case003_hypothesis_management(session_id: str, answer: dict):
     return {
         "correct": False,
         "message": "Incorrect conclusion. The evidence is insufficient to resolve the competing hypotheses or establish a definitive explanation.",
+        "solved_puzzles": game_state.solved_puzzles,
+        "unlocked_evidence": game_state.unlocked_evidence,
+        "mistakes": game_state.mistakes,
+        "game_over": game_state.game_over
+    }
+
+@app.post("/sessions/{session_id}/puzzles/case005-comparative-analysis")
+def solve_case005_comparative_analysis(session_id: str, answer: dict):
+    if session_id not in sessions:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    session = sessions[session_id]
+
+    if session["case_id"] != "005":
+        raise HTTPException(status_code=400, detail="This puzzle belongs to Case 005")
+
+    case = load_case("data/case_005.json")
+
+    puzzle_data = next(
+        puzzle for puzzle in case.puzzles
+        if puzzle["type"] == "comparative_analysis"
+    )
+
+    puzzle = Case005ComparativeAnalysisPuzzle(puzzle_data)
+
+    correct = puzzle.check_answer(answer)
+
+    game_state = session["game_state"]
+
+    log_puzzle_attempt(
+        session["db_session_id"],
+        session["player_id"],
+        "P01",
+        1,
+        "correct" if correct else "incorrect",
+        0
+    )
+
+    if correct:
+        if "comparative_analysis" not in game_state.solved_puzzles:
+            game_state.solved_puzzles.append("comparative_analysis")
+
+        for evidence_id in puzzle.get_unlocked_evidence():
+            if evidence_id not in game_state.unlocked_evidence:
+                game_state.unlocked_evidence.append(evidence_id)
+
+        game_state.current_puzzle = "provenance_tracing"
+
+        return {
+            "correct": True,
+            "message": "Correct! Profile X is repeatedly reported but questioned, while Profile Y is an authenticated competing result. Repetition alone does not establish biological authenticity.",
+            "solved_puzzles": game_state.solved_puzzles,
+            "unlocked_evidence": game_state.unlocked_evidence,
+            "mistakes": game_state.mistakes
+        }
+
+    game_state.mistakes += 1
+
+    return {
+        "correct": False,
+        "message": "Incorrect comparison. Repeated Profile X results must be distinguished from the authenticated Profile Y result and its stronger evidentiary basis.",
+        "solved_puzzles": game_state.solved_puzzles,
+        "unlocked_evidence": game_state.unlocked_evidence,
+        "mistakes": game_state.mistakes
+    }
+
+@app.post("/sessions/{session_id}/puzzles/case005-provenance-tracing")
+def solve_case005_provenance_tracing(session_id: str, answer: dict):
+    if session_id not in sessions:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    session = sessions[session_id]
+
+    if session["case_id"] != "005":
+        raise HTTPException(status_code=400, detail="This puzzle belongs to Case 005")
+
+    case = load_case("data/case_005.json")
+
+    puzzle_data = next(
+        puzzle for puzzle in case.puzzles
+        if puzzle["type"] == "provenance_tracing"
+    )
+
+    puzzle = Case005ProvenanceTracingPuzzle(puzzle_data)
+
+    correct = puzzle.check_answer(answer)
+
+    game_state = session["game_state"]
+
+    log_puzzle_attempt(
+        session["db_session_id"],
+        session["player_id"],
+        "P02",
+        1,
+        "correct" if correct else "incorrect",
+        0
+    )
+
+    if correct:
+        if "provenance_tracing" not in game_state.solved_puzzles:
+            game_state.solved_puzzles.append("provenance_tracing")
+
+        for evidence_id in puzzle.get_unlocked_evidence():
+            if evidence_id not in game_state.unlocked_evidence:
+                game_state.unlocked_evidence.append(evidence_id)
+
+        game_state.current_puzzle = "chain_analysis"
+
+        return {
+            "correct": True,
+            "message": "Correct! The sample origin and initial handling have been traced, establishing the provenance chain separately from the biological result.",
+            "solved_puzzles": game_state.solved_puzzles,
+            "unlocked_evidence": game_state.unlocked_evidence,
+            "mistakes": game_state.mistakes
+        }
+
+    game_state.mistakes += 1
+
+    return {
+        "correct": False,
+        "message": "Incorrect provenance analysis. Trace the sample origin and initial handling before evaluating the biological result.",
+        "solved_puzzles": game_state.solved_puzzles,
+        "unlocked_evidence": game_state.unlocked_evidence,
+        "mistakes": game_state.mistakes
+    }
+
+@app.post("/sessions/{session_id}/puzzles/case005-chain-analysis")
+def solve_case005_chain_analysis(session_id: str, answer: dict):
+    if session_id not in sessions:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    session = sessions[session_id]
+
+    if session["case_id"] != "005":
+        raise HTTPException(status_code=400, detail="This puzzle belongs to Case 005")
+
+    case = load_case("data/case_005.json")
+
+    puzzle_data = next(
+        puzzle for puzzle in case.puzzles
+        if puzzle["type"] == "chain_analysis"
+    )
+
+    puzzle = Case005ChainAnalysisPuzzle(puzzle_data)
+
+    correct = puzzle.check_answer(answer)
+
+    game_state = session["game_state"]
+
+    log_puzzle_attempt(
+        session["db_session_id"],
+        session["player_id"],
+        "P03",
+        1,
+        "correct" if correct else "incorrect",
+        0
+    )
+
+    if correct:
+        if "chain_analysis" not in game_state.solved_puzzles:
+            game_state.solved_puzzles.append("chain_analysis")
+
+        for evidence_id in puzzle.get_unlocked_evidence():
+            if evidence_id not in game_state.unlocked_evidence:
+                game_state.unlocked_evidence.append(evidence_id)
+
+        game_state.current_puzzle = "evidentiary_standard"
+
+        return {
+            "correct": True,
+            "message": "Correct! The laboratory processing chain has been reconstructed and the possible contamination or substitution points have been identified.",
+            "solved_puzzles": game_state.solved_puzzles,
+            "unlocked_evidence": game_state.unlocked_evidence,
+            "mistakes": game_state.mistakes
+        }
+
+    game_state.mistakes += 1
+
+    return {
+        "correct": False,
+        "message": "Incorrect chain analysis. Review the laboratory processing steps and identify where contamination or substitution could have occurred.",
+        "solved_puzzles": game_state.solved_puzzles,
+        "unlocked_evidence": game_state.unlocked_evidence,
+        "mistakes": game_state.mistakes
+    }
+
+@app.post("/sessions/{session_id}/puzzles/case005-evidentiary-standard")
+def solve_case005_evidentiary_standard(session_id: str, answer: dict):
+    if session_id not in sessions:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    session = sessions[session_id]
+
+    if session["case_id"] != "005":
+        raise HTTPException(status_code=400, detail="This puzzle belongs to Case 005")
+
+    case = load_case("data/case_005.json")
+
+    puzzle_data = next(
+        puzzle for puzzle in case.puzzles
+        if puzzle["type"] == "evidentiary_standard"
+    )
+
+    puzzle = Case005EvidentiaryStandardPuzzle(puzzle_data)
+
+    correct = puzzle.check_answer(answer)
+
+    game_state = session["game_state"]
+
+    log_puzzle_attempt(
+        session["db_session_id"],
+        session["player_id"],
+        "P04",
+        1,
+        "correct" if correct else "incorrect",
+        0
+    )
+
+    if correct:
+        if "evidentiary_standard" not in game_state.solved_puzzles:
+            game_state.solved_puzzles.append("evidentiary_standard")
+
+        for evidence_id in puzzle.get_unlocked_evidence():
+            if evidence_id not in game_state.unlocked_evidence:
+                game_state.unlocked_evidence.append(evidence_id)
+
+        game_state.current_puzzle = "hypothesis_management"
+
+        return {
+            "correct": True,
+            "message": "Correct! Profile Y is authenticated, while Profile X lacks formal authentication. Repeated reports do not equal authentication.",
+            "solved_puzzles": game_state.solved_puzzles,
+            "unlocked_evidence": game_state.unlocked_evidence,
+            "mistakes": game_state.mistakes
+        }
+
+    game_state.mistakes += 1
+
+    return {
+        "correct": False,
+        "message": "Incorrect evidentiary analysis. Distinguish repeated Profile X reports from the formal authentication supporting Profile Y.",
+        "solved_puzzles": game_state.solved_puzzles,
+        "unlocked_evidence": game_state.unlocked_evidence,
+        "mistakes": game_state.mistakes
+    }
+
+@app.post("/sessions/{session_id}/puzzles/case005-hypothesis-management")
+def solve_case005_hypothesis_management(session_id: str, answer: dict):
+    if session_id not in sessions:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    session = sessions[session_id]
+
+    if session["case_id"] != "005":
+        raise HTTPException(status_code=400, detail="This puzzle belongs to Case 005")
+
+    case = load_case("data/case_005.json")
+
+    puzzle_data = next(
+        puzzle for puzzle in case.puzzles
+        if puzzle["type"] == "hypothesis_management"
+    )
+
+    puzzle = Case005HypothesisManagementPuzzle(puzzle_data)
+
+    correct = puzzle.check_answer(answer)
+
+    game_state = session["game_state"]
+
+    log_puzzle_attempt(
+        session["db_session_id"],
+        session["player_id"],
+        "P05",
+        1,
+        "correct" if correct else "incorrect",
+        0
+    )
+
+    if correct:
+        if "hypothesis_management" not in game_state.solved_puzzles:
+            game_state.solved_puzzles.append("hypothesis_management")
+
+        for evidence_id in puzzle.get_unlocked_evidence():
+            if evidence_id not in game_state.unlocked_evidence:
+                game_state.unlocked_evidence.append(evidence_id)
+
+        game_state.current_puzzle = None
+        game_state.game_over = True
+
+        return {
+            "correct": True,
+            "message": "Correct! Profile X is contradicted, Profile Y is supported, and the contamination and substitution hypotheses remain unresolved. The authenticated Profile Y conclusion is the supportable forensic conclusion.",
+            "solved_puzzles": game_state.solved_puzzles,
+            "unlocked_evidence": game_state.unlocked_evidence,
+            "mistakes": game_state.mistakes,
+            "game_over": game_state.game_over
+        }
+
+    game_state.mistakes += 1
+
+    return {
+        "correct": False,
+        "message": "Incorrect reconstruction. Review the authentication, provenance, and competing profile evidence before determining the final supportable conclusion.",
         "solved_puzzles": game_state.solved_puzzles,
         "unlocked_evidence": game_state.unlocked_evidence,
         "mistakes": game_state.mistakes,
