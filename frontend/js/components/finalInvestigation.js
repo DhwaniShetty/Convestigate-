@@ -1,4 +1,5 @@
 import { gameState } from '../state/gameState.js';
+import { sound } from '../effects/soundSystem.js';
 
 export function renderFinalInvestigation(container) {
   const state = gameState.getState();
@@ -71,10 +72,12 @@ export function renderFinalInvestigation(container) {
   `;
 
   container.querySelector('#btn-final-back')?.addEventListener('click', () => {
+    sound.playClick();
     gameState.setScreen('DASHBOARD');
   });
 
   container.querySelector('#btn-proceed-answer')?.addEventListener('click', () => {
+    sound.playStamp();
     gameState.setScreen('FINAL_ANSWER');
   });
 }

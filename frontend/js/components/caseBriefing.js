@@ -1,4 +1,6 @@
 import { gameState } from '../state/gameState.js';
+import { sound } from '../effects/soundSystem.js';
+import { mangaStory } from '../effects/mangaStory.js';
 
 export function renderCaseBriefing(container) {
   const state = gameState.getState();
@@ -79,21 +81,33 @@ export function renderCaseBriefing(container) {
           </div>
         </div>
 
-        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 2px solid var(--border-medium); padding-top: 24px; margin-top: 10px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 2px solid var(--border-medium); padding-top: 24px; margin-top: 10px; flex-wrap: wrap; gap: 12px;">
           <button class="btn" id="btn-briefing-back">← CHOOSE ANOTHER CASE</button>
-          <button class="btn btn-primary" id="btn-briefing-start" style="padding: 12px 28px; font-size: 0.95rem;">
-            ENTER INVESTIGATION CONSOLE →
-          </button>
+          <div style="display: flex; gap: 12px; align-items: center;">
+            <button class="btn" id="btn-briefing-manga" style="border-color: var(--blood-red-bright); color: var(--blood-red-bright); font-weight: bold;">
+              📖 PLAY MANGA SCENE
+            </button>
+            <button class="btn btn-primary" id="btn-briefing-start" style="padding: 12px 28px; font-size: 0.95rem;">
+              ENTER INVESTIGATION CONSOLE →
+            </button>
+          </div>
         </div>
       </div>
     </div>
   `;
 
   container.querySelector('#btn-briefing-back')?.addEventListener('click', () => {
+    sound.playClick();
     gameState.setScreen('LANDING');
   });
 
+  container.querySelector('#btn-briefing-manga')?.addEventListener('click', () => {
+    sound.playClick();
+    mangaStory.presentCase(c, () => {});
+  });
+
   container.querySelector('#btn-briefing-start')?.addEventListener('click', () => {
+    sound.playStamp();
     gameState.setScreen('DASHBOARD');
   });
 }

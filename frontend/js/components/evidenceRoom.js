@@ -1,5 +1,6 @@
 import { gameState } from '../state/gameState.js';
 import { eventBus, EVENTS } from '../state/eventBus.js';
+import { sound } from '../effects/soundSystem.js';
 
 let currentFilter = 'ALL';
 let activeEvidenceModal = null;
@@ -92,14 +93,21 @@ export function renderEvidenceRoom(container) {
 
   // Modal setup
   const modal = container.querySelector('#evidence-detail-modal');
-  const modalClose = () => modal?.classList.remove('open');
+  const modalClose = () => {
+    sound.playClick();
+    modal?.classList.remove('open');
+  };
   container.querySelector('#modal-ev-close')?.addEventListener('click', modalClose);
   container.querySelector('#modal-ev-dismiss')?.addEventListener('click', modalClose);
 
   // Evidence card click
   container.querySelectorAll('.evidence-card').forEach(card => {
     card.addEventListener('click', () => {
-      if (card.classList.contains('locked')) return;
+      if (card.classList.contains('locked')) {
+        sound.playClick();
+        return;
+      }
+      sound.playStamp();
       const evId = card.getAttribute('data-evidence-id');
       const item = state.evidenceMap[evId];
       if (!item) return;
@@ -115,11 +123,18 @@ export function renderEvidenceRoom(container) {
       if (body) {
         body.innerHTML = `
           <div class="evidence-doc-view">
-            <p style="font-size: 0.95rem; margin-bottom: 12px; color: #000000; font-family: var(--font-mono);">${item.description}</p>
-            <div style="border-top: 1px dashed #666; padding-top: 8px; font-size: 0.8rem; color: #444;">
-              <div><strong>CHAIN OF CUSTODY:</strong> ${item.source || 'Evidence Archive'}</div>
-              <div><strong>RELIABILITY RATING:</strong> ${item.reliability || 'VERIFIED'}</div>
-              ${item.clue ? `<div style="margin-top: 8px; color: #990000; font-weight: bold;">KEY DEDUCTIVE VALUE: ${item.clue}</div>` : ''}
+            <p style="font-size: 0.95rem; margin-bottom: 14px; color: #000000; font-family: var(--font-mono); line-height: 1.5;">
+              ${item.description}
+            </p>
+            <div style="border-top: 1px dashed #666; padding-top: 10px; font-size: 0.8rem; color: #444; font-family: var(--font-mono);">
+              <div style="margin-bottom: 4px;"><strong>CHAIN OF CUSTODY:</strong> ${item.source || 'Evidence Archive'}</div>
+              <div style="margin-bottom: 8px;"><strong>RELIABILITY RATING:</strong> ${item.reliability || 'VERIFIED AUDIT'}</div>
+              ${item.clue ? `
+                <div class="key-clue-badge">
+                  <span>KEY DEDUCTIVE VALUE:</span>
+                  <span class="clue-highlight-sweep">${item.clue}</span>
+                </div>
+              ` : ''}
             </div>
           </div>
         `;

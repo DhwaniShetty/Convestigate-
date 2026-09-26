@@ -1,5 +1,6 @@
 import { gameState } from '../state/gameState.js';
 import { eventBus, EVENTS } from '../state/eventBus.js';
+import { sound } from '../effects/soundSystem.js';
 
 export function renderAIPanel(container) {
   const state = gameState.getState();
@@ -20,11 +21,13 @@ export function renderAIPanel(container) {
           AI INVESTIGATOR OFFLINE
         </h2>
         
-        <div style="margin: 20px 0; background: #000; border: 2px solid var(--blood-red); padding: 16px 28px; box-shadow: 0 0 15px rgba(220, 38, 38, 0.4);">
-          <div style="font-family: var(--font-mono); font-size: 2.5rem; font-weight: bold; color: var(--blood-red-bright); letter-spacing: 4px;">
+        <div class="countdown-box-active">
+          <div class="countdown-digits">
             ${timeFormatted}
           </div>
-          <span style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted); letter-spacing: 1px;">EMERGENCY BUFFER COUNTDOWN</span>
+          <span style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted); letter-spacing: 2px;">
+            EMERGENCY BUFFER COUNTDOWN
+          </span>
         </div>
 
         <p style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-secondary); max-width: 260px; line-height: 1.4; margin-bottom: 16px;">
@@ -111,6 +114,7 @@ export function renderAIPanel(container) {
   // Mood switchers
   container.querySelectorAll('.btn-mood').forEach(btn => {
     btn.addEventListener('click', () => {
+      sound.playClick();
       const mood = btn.getAttribute('data-mood');
       gameState.setAIState(mood);
       renderAIPanel(container);
@@ -119,6 +123,7 @@ export function renderAIPanel(container) {
 
   // Hint button
   container.querySelector('#btn-ai-hint')?.addEventListener('click', () => {
+    sound.playDiscovery();
     gameState.requestAIHint('P01');
     renderAIPanel(container);
   });
@@ -128,11 +133,13 @@ export function renderAIPanel(container) {
     const input = container.querySelector('#input-ai-msg');
     const text = input?.value.trim();
     if (text) {
+      sound.playClick();
       gameState.addAIMessage('user', text);
       input.value = '';
 
       // Mock advisor reply
       setTimeout(() => {
+        sound.playTypewriter();
         let reply = 'Examining the docket records. Notice any inconsistencies between stated time windows and physical logs.';
         if (text.toLowerCase().includes('daniel') || text.toLowerCase().includes('cross')) {
           reply = 'Daniel Cross has a verified administrative connection, but be careful not to conflate geographic proximity with direct homicide culpability.';

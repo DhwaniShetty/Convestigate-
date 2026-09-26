@@ -1,5 +1,6 @@
 import { gameState } from '../state/gameState.js';
 import { eventBus, EVENTS } from '../state/eventBus.js';
+import { sound } from '../effects/soundSystem.js';
 
 let selectedFirstNode = null;
 
@@ -19,7 +20,7 @@ export function renderInvestigationBoard(container) {
 
   container.innerHTML = `
     <div>
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
         <div>
           <span class="stamp stamp-red">EVIDENCE CORRELATION BOARD</span>
           <h2 style="font-family: var(--font-headline); font-size: 1.6rem; letter-spacing: 1px; margin-top: 4px;">
@@ -31,6 +32,12 @@ export function renderInvestigationBoard(container) {
         </div>
       </div>
 
+      <!-- Quick User Guide Banner -->
+      <div class="board-guide-banner">
+        <span>📍 <strong>HOW TO PIN A LINK:</strong> Click Node 1, then click Node 2 to draw a correlation string. Click "SEVER LINK" below to delete.</span>
+        <span style="color: var(--text-muted); font-size: 0.72rem;">INTERACTIVE CORKBOARD // SYSTEM v2.4</span>
+      </div>
+
       <!-- Corkboard Viewport with SVG Lines -->
       <div class="board-viewport" id="board-canvas-box">
         <svg class="board-svg-canvas" id="board-svg"></svg>
@@ -40,7 +47,7 @@ export function renderInvestigationBoard(container) {
                  id="bnode-${ent.id}" 
                  data-node-id="${ent.id}" 
                  style="left: ${ent.x || 100}px; top: ${ent.y || 100}px;">
-              <div class="board-node-pin"></div>
+              <div class="board-node-pin" id="pin-${ent.id}"></div>
               <div class="board-node-type">${ent.node_type}</div>
               <div class="board-node-title">${ent.name}</div>
             </div>
@@ -66,7 +73,7 @@ export function renderInvestigationBoard(container) {
             const label = conn.connection || `${fromEnt?.name || conn.from} ➔ ${toEnt?.name || conn.to}`;
 
             return `
-              <div class="connection-item">
+              <div class="connection-item" data-conn-from="${conn.from}" data-conn-to="${conn.to}">
                 <div>
                   <strong style="color: #ffffff; font-size: 0.9rem;">${label}</strong>
                   ${conn.reasoning ? `<p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px;">${conn.reasoning}</p>` : ''}
@@ -90,11 +97,12 @@ export function renderInvestigationBoard(container) {
   // Draw SVG lines between connected nodes
   setTimeout(() => {
     drawConnectionLines(container, entities, connections);
-  }, 50);
+  }, 40);
 
   // Node selection for creating connections
   container.querySelectorAll('.board-node').forEach(nodeEl => {
     nodeEl.addEventListener('click', () => {
+      sound.playClick();
       const nodeId = nodeEl.getAttribute('data-node-id');
       const clickedEntity = entities.find(e => e.id === nodeId);
       if (!clickedEntity) return;
@@ -108,6 +116,14 @@ export function renderInvestigationBoard(container) {
       } else {
         // Connect the two nodes
         gameState.addConnection(selectedFirstNode.id, clickedEntity.id, 'RELEVANT');
+        eventBus.emit(EVENTS.CONNECTION_CREATED, { from: selectedFirstNode.name, to: clickedEntity.name });
+
+        // Trigger visual pin sparks on both nodes
+        const pin1 = container.querySelector(`#pin-${selectedFirstNode.id}`);
+        const pin2 = container.querySelector(`#pin-${clickedEntity.id}`);
+        pin1?.classList.add('pin-flash');
+        pin2?.classList.add('pin-flash');
+
         selectedFirstNode = null;
         renderInvestigationBoard(container);
       }
@@ -118,9 +134,26 @@ export function renderInvestigationBoard(container) {
   container.querySelectorAll('.btn-remove-conn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
+      sound.playGlitch();
       const connId = btn.getAttribute('data-conn-id');
       gameState.removeConnection(connId);
       renderInvestigationBoard(container);
+    });
+  });
+
+  // Connection item hover highlight
+  container.querySelectorAll('.connection-item').forEach(item => {
+    item.addEventListener('mouseenter', () => {
+      const from = item.getAttribute('data-conn-from');
+      const to = item.getAttribute('data-conn-to');
+      container.querySelector(`#bnode-${from}`)?.classList.add('selected');
+      container.querySelector(`#bnode-${to}`)?.classList.add('selected');
+    });
+    item.addEventListener('mouseleave', () => {
+      const from = item.getAttribute('data-conn-from');
+      const to = item.getAttribute('data-conn-to');
+      if (selectedFirstNode?.id !== from) container.querySelector(`#bnode-${from}`)?.classList.remove('selected');
+      if (selectedFirstNode?.id !== to) container.querySelector(`#bnode-${to}`)?.classList.remove('selected');
     });
   });
 }
@@ -145,20 +178,22 @@ function drawConnectionLines(container, entities, connections) {
       line.setAttribute('x2', x2);
       line.setAttribute('y2', y2);
 
-      // Color coding per Black/White/Blood Red theme
+      // Color coding & animated flowing current per Black/White/Blood Red theme
       if (conn.status === 'CONFIRMED') {
         line.setAttribute('stroke', '#ffffff');
-        line.setAttribute('stroke-width', '2');
+        line.setAttribute('stroke-width', '2.5');
+        line.classList.add('conn-line-confirmed', 'conn-line-flowing');
       } else if (conn.status === 'RELEVANT') {
-        line.setAttribute('stroke', '#dc2626');
-        line.setAttribute('stroke-width', '2');
-        line.setAttribute('stroke-dasharray', '4,4');
+        line.setAttribute('stroke', '#e52525');
+        line.setAttribute('stroke-width', '2.5');
+        line.classList.add('conn-line-relevant', 'conn-line-flowing');
       } else {
         line.setAttribute('stroke', '#52525b');
         line.setAttribute('stroke-width', '1.5');
-        line.setAttribute('stroke-dasharray', '2,2');
+        line.setAttribute('stroke-dasharray', '3,3');
       }
       svg.appendChild(line);
     }
   });
 }
+

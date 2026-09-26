@@ -8,6 +8,7 @@ import { renderDashboard } from './components/dashboard.js';
 import { renderFinalInvestigation } from './components/finalInvestigation.js';
 import { renderFinalAnswer } from './components/finalAnswer.js';
 import { renderResultsScreen } from './components/resultsScreen.js';
+import { cinematic } from './effects/cinematic.js';
 
 class App {
   constructor() {
@@ -26,6 +27,9 @@ class App {
   }
 
   init() {
+    // Initialize cinematic atmosphere and effects
+    cinematic.init();
+
     // Initial case load (Case 014: The Man Who Moved)
     const initialCase = getCaseById('014');
     gameState.loadCase(initialCase);

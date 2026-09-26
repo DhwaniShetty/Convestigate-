@@ -1,0 +1,1671 @@
+/* ==========================================================================
+   CONVESTIGATE — CINEMATIC INVESTIGATION ANIMATIONS & ATMOSPHERE
+   Palette: Strict Noir (Black, White, Blood Red)
+   Focus: Investigation, Mystery, Discovery, Tension, AI Psychology
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   0. CARVED ARCHIVAL INVESTIGATION DESK SURFACE (Physical Slate & Engravings)
+   -------------------------------------------------------------------------- */
+#carved-noir-surface {
+  position: fixed;
+  inset: -15px;
+  width: calc(100vw + 30px);
+  height: calc(100vh + 30px);
+  z-index: 0;
+  pointer-events: none;
+  background-color: #050507;
+  background-image: 
+    radial-gradient(ellipse at 50% 50%, rgba(5, 5, 7, 0.45) 0%, rgba(5, 5, 7, 0.15) 55%, transparent 85%),
+    url('../assets/carved_noir_bg.jpg');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  opacity: 1;
+  filter: contrast(120%) brightness(1.1);
+  transform: translate3d(0, 0, 0);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease, filter 0.6s ease;
+  will-change: transform;
+}
+
+body.tension-threatened #carved-noir-surface {
+  filter: contrast(125%) brightness(1.05);
+}
+
+body.tension-panic #carved-noir-surface {
+  filter: contrast(135%) brightness(1.0);
+}
+
+body.tension-vanished #carved-noir-surface {
+  filter: contrast(140%) brightness(0.95);
+}
+
+/* --------------------------------------------------------------------------
+   1. ATMOSPHERIC SCANLINES, GRAIN & TENSION VIGNETTE
+   -------------------------------------------------------------------------- */
+#cinematic-atmosphere {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 9999;
+  overflow: hidden;
+}
+
+/* CRT Scanlines */
+.cinematic-scanlines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%, 
+    rgba(0, 0, 0, 0.22) 50%
+  ), linear-gradient(
+    90deg,
+    rgba(255, 0, 0, 0.02),
+    rgba(0, 255, 0, 0.01),
+    rgba(0, 0, 255, 0.02)
+  );
+  background-size: 100% 3px, 6px 100%;
+  opacity: 0.5;
+}
+
+/* Noir Ambient Vignette - Light so carvings remain clearly visible */
+.cinematic-vignette {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.35);
+  transition: box-shadow 0.8s ease;
+}
+
+/* Dynamic Psychological Tension Modes */
+body.tension-calm .cinematic-vignette {
+  box-shadow: inset 0 0 45px rgba(0, 0, 0, 0.3);
+}
+
+body.tension-excited .cinematic-vignette {
+  box-shadow: inset 0 0 110px rgba(255, 255, 255, 0.05), inset 0 0 140px rgba(0, 0, 0, 0.9);
+}
+
+body.tension-defensive .cinematic-vignette {
+  box-shadow: inset 0 0 120px rgba(192, 21, 21, 0.15), inset 0 0 160px rgba(0, 0, 0, 0.92);
+}
+
+body.tension-threatened .cinematic-vignette {
+  box-shadow: inset 0 0 140px rgba(192, 21, 21, 0.35), inset 0 0 180px rgba(0, 0, 0, 0.95);
+  animation: atmospheric-threat-breathe 4s infinite ease-in-out;
+}
+
+body.tension-panic .cinematic-vignette {
+  box-shadow: inset 0 0 160px rgba(229, 37, 37, 0.6), inset 0 0 200px rgba(0, 0, 0, 0.98);
+  animation: atmospheric-panic-strobe 0.8s infinite ease-in-out;
+}
+
+body.tension-vanished .cinematic-vignette {
+  box-shadow: inset 0 0 150px rgba(192, 21, 21, 0.5), inset 0 0 220px rgba(0, 0, 0, 1);
+  animation: countdown-heartbeat-vignette 1s infinite ease-in-out;
+}
+
+@keyframes atmospheric-threat-breathe {
+  0%, 100% { box-shadow: inset 0 0 130px rgba(192, 21, 21, 0.28), inset 0 0 180px rgba(0, 0, 0, 0.95); }
+  50% { box-shadow: inset 0 0 160px rgba(192, 21, 21, 0.42), inset 0 0 200px rgba(0, 0, 0, 0.95); }
+}
+
+@keyframes atmospheric-panic-strobe {
+  0%, 100% { opacity: 0.85; filter: contrast(110%); }
+  50% { opacity: 1; filter: contrast(135%) drop-shadow(0 0 10px rgba(229, 37, 37, 0.4)); }
+}
+
+@keyframes countdown-heartbeat-vignette {
+  0% { box-shadow: inset 0 0 130px rgba(192, 21, 21, 0.35), inset 0 0 200px #000; }
+  25% { box-shadow: inset 0 0 180px rgba(229, 37, 37, 0.65), inset 0 0 210px #000; }
+  45% { box-shadow: inset 0 0 140px rgba(192, 21, 21, 0.4), inset 0 0 200px #000; }
+  100% { box-shadow: inset 0 0 130px rgba(192, 21, 21, 0.35), inset 0 0 200px #000; }
+}
+
+/* Subtle Screen Jolt / Jitter */
+.screen-jolt {
+  animation: jolt-shake 0.35s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes jolt-shake {
+  10%, 90% { transform: translate3d(-1px, 1px, 0); }
+  20%, 80% { transform: translate3d(2px, -1px, 0); }
+  30%, 50%, 70% { transform: translate3d(-3px, 2px, 0); }
+  40%, 60% { transform: translate3d(3px, -2px, 0); }
+}
+
+/* --------------------------------------------------------------------------
+   2. WOW MOMENT 1: CINEMATIC MURDER-MYSTERY MANGA INTRODUCTION
+   -------------------------------------------------------------------------- */
+#cinematic-overlay-root {
+  position: relative;
+  z-index: 100000;
+}
+
+.manga-case-opening {
+  position: fixed;
+  inset: 0;
+  background-color: #030305;
+  z-index: 100001;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 32px;
+  overflow: hidden;
+  opacity: 1;
+  user-select: none;
+}
+
+/* Layer 0: Film Grain Texture Overlay */
+.manga-film-grain {
+  position: absolute;
+  inset: -50px;
+  pointer-events: none;
+  z-index: 4;
+  opacity: 0.12;
+  background-image: 
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.4) 1px, transparent 1px),
+    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.25) 1px, transparent 1px);
+  background-size: 4px 4px, 7px 7px;
+  animation: grain-flicker 0.15s steps(3) infinite;
+}
+
+@keyframes grain-flicker {
+  0% { transform: translate(0, 0); }
+  33% { transform: translate(-2px, 1px); }
+  66% { transform: translate(1px, -2px); }
+  100% { transform: translate(0, 0); }
+}
+
+/* Layer 0: Manga Screentone / Halftone Dot Matrix */
+.manga-screentone {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+  opacity: 0.05;
+  background-image: radial-gradient(circle at 1px 1px, #ffffff 1px, transparent 0);
+  background-size: 10px 10px;
+}
+
+/* Layer 0: Deep Noir Vignette */
+.manga-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  box-shadow: 
+    inset 0 0 100px rgba(0, 0, 0, 0.95), 
+    inset 0 0 220px #030305,
+    inset 0 0 40px rgba(192, 21, 21, 0.15);
+}
+
+/* Layer 1: Crime Scene Environment with Slow Ken Burns Camera Zoom & Pan */
+.manga-env-layer {
+  position: absolute;
+  inset: -40px;
+  z-index: 1;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  filter: contrast(130%) brightness(0.65) grayscale(20%);
+  transition: opacity 2s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
+}
+
+.manga-env-layer.env-visible {
+  opacity: 0.52;
+  animation: ken-burns-pan 16s ease-out forwards;
+}
+
+@keyframes ken-burns-pan {
+  0% { transform: scale(1.0) translate(0, 0); }
+  100% { transform: scale(1.15) translate(-25px, -15px); }
+}
+
+.manga-env-gradient {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 45%, rgba(3, 3, 5, 0.4) 0%, rgba(3, 3, 5, 0.85) 60%, #030305 100%);
+}
+
+/* Layer 2: Cinematic Letterbox Bars (Top & Bottom) with Manga Technical Metadata */
+.manga-cinematic-bar {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 48px;
+  background: rgba(3, 3, 5, 0.96);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+}
+
+.manga-bar-top {
+  top: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.manga-bar-bottom {
+  bottom: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.manga-bar-tag {
+  color: var(--blood-red-bright);
+  font-weight: bold;
+}
+
+.manga-status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.manga-pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--blood-red-bright);
+  box-shadow: 0 0 10px var(--blood-red-glow);
+  animation: pulse-dot 1.2s infinite ease-out;
+}
+
+@keyframes pulse-dot {
+  0% { transform: scale(0.9); opacity: 1; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+
+.manga-skip-hint {
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 1px;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.manga-skip-hint:hover {
+  color: #ffffff;
+  border-color: #ffffff;
+}
+
+/* Layer 3: Central Manga Stage Content */
+.manga-stage-content {
+  position: relative;
+  z-index: 8;
+  max-width: 840px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Cold Open Red Katana Slash Line */
+.manga-slash-accent {
+  width: 0%;
+  height: 3px;
+  background: linear-gradient(90deg, var(--blood-red-bright), var(--blood-red-deep), transparent);
+  margin-bottom: 14px;
+  box-shadow: 0 0 16px var(--blood-red-glow);
+  transition: width 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.manga-slash-accent.slashed {
+  width: 100%;
+}
+
+/* Case Docket Header */
+.manga-case-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.manga-stamp-wrap {
+  opacity: 0;
+  transform: scale(2.4) rotate(-10deg);
+  animation: stamp-slam 0.45s 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.manga-case-number {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  letter-spacing: 3px;
+  color: var(--blood-red-bright);
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.manga-status-badge {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 1.5px;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
+  padding: 2px 8px;
+}
+
+/* Manga Typography Title Block */
+.manga-title-block {
+  position: relative;
+  margin-bottom: 22px;
+}
+
+.manga-kanji-bg {
+  position: absolute;
+  top: -35px;
+  left: -20px;
+  font-size: clamp(5.5rem, 13vw, 9.5rem);
+  font-family: 'Hiragino Mincho Pro', 'Songti SC', serif;
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.035);
+  pointer-events: none;
+  z-index: -1;
+  user-select: none;
+  letter-spacing: 14px;
+  line-height: 1;
+}
+
+.manga-title-headline {
+  font-family: var(--font-headline);
+  font-size: clamp(2.4rem, 5.5vw, 4.2rem);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: #ffffff;
+  line-height: 1.1;
+  margin: 0;
+  min-height: 3.5rem;
+  text-shadow: 0 0 30px rgba(229, 37, 37, 0.55), 3px 3px 0px #000;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+.manga-cursor {
+  display: inline-block;
+  color: var(--blood-red-bright);
+  font-weight: bold;
+  animation: cursor-blink 0.6s infinite;
+  margin-left: 4px;
+}
+
+/* Case Dossier Information Grid */
+.manga-dossier-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
+  gap: 16px;
+  margin-bottom: 28px;
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.manga-dossier-grid.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.manga-victim-card {
+  background: rgba(10, 10, 15, 0.88);
+  border: 1px solid var(--border-medium);
+  border-left: 4px solid var(--blood-red-bright);
+  padding: 16px 20px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.85);
+}
+
+.manga-section-tag {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--blood-red-bright);
+  letter-spacing: 1.5px;
+  margin-bottom: 4px;
+}
+
+.manga-victim-name {
+  font-family: var(--font-headline);
+  font-size: 1.35rem;
+  color: #ffffff;
+  letter-spacing: 1px;
+}
+
+.manga-victim-meta {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.manga-synopsis-box {
+  background: rgba(10, 10, 15, 0.88);
+  border: 1px solid var(--border-medium);
+  padding: 16px 20px 16px 36px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  position: relative;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.85);
+}
+
+.manga-quote-mark {
+  position: absolute;
+  top: 4px;
+  left: 10px;
+  font-family: serif;
+  font-size: 2.4rem;
+  line-height: 1;
+  color: var(--blood-red-bright);
+  opacity: 0.75;
+}
+
+.manga-synopsis-text {
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* Manga Action Dock */
+.manga-action-dock {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.5s 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.manga-action-dock.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.manga-enter-btn {
+  padding: 14px 38px;
+  font-size: 1.05rem;
+  letter-spacing: 2px;
+  animation: cta-pulse 1.8s infinite ease-in-out;
+  border-color: var(--blood-red-bright) !important;
+  background: var(--blood-red) !important;
+  box-shadow: 0 0 20px rgba(229, 37, 37, 0.5);
+  cursor: pointer;
+}
+
+.manga-enter-btn:hover {
+  background: var(--blood-red-bright) !important;
+  box-shadow: 0 0 35px rgba(229, 37, 37, 0.85);
+}
+
+/* Exit Shutter & Dissolve Animation */
+.manga-case-opening.manga-exit {
+  animation: manga-shutter-dissolve 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  pointer-events: none;
+}
+
+@keyframes manga-shutter-dissolve {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+    filter: brightness(1) contrast(100%);
+  }
+  35% {
+    opacity: 0.9;
+    transform: scale(1.02);
+    filter: brightness(2) contrast(160%);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.08);
+    filter: brightness(3) blur(4px);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   MANGA STORY LAYER: PANELS, DIALOGUE BUBBLES & TRANSITIONS
+   -------------------------------------------------------------------------- */
+/* Flash Strobe Overlay */
+.manga-flash-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 99;
+  background: #ffffff;
+  animation: manga-flash-fade 0.35s ease-out forwards;
+}
+
+@keyframes manga-flash-fade {
+  0% { opacity: 0.85; }
+  100% { opacity: 0; }
+}
+
+/* Panel Layouts */
+.manga-panels-container {
+  width: 100%;
+  margin: 10px 0;
+}
+
+.manga-panels-container.layout-fullscreen {
+  display: block;
+}
+
+.manga-panels-container.layout-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.manga-panels-container.layout-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Base Manga Panel Box */
+.manga-panel-box {
+  background: rgba(10, 10, 15, 0.9);
+  border: 2px solid #ffffff;
+  box-shadow: 6px 6px 0px rgba(0, 0, 0, 0.95);
+  padding: 16px 20px;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: manga-panel-enter 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes manga-panel-enter {
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Vertical Victim Dossier Inset */
+.vertical-panel.manga-victim-card {
+  border-left: 5px solid var(--blood-red-bright);
+}
+
+.manga-avatar-frame {
+  width: 44px;
+  height: 44px;
+  background: #000000;
+  border: 2px solid var(--border-medium);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.manga-victim-background {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  margin-top: 6px;
+}
+
+/* Evidence / CCTV / Phone Panel */
+.cctv-panel {
+  background: #020204;
+  border: 2px solid var(--blood-red);
+  padding: 14px 18px;
+  font-family: var(--font-mono);
+  position: relative;
+}
+
+.cctv-header-bar {
+  display: flex;
+  align-items: center;
+  font-size: 0.72rem;
+  color: var(--blood-red-bright);
+  letter-spacing: 1.5px;
+  font-weight: bold;
+  border-bottom: 1px solid rgba(229, 37, 37, 0.3);
+  padding-bottom: 6px;
+  margin-bottom: 8px;
+}
+
+.cctv-rec-dot {
+  width: 8px;
+  height: 8px;
+  background: #ef4444;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 8px;
+  animation: pulse-dot 1s infinite;
+}
+
+.cctv-screen-body {
+  position: relative;
+}
+
+.cctv-scanline-fx {
+  position: absolute;
+  inset: -10px;
+  pointer-events: none;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(229, 37, 37, 0.12) 50%);
+  background-size: 100% 4px;
+  opacity: 0.7;
+}
+
+.cctv-evidence-title {
+  font-family: var(--font-headline);
+  font-size: 1.15rem;
+  color: #ffffff;
+  letter-spacing: 1px;
+  margin-bottom: 2px;
+}
+
+.cctv-evidence-type {
+  font-size: 0.7rem;
+  color: var(--blood-red-bright);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.cctv-evidence-clue {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  margin: 6px 0 8px;
+}
+
+.cctv-footer-status {
+  font-size: 0.7rem;
+  color: #4ade80;
+  letter-spacing: 1px;
+  font-weight: bold;
+}
+
+/* Character Close-Up & Dialogue Panels */
+.character-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.character-card-head {
+  margin-bottom: 12px;
+}
+
+.character-role-tag {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--blood-red-bright);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.character-name-title {
+  font-family: var(--font-headline);
+  font-size: 1.25rem;
+  color: #ffffff;
+  letter-spacing: 1px;
+}
+
+.manga-bubble-wrapper {
+  margin-top: 8px;
+}
+
+/* Manga Speech Bubble */
+.manga-speech-bubble {
+  background: #ffffff;
+  color: #050507;
+  border: 3px solid #000000;
+  border-radius: 12px;
+  padding: 12px 16px;
+  position: relative;
+  box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.9);
+}
+
+.manga-speech-bubble::before {
+  content: '';
+  position: absolute;
+  bottom: -15px;
+  left: 20px;
+  border-width: 14px 12px 0;
+  border-style: solid;
+  border-color: #000000 transparent;
+  display: block;
+  width: 0;
+}
+
+.manga-speech-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 22px;
+  border-width: 10px 10px 0;
+  border-style: solid;
+  border-color: #ffffff transparent;
+  display: block;
+  width: 0;
+}
+
+.bubble-quote-text {
+  font-family: var(--font-headline);
+  font-size: 0.95rem;
+  letter-spacing: 0.5px;
+  line-height: 1.35;
+  margin: 0;
+}
+
+/* Manga Thought Bubble */
+.manga-thought-bubble {
+  background: #ffffff;
+  color: #050507;
+  border: 3px dashed #000000;
+  border-radius: 16px;
+  padding: 12px 16px;
+  position: relative;
+  box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.9);
+}
+
+.manga-thought-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  right: 24px;
+  width: 10px;
+  height: 10px;
+  background: #ffffff;
+  border: 2px solid #000000;
+  border-radius: 50%;
+}
+
+/* Manga Shout / Exclamation Bubble */
+.manga-shout-bubble {
+  background: #ffffff;
+  color: #050507;
+  border: 3px solid #000000;
+  border-radius: 4px;
+  padding: 12px 16px;
+  position: relative;
+  box-shadow: 5px 5px 0px var(--blood-red-bright);
+  clip-path: polygon(
+    0% 5%, 8% 0%, 92% 2%, 100% 7%,
+    98% 90%, 93% 98%, 40% 96%, 30% 100%, 25% 95%, 5% 98%, 0% 90%
+  );
+}
+
+.manga-shout-bubble .bubble-quote-text {
+  font-weight: 800;
+  color: #000000;
+  letter-spacing: 0.8px;
+}
+
+/* Encrypted Mobile Phone / Cellular Panel */
+.phone-panel {
+  background: #06060a;
+  border: 2px solid #3b82f6;
+  padding: 12px 16px;
+  font-family: var(--font-mono);
+  box-shadow: 6px 6px 0px rgba(0, 0, 0, 0.95);
+  position: relative;
+}
+
+.phone-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.68rem;
+  color: #60a5fa;
+  border-bottom: 1px solid rgba(59, 130, 246, 0.25);
+  padding-bottom: 4px;
+  margin-bottom: 8px;
+}
+
+.phone-screen-content {
+  position: relative;
+}
+
+.phone-header-title {
+  font-size: 0.72rem;
+  letter-spacing: 1.5px;
+  font-weight: bold;
+  color: #93c5fd;
+  margin-bottom: 6px;
+}
+
+.phone-bubble {
+  background: rgba(30, 58, 138, 0.4);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 6px 0;
+}
+
+.phone-msg-text {
+  font-size: 0.82rem;
+  color: #e0f2fe;
+  line-height: 1.35;
+  margin: 0;
+  font-style: italic;
+}
+
+.phone-meta-status {
+  font-size: 0.68rem;
+  color: #38bdf8;
+  letter-spacing: 1px;
+  margin-top: 6px;
+}
+
+/* Subhead Metadata */
+.manga-subhead-meta {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  letter-spacing: 1.5px;
+  margin-top: 4px;
+}
+
+/* Act Navigation Pills */
+.manga-act-nav-dots {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.manga-act-pill {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-medium);
+  color: var(--text-muted);
+  padding: 4px 12px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.manga-act-pill:hover {
+  color: #ffffff;
+  border-color: #ffffff;
+}
+
+.manga-act-pill.active {
+  background: var(--blood-red);
+  border-color: var(--blood-red-bright);
+  color: #ffffff;
+  font-weight: bold;
+  box-shadow: 0 0 12px var(--blood-red-glow);
+}
+
+/* Scene Transitions */
+.scene-transition-zoom {
+  animation: manga-scene-zoom 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes manga-scene-zoom {
+  from { opacity: 0; transform: scale(1.04); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.scene-transition-slide {
+  animation: manga-scene-slide 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes manga-scene-slide {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.scene-transition-fade {
+  animation: manga-scene-fade 0.45s ease-out both;
+}
+
+@keyframes manga-scene-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.scene-transition-glitch {
+  animation: manga-scene-glitch 0.4s ease-out both;
+}
+
+@keyframes manga-scene-glitch {
+  0% { opacity: 0; transform: translateX(-4px); filter: contrast(180%); }
+  25% { transform: translateX(4px); filter: invert(20%); }
+  50% { transform: translateX(-2px); }
+  100% { opacity: 1; transform: translateX(0); filter: contrast(100%); }
+}
+
+.scene-transition-flash {
+  animation: manga-scene-flash 0.4s ease-out both;
+}
+
+@keyframes manga-scene-flash {
+  0% { opacity: 0; filter: brightness(2.5); }
+  100% { opacity: 1; filter: brightness(1); }
+}
+
+.scene-transition-hard-cut {
+  animation: manga-scene-hard 0.2s ease-out both;
+}
+
+@keyframes manga-scene-hard {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+/* Panel-Level Sliding Animations */
+.manga-panel-box.slide-left {
+  animation: manga-panel-slide-left 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.manga-panel-box.slide-right {
+  animation: manga-panel-slide-right 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes manga-panel-slide-left {
+  from { opacity: 0; transform: translateX(-25px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes manga-panel-slide-right {
+  from { opacity: 0; transform: translateX(25px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes stamp-slam {
+  0% {
+    opacity: 0;
+    transform: scale(2.5) rotate(-12deg);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(0.95) rotate(-3deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(-4deg);
+  }
+}
+
+@keyframes cursor-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+@media (max-width: 768px) {
+  .manga-dossier-grid {
+    grid-template-columns: 1fr;
+  }
+  .manga-cinematic-bar {
+    padding: 0 16px;
+    font-size: 0.68rem;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   3. WOW MOMENT 2: EVIDENCE INTERACTION & CORRELATION FOCUS
+   -------------------------------------------------------------------------- */
+.evidence-card {
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1), 
+              border-color 0.22s ease !important;
+  cursor: pointer;
+  position: relative;
+}
+
+.evidence-card:not(.locked):hover {
+  transform: translateY(-4px) scale(1.02);
+  border-color: #ffffff !important;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.95), 0 0 15px rgba(255, 255, 255, 0.1);
+  z-index: 5;
+}
+
+.evidence-card:not(.locked):active {
+  transform: scale(0.99);
+}
+
+/* Tactile Stamp when Investigated */
+.evidence-card.investigated .stamp-red {
+  animation: stamp-pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+@keyframes stamp-pop {
+  0% { transform: scale(1.6); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Evidence Inspection Modal Pop */
+.modal-overlay.open .modal-box {
+  animation: evidence-folder-open 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes evidence-folder-open {
+  0% {
+    opacity: 0;
+    transform: scale(0.92) translateY(14px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Forensic Clue Marker Highlighter Sweep */
+.clue-highlight-sweep {
+  display: inline;
+  background: linear-gradient(
+    90deg,
+    rgba(192, 21, 21, 0.3) 0%,
+    rgba(229, 37, 37, 0.38) 100%
+  );
+  background-size: 0% 100%;
+  background-repeat: no-repeat;
+  color: #ffffff;
+  padding: 1px 4px;
+  border-radius: 2px;
+  animation: marker-sweep 0.7s 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes marker-sweep {
+  0% { background-size: 0% 100%; }
+  100% { background-size: 100% 100%; }
+}
+
+/* Key Clue Discovery Badge Pulsing */
+.key-clue-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(192, 21, 21, 0.18);
+  border: 1px solid var(--blood-red-bright);
+  color: #ffffff;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  margin-top: 8px;
+  box-shadow: 0 0 10px rgba(192, 21, 21, 0.35);
+  animation: clue-pulse 2s infinite ease-in-out;
+}
+
+@keyframes clue-pulse {
+  0%, 100% { box-shadow: 0 0 6px rgba(192, 21, 21, 0.3); }
+  50% { box-shadow: 0 0 16px rgba(229, 37, 37, 0.6); }
+}
+
+/* --------------------------------------------------------------------------
+   4. INVESTIGATION BOARD: NODES, STRINGS & CONNECTIONS
+   -------------------------------------------------------------------------- */
+/* Ambient Pin Sway on Corkboard */
+.board-node {
+  transform-origin: 50% 0%;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.2s ease,
+              border-color 0.2s ease !important;
+}
+
+.board-node:hover {
+  transform: translateY(-4px) scale(1.05) rotate(0.5deg);
+  border-color: #ffffff !important;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.95), 0 0 12px rgba(255, 255, 255, 0.15) !important;
+  z-index: 20 !important;
+}
+
+/* Selected Node Pulsing Halo */
+.board-node.selected {
+  border-color: var(--blood-red-bright) !important;
+  box-shadow: 0 0 20px var(--blood-red-glow), 4px 4px 0px var(--blood-red) !important;
+  animation: node-selected-pulse 1.4s infinite ease-in-out;
+}
+
+@keyframes node-selected-pulse {
+  0%, 100% {
+    box-shadow: 0 0 12px rgba(229, 37, 37, 0.4), 4px 4px 0px var(--blood-red);
+  }
+  50% {
+    box-shadow: 0 0 24px rgba(229, 37, 37, 0.8), 4px 4px 0px var(--blood-red-bright);
+  }
+}
+
+/* Node Pin Gleam */
+.board-node-pin {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ff6b6b, var(--blood-red) 70%, #4a0000 100%);
+  border: 2px solid #ffffff;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.8);
+  transition: transform 0.2s ease;
+}
+
+.board-node:hover .board-node-pin {
+  transform: translateX(-50%) scale(1.15);
+}
+
+/* Pin Connection Flash on New Link */
+.pin-flash {
+  animation: pin-spark 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes pin-spark {
+  0% { transform: translateX(-50%) scale(1); filter: brightness(1); }
+  50% { transform: translateX(-50%) scale(1.6); filter: brightness(2) drop-shadow(0 0 10px #ff3333); }
+  100% { transform: translateX(-50%) scale(1); filter: brightness(1); }
+}
+
+/* Animated SVG Connection Strings */
+.conn-line-flowing {
+  stroke-dasharray: 6, 6;
+  animation: line-electron-flow 1.5s linear infinite;
+}
+
+@keyframes line-electron-flow {
+  from { stroke-dashoffset: 24; }
+  to { stroke-dashoffset: 0; }
+}
+
+.conn-line-confirmed {
+  stroke: #ffffff;
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.6));
+}
+
+.conn-line-relevant {
+  stroke: var(--blood-red-bright);
+  filter: drop-shadow(0 0 5px rgba(229, 37, 37, 0.7));
+}
+
+/* Connection Creation Draw-in */
+.conn-line-new {
+  animation: line-draw-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes line-draw-in {
+  from { opacity: 0; stroke-width: 0; }
+  to { opacity: 1; stroke-width: 2.5; }
+}
+
+/* Board Helper Banner */
+.board-guide-banner {
+  background: rgba(10, 10, 15, 0.95);
+  border: 1px solid var(--border-medium);
+  border-left: 3px solid var(--blood-red-bright);
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+/* --------------------------------------------------------------------------
+   5. WOW MOMENT 3: AI CHARACTER STATES & PANIC → VANISH BREAKDOWN
+   -------------------------------------------------------------------------- */
+/* AI Panel Mood Wrappers */
+.ai-panel-wrapper {
+  transition: border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+/* Calm */
+.ai-mood-calm .ai-avatar {
+  border-color: #ffffff;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+  animation: ai-breathing 4s infinite ease-in-out;
+}
+
+@keyframes ai-breathing {
+  0%, 100% { box-shadow: 0 0 8px rgba(255, 255, 255, 0.15); }
+  50% { box-shadow: 0 0 16px rgba(255, 255, 255, 0.35); }
+}
+
+/* Excited */
+.ai-mood-excited .ai-avatar {
+  border-color: #ffffff;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+  animation: ai-pulse-excited 1.5s infinite ease-in-out;
+}
+
+@keyframes ai-pulse-excited {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* Defensive */
+.ai-mood-defensive {
+  border-left: 2px solid #ea580c;
+}
+
+.ai-mood-defensive .ai-avatar {
+  border-color: #ea580c;
+  box-shadow: 0 0 12px rgba(234, 88, 12, 0.4);
+}
+
+/* Threatened */
+.ai-mood-threatened {
+  border-left: 2px solid var(--blood-red-bright);
+}
+
+.ai-mood-threatened .ai-avatar {
+  border-color: var(--blood-red-bright);
+  box-shadow: 0 0 18px var(--blood-red-glow);
+  animation: ai-threat-flicker 2.5s infinite ease-in-out;
+}
+
+@keyframes ai-threat-flicker {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  45% { opacity: 0.9; }
+  50% { opacity: 0.6; transform: scale(0.98); }
+  55% { opacity: 1; transform: scale(1.02); }
+}
+
+/* PANIC: Instability & Distortion */
+.ai-mood-panic {
+  border-left: 3px solid var(--blood-red-bright) !important;
+  animation: ai-panel-panic-jitter 0.25s infinite ease-in-out;
+}
+
+.ai-mood-panic .ai-avatar {
+  border-color: var(--blood-red-bright) !important;
+  color: var(--blood-red-bright) !important;
+  box-shadow: 0 0 25px rgba(229, 37, 37, 0.8), inset 0 0 15px rgba(229, 37, 37, 0.4);
+  animation: ai-avatar-spasm 0.18s infinite linear;
+}
+
+.ai-mood-panic .ai-messages-scroll {
+  text-shadow: 1px 0px 1px #ff0000, -1px 0px 1px #00ffff;
+  animation: ai-text-shudder 0.3s infinite ease-in-out;
+}
+
+@keyframes ai-panel-panic-jitter {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-1px, 1px); }
+  50% { transform: translate(1px, -1px); }
+  75% { transform: translate(-1px, -1px); }
+  100% { transform: translate(0, 0); }
+}
+
+@keyframes ai-avatar-spasm {
+  0% { transform: scale(1) rotate(0deg); }
+  25% { transform: scale(1.08) rotate(-2deg); }
+  70% { transform: scale(0.95) rotate(2deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+@keyframes ai-text-shudder {
+  0%, 100% { filter: blur(0px); }
+  50% { filter: blur(0.3px); }
+}
+
+/* THE VANISH TRANSITION SEQUENCE */
+.vanish-flash-effect {
+  position: fixed;
+  inset: 0;
+  background: #ffffff;
+  z-index: 10001;
+  pointer-events: none;
+  animation: crt-flash-fade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes crt-flash-fade {
+  0% { opacity: 0.9; }
+  100% { opacity: 0; }
+}
+
+.crt-shutdown-line {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--blood-red-bright);
+  box-shadow: 0 0 20px #ff3333;
+  animation: crt-collapse 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes crt-collapse {
+  0% { transform: scaleY(1) scaleX(1); opacity: 1; }
+  40% { transform: scaleY(0.05) scaleX(1); opacity: 1; }
+  80% { transform: scaleY(0.05) scaleX(0.08); opacity: 1; }
+  100% { transform: scale(0); opacity: 0; }
+}
+
+/* Vanished Screen Overlay & Urgency */
+.ai-vanished-overlay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  height: 100%;
+  padding: 30px 20px;
+  background: radial-gradient(circle at 50% 40%, #150505 0%, #060608 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.ai-vanished-overlay::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(229, 37, 37, 0.03),
+    rgba(229, 37, 37, 0.03) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  pointer-events: none;
+}
+
+/* --------------------------------------------------------------------------
+   6. COUNTDOWN TIMER ENHANCEMENTS
+   -------------------------------------------------------------------------- */
+.countdown-box-active {
+  margin: 18px 0;
+  background: #000000;
+  border: 2px solid var(--blood-red);
+  padding: 14px 24px;
+  box-shadow: 0 0 20px rgba(192, 21, 21, 0.45);
+  animation: countdown-heartbeat 1s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+
+@keyframes countdown-heartbeat {
+  0% { transform: scale(1); box-shadow: 0 0 15px rgba(192, 21, 21, 0.4); }
+  15% { transform: scale(1.02); box-shadow: 0 0 25px rgba(229, 37, 37, 0.7); }
+  30% { transform: scale(1); box-shadow: 0 0 15px rgba(192, 21, 21, 0.4); }
+  100% { transform: scale(1); box-shadow: 0 0 15px rgba(192, 21, 21, 0.4); }
+}
+
+.countdown-digits {
+  font-family: var(--font-mono);
+  font-size: 2.6rem;
+  font-weight: 800;
+  color: var(--blood-red-bright);
+  letter-spacing: 5px;
+  text-shadow: 0 0 12px var(--blood-red-glow);
+}
+
+/* HUD Timer Pulse */
+.hud-timer {
+  animation: hud-timer-warn 1.5s infinite ease-in-out !important;
+}
+
+@keyframes hud-timer-warn {
+  0%, 100% { border-color: var(--blood-red-deep); background: rgba(220, 38, 38, 0.08); }
+  50% { border-color: var(--blood-red-bright); background: rgba(220, 38, 38, 0.22); box-shadow: 0 0 10px rgba(229, 37, 37, 0.4); }
+}
+
+/* --------------------------------------------------------------------------
+   7. TOAST NOTIFICATION SYSTEM (FORENSIC / CRIME ALERT STYLE)
+   -------------------------------------------------------------------------- */
+.toast-container {
+  position: fixed;
+  top: 72px;
+  right: 24px;
+  z-index: 9998;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.convestigate-toast {
+  pointer-events: auto;
+  min-width: 290px;
+  max-width: 380px;
+  background: #0a0a0f;
+  border: 1px solid var(--border-medium);
+  border-left: 4px solid var(--blood-red-bright);
+  padding: 12px 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.9), 0 0 10px rgba(192, 21, 21, 0.2);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  animation: toast-slide-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.convestigate-toast.toast-hiding {
+  opacity: 0;
+  transform: translateX(40px);
+}
+
+@keyframes toast-slide-in {
+  from { opacity: 0; transform: translateX(60px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.toast-icon {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.toast-tag {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  color: var(--blood-red-bright);
+  letter-spacing: 1px;
+}
+
+.toast-title {
+  font-family: var(--font-headline);
+  font-size: 0.95rem;
+  color: #ffffff;
+  margin: 2px 0;
+}
+
+.toast-desc {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.35;
+}
+
+/* --------------------------------------------------------------------------
+   8. USER FRIENDLINESS: FIELD MANUAL / GUIDE MODAL
+   -------------------------------------------------------------------------- */
+.guide-modal-box {
+  max-width: 720px !important;
+  background: #0d0d12 !important;
+  border: 2px solid var(--border-medium) !important;
+}
+
+.guide-step-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+  margin: 20px 0;
+}
+
+.guide-step-card {
+  background: var(--bg-dark);
+  border: 1px solid var(--border-subtle);
+  border-top: 3px solid var(--blood-red);
+  padding: 16px;
+}
+
+.guide-step-num {
+  font-family: var(--font-headline);
+  font-size: 1.4rem;
+  color: var(--blood-red-bright);
+  margin-bottom: 6px;
+}
+
+.guide-step-title {
+  font-family: var(--font-headline);
+  font-size: 0.95rem;
+  color: #ffffff;
+  margin-bottom: 4px;
+}
+
+.guide-step-desc {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* Audio Toggle Indicator */
+.btn-sound-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-sound-toggle:hover {
+  color: #ffffff;
+  border-color: var(--border-medium);
+}
+
+.btn-sound-toggle.sound-active {
+  color: var(--blood-red-bright);
+  border-color: var(--blood-red-deep);
+  background: rgba(192, 21, 21, 0.1);
+}
+
+/* --------------------------------------------------------------------------
+   9. MICRO-INTERACTIONS & POLISH
+   -------------------------------------------------------------------------- */
+/* Buttons subtle noir hover shine */
+.btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+  transition: left 0.4s ease;
+}
+
+.btn:hover::after {
+  left: 150%;
+}
+
+/* Puzzle Verification Glow */
+.puzzle-solved-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #ffffff;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid #22c55e;
+  padding: 4px 10px;
+  animation: badge-glow 1s ease-out;
+}
+
+@keyframes badge-glow {
+  0% { transform: scale(1.2); box-shadow: 0 0 20px rgba(34, 197, 94, 0.8); }
+  100% { transform: scale(1); box-shadow: none; }
+}
+
+/* Accessible Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   10. HIGH-VISIBILITY LANDING & CARD SELECTION ANIMATIONS
+   -------------------------------------------------------------------------- */
+/* Pulsing title glow */
+.landing-title {
+  text-shadow: 0 0 20px rgba(192, 21, 21, 0.4), 3px 3px 0px var(--blood-red-deep) !important;
+  animation: title-noir-shimmer 4s infinite ease-in-out;
+}
+
+@keyframes title-noir-shimmer {
+  0%, 100% { text-shadow: 0 0 15px rgba(192, 21, 21, 0.3), 3px 3px 0px var(--blood-red-deep); }
+  50% { text-shadow: 0 0 35px rgba(229, 37, 37, 0.75), 3px 3px 0px var(--blood-red-bright); }
+}
+
+/* Staggered entrance animation for case cards */
+.case-card {
+  animation: card-appear 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes card-appear {
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Active Selected Case Glow */
+.case-card.active-case {
+  border-color: var(--blood-red-bright) !important;
+  box-shadow: 0 0 24px rgba(229, 37, 37, 0.6), inset 0 0 12px rgba(192, 21, 21, 0.3) !important;
+  transform: translateY(-3px) scale(1.02);
+  animation: active-case-border-pulse 2s infinite ease-in-out;
+}
+
+@keyframes active-case-border-pulse {
+  0%, 100% { border-color: var(--blood-red); box-shadow: 0 0 16px rgba(192, 21, 21, 0.5); }
+  50% { border-color: var(--blood-red-bright); box-shadow: 0 0 32px rgba(229, 37, 37, 0.9), 0 0 10px #ffffff; }
+}
+
+/* Primary Investigate Button Pulsing Call-to-Action */
+#btn-quick-start {
+  animation: cta-pulse 1.8s infinite ease-in-out;
+  border-color: var(--blood-red-bright) !important;
+  background: var(--blood-red) !important;
+}
+
+#btn-quick-start:hover {
+  background: var(--blood-red-bright) !important;
+}
+
+@keyframes cta-pulse {
+  0%, 100% { box-shadow: 0 0 12px rgba(192, 21, 21, 0.4); transform: scale(1); }
+  50% { box-shadow: 0 0 28px rgba(229, 37, 37, 0.85); transform: scale(1.02); }
+}
+
+/* Screen transition effect between landing and briefing */
+.screen-view.active {
+  animation: screen-fade-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes screen-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
