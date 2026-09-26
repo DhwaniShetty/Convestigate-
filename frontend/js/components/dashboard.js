@@ -9,6 +9,7 @@ import { renderP04Witness } from './puzzles/p04Witness.js';
 import { renderP05Missing } from './puzzles/p05Missing.js';
 import { renderAIPanel } from './aiPanel.js';
 import { renderNotesPanel } from './notesPanel.js';
+import { sound } from '../effects/soundSystem.js';
 
 let activeTab = 'overview';
 let activeRightTab = 'ai'; // 'ai' or 'notes'
@@ -107,6 +108,7 @@ export function renderDashboard(container) {
   // Attach tab click handlers
   container.querySelectorAll('.sidebar-item').forEach(item => {
     item.addEventListener('click', () => {
+      sound.playClick();
       activeTab = item.getAttribute('data-tab');
       renderDashboard(container);
     });
@@ -114,16 +116,19 @@ export function renderDashboard(container) {
 
   // Right panel toggle handlers
   container.querySelector('#tab-toggle-ai')?.addEventListener('click', () => {
+    sound.playClick();
     activeRightTab = 'ai';
     renderDashboard(container);
   });
   container.querySelector('#tab-toggle-notes')?.addEventListener('click', () => {
+    sound.playClick();
     activeRightTab = 'notes';
     renderDashboard(container);
   });
 
   // Final verdict button
   container.querySelector('#btn-dash-verdict')?.addEventListener('click', () => {
+    sound.playStamp();
     gameState.setScreen('FINAL_INVESTIGATION');
   });
 

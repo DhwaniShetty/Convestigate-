@@ -1,4 +1,5 @@
 import { gameState } from '../state/gameState.js';
+import { sound } from '../effects/soundSystem.js';
 
 let selectedSuspectId = null;
 let selectedHypothesisId = null;
@@ -126,11 +127,13 @@ export function renderFinalAnswer(container) {
 
   // Back button
   container.querySelector('#btn-answer-back')?.addEventListener('click', () => {
+    sound.playClick();
     gameState.setScreen('FINAL_INVESTIGATION');
   });
 
   // Submit verdict
   container.querySelector('#btn-submit-verdict')?.addEventListener('click', () => {
+    sound.playStamp();
     const reasoningText = container.querySelector('#final-reasoning-input')?.value || '';
     gameState.submitFinalAnswer({
       suspectId: selectedSuspectId,

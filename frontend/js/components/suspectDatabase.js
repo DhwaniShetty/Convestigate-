@@ -1,5 +1,6 @@
 import { gameState } from '../state/gameState.js';
 import { eventBus, EVENTS } from '../state/eventBus.js';
+import { sound } from '../effects/soundSystem.js';
 
 let selectedSuspectId = null;
 let interrogationMoves = 10;
@@ -180,6 +181,7 @@ export function renderSuspectDatabase(container) {
   // Suspect switcher buttons
   container.querySelectorAll('.btn-switch-suspect').forEach(btn => {
     btn.addEventListener('click', () => {
+      sound.playClick();
       selectedSuspectId = btn.getAttribute('data-id');
       renderSuspectDatabase(container);
     });
@@ -187,6 +189,7 @@ export function renderSuspectDatabase(container) {
 
   // Action Cards Click Listeners
   container.querySelector('#card-press')?.addEventListener('click', () => {
+    sound.playStamp();
     if (interrogationMoves > 0) {
       interrogationMoves -= 1;
       suspectStress = Math.min(100, suspectStress + 18);
@@ -197,6 +200,7 @@ export function renderSuspectDatabase(container) {
   });
 
   container.querySelector('#card-empathize')?.addEventListener('click', () => {
+    sound.playClick();
     if (interrogationMoves > 0) {
       interrogationMoves -= 1;
       suspectTrust = Math.min(100, suspectTrust + 20);
@@ -207,12 +211,14 @@ export function renderSuspectDatabase(container) {
   });
 
   container.querySelector('#card-evidence')?.addEventListener('click', () => {
+    sound.playClick();
     isPresentEvidenceOpen = true;
     renderSuspectDatabase(container);
   });
 
   // Present Evidence Modal Controls
   container.querySelector('#btn-close-present-ev')?.addEventListener('click', () => {
+    sound.playClick();
     isPresentEvidenceOpen = false;
     renderSuspectDatabase(container);
   });
@@ -225,11 +231,13 @@ export function renderSuspectDatabase(container) {
 
       // Check contradiction
       if (currentStatement.contradictedBy === evId || evId === 'E04' || evId === 'E08') {
+        sound.playStamp();
         hintBannerText = `CONTRADICTION PROVEN! Presented ${ev.name}. Suspect alibi collapsed!`;
         suspectStress = 95;
         eventBus.emit(EVENTS.CONTRADICTION_FOUND, { suspectId: selectedSuspect.id, evidenceId: evId });
         gameState.addNote(`Contradicted ${selectedSuspect.name} with ${ev.name}: alibi broken.`);
       } else {
+        sound.playClick();
         hintBannerText = `Presented ${ev?.name || 'evidence'}. Did not produce an immediate confession. Try another piece.`;
       }
       renderSuspectDatabase(container);
