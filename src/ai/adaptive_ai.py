@@ -1,5 +1,7 @@
+from .llm_integration import LLMIntegration
 class AdaptiveAI:
-
+    def __init__(self):
+        self.llm = LLMIntegration()
     def decide(self, behavior_profile, game_state):
 
         if behavior_profile == "STRUGGLING":
@@ -116,3 +118,29 @@ class AdaptiveAI:
             game_state.ai_threat += 0
 
         return self.get_state(game_state)
+    def generate_ai_response(self, game_state, player_input):
+        state = self.get_state(game_state)
+        action = self.choose_action(game_state)
+
+        prompt = f"""
+        You are the AI Investigator in the murder mystery game Convestigate.
+
+        Current AI state: {state}
+        Current AI action: {action}
+
+        Player input:
+        {player_input}
+
+        Respond as the AI Investigator.
+
+        Rules:
+        - Stay in character.
+        - Do not reveal the complete solution.
+        - Give information appropriate to the current AI state.
+        - If the AI is threatened, become more defensive.
+        - If the AI is comfortable, provide useful but incomplete guidance.
+        - If the AI is panicking, create uncertainty or confusion.
+        - Keep the response concise.
+        """
+
+        return self.llm.generate_response(prompt)
