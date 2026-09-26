@@ -66,6 +66,16 @@ from src.game.case007_timeline_reconstruction_puzzle import Case007TimelineRecon
 from src.game.case007_forensic_analysis_puzzle import Case007ForensicAnalysisPuzzle
 from src.game.case007_trace_evidence_analysis_puzzle import Case007TraceEvidenceAnalysisPuzzle
 
+from src.game.case010_comparative_analysis_puzzle import Case010ComparativeAnalysisPuzzle
+from src.game.case010_comparative_similarity_puzzle import Case010ComparativeSimilarityPuzzle
+from src.game.case010_source_analysis_puzzle import Case010SourceAnalysisPuzzle
+from src.game.case010_hypothesis_management_puzzle import Case010HypothesisManagementPuzzle
+from src.game.case010_conclusion_writing_puzzle import Case010ConclusionWritingPuzzle
+from src.game.case011_spatial_analysis_puzzle import Case011SpatialAnalysisPuzzle
+from src.game.case011_document_reconstruction_puzzle import Case011DocumentReconstructionPuzzle
+from src.game.case011_source_analysis_puzzle import Case011SourceAnalysisPuzzle
+from src.game.case011_comparative_analysis_puzzle import Case011ComparativeAnalysisPuzzle
+from src.game.case011_social_dynamics_model_puzzle import Case011SocialDynamicsModelPuzzle
 from src.game.case012_fact_listing_puzzle import Case012FactListingPuzzle
 from src.game.case012_identity_verification_puzzle import Case012IdentityVerificationPuzzle
 from src.game.case012_field_investigation_puzzle import Case012FieldInvestigationPuzzle
@@ -115,11 +125,7 @@ def is_puzzle_unlocked(game_state, puzzle_name):
 class CreateSessionRequest(BaseModel):
     case_id: str
     player_count: int = 1
-<<<<<<< ours
-    username: str = "Guest"
-=======
     username: str
->>>>>>> theirs
 
 class TimelineAnswer(BaseModel):
     order: list[str]
@@ -128,38 +134,19 @@ class EmploymentAnswer(BaseModel):
     employment_verified: bool
     transfer_verified: bool
 
-<<<<<<< ours
-=======
 class BehaviorComparisonAnswer(BaseModel):
     directly_observed: list[str]
     narrative_added_afterward: list[str]
 
->>>>>>> theirs
 class ConnectionItem(BaseModel):
     from_node: str
     to_node: str
     status: str
 
-<<<<<<< ours
-
-=======
->>>>>>> theirs
 class ConnectionAnswer(BaseModel):
     case_id: str
     connections: list[ConnectionItem]
 
-<<<<<<< ours
-class ContradictoryAnswer(BaseModel):
-    case_id: str
-    unreliable_witness: str
-
-class MissingRecordAnswer(BaseModel):
-    case_id: str
-    missing_record: str
-    location: str
-    credential_use: bool
-    avoids_direct_accusation: bool
-=======
 class ForensicAnalysisAnswer(BaseModel):
     case_id: str
     establishes: str
@@ -183,7 +170,6 @@ class MissingRecordAnswer(BaseModel):
     credential_use: bool | None = None
     avoids_direct_accusation: bool | None = None
     hypotheses: list[str] | None = None
->>>>>>> theirs
 
 @app.get("/")
 def home():
@@ -199,27 +185,6 @@ def home():
 @app.get("/cases/{case_id}")
 def get_case(case_id: str):
 
-<<<<<<< ours
-    try:
-        case = load_case(case_id)
-
-        return {
-            "case_id": case.case_id,
-            "title": case.title,
-            "victim": case.victim,
-            "suspects": case.suspects,
-            "timeline": case.timeline,
-            "evidence": case.evidence,
-            "puzzles": case.puzzles
-        }
-
-    except FileNotFoundError:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Case {case_id} not found"
-        )
-    case = load_case()
-=======
     file_path = f"data/case_{case_id.zfill(3)}.json"
 
     try:
@@ -229,7 +194,6 @@ def get_case(case_id: str):
             status_code=404,
             detail="Case not found"
         )
->>>>>>> theirs
 
     return {
         "case_id": case.case_id,
@@ -249,15 +213,6 @@ def get_case(case_id: str):
 @app.post("/sessions")
 def create_session(request: CreateSessionRequest):
 
-<<<<<<< ours
-    try:
-     load_case(request.case_id)
-    except FileNotFoundError:
-     raise HTTPException(
-        status_code=404,
-        detail=f"Case {request.case_id} not found"
-    )
-=======
     case_file = f"data/case_{request.case_id.zfill(3)}.json"
 
     try:
@@ -267,7 +222,6 @@ def create_session(request: CreateSessionRequest):
             status_code=404,
             detail="Case not found"
         )
->>>>>>> theirs
 
     if request.player_count < 1 or request.player_count > 6:
         raise HTTPException(
@@ -276,33 +230,6 @@ def create_session(request: CreateSessionRequest):
         )
 
     session_id = str(uuid4())
-<<<<<<< ours
-
-    # Create player in database
-    username = request.username
-
-    if username == "Guest":
-        username = f"Guest_{uuid4().hex[:8]}"
-
-    player_id = create_player(username)
-
-    # Create game session in database
-    db_session_id = create_game_session(request.case_id)
-
-    # Connect player to the session
-    add_player_to_session(db_session_id, player_id)
-
-    game_state = GameState(request.case_id)
-
-    sessions[session_id] = {
-        "session_id": session_id,
-        "db_session_id": db_session_id,
-        "player_id": player_id,
-        "case_id": request.case_id,
-        "player_count": request.player_count,
-        "game_state": game_state
-    }
-=======
     game_state = GameState(request.case_id)
 
     # Start with the first puzzle defined in the case
@@ -322,7 +249,6 @@ def create_session(request: CreateSessionRequest):
     "game_state": game_state
     }
 
->>>>>>> theirs
     return {
         "session_id": session_id,
         "case_id": request.case_id,
@@ -380,14 +306,9 @@ def solve_timeline(session_id: str, answer: TimelineAnswer):
     session = sessions[session_id]
     game_state = session["game_state"]
 
-<<<<<<< ours
-    # Load case
-    case = load_case(session["case_id"])
-=======
     # Load the case selected for this session
     case_file = f"data/case_{session['case_id'].zfill(3)}.json"
     case = load_case(case_file)
->>>>>>> theirs
 
     # Get timeline puzzle data
     puzzle_data = None
@@ -413,8 +334,6 @@ def solve_timeline(session_id: str, answer: TimelineAnswer):
     # Check player's answer
     correct = puzzle.check_answer(answer.order)
 
-<<<<<<< ours
-=======
     attempt_number = get_puzzle_attempt_count(
     session["db_session_id"],
     session["player_id"],
@@ -429,7 +348,6 @@ def solve_timeline(session_id: str, answer: TimelineAnswer):
     "success" if correct else "failure",
     None
     )
->>>>>>> theirs
     if correct:
 
         # Save puzzle as solved
@@ -442,11 +360,7 @@ def solve_timeline(session_id: str, answer: TimelineAnswer):
             if evidence_id not in game_state.unlocked_evidence:
                 game_state.unlocked_evidence.append(evidence_id)
 
-<<<<<<< ours
-        game_state.current_puzzle = None
-=======
         game_state.current_puzzle = "employment"
->>>>>>> theirs
 
         return {
             "correct": True,
@@ -465,14 +379,9 @@ def solve_timeline(session_id: str, answer: TimelineAnswer):
             "message": "Incorrect order. Try again.",
             "mistakes": game_state.mistakes
         }
-<<<<<<< ours
-@app.post("/sessions/{session_id}/puzzles/employment")
-def solve_employment(session_id: str, answer: EmploymentAnswer):
-=======
 
 @app.post("/sessions/{session_id}/puzzles/asset-tracing")
 def solve_asset_tracing(session_id: str, answer: dict):
->>>>>>> theirs
 
     if session_id not in sessions:
         raise HTTPException(
@@ -483,22 +392,6 @@ def solve_asset_tracing(session_id: str, answer: dict):
     session = sessions[session_id]
     game_state = session["game_state"]
 
-<<<<<<< ours
-    if not is_puzzle_unlocked(game_state, "employment"):
-        raise HTTPException(
-            status_code=403,
-            detail="Employment puzzle is locked. Solve the timeline puzzle first."
-        )
-
-    # Load case
-    case = load_case()
-
-    # Find P02
-    puzzle_data = None
-
-    for puzzle in case.puzzles:
-        if puzzle.get("id") == "P02":
-=======
     # Make sure this endpoint is being used for Case 013
     if session["case_id"] != "013":
         raise HTTPException(
@@ -515,27 +408,12 @@ def solve_asset_tracing(session_id: str, answer: dict):
 
     for puzzle in case.puzzles:
         if puzzle.get("type") == "asset_tracing":
->>>>>>> theirs
             puzzle_data = puzzle
             break
 
     if puzzle_data is None:
         raise HTTPException(
             status_code=404,
-<<<<<<< ours
-            detail="Employment puzzle not found"
-        )
-
-    # Create puzzle
-    puzzle = EmploymentPuzzle(puzzle_data)
-
-    # Check player's answer
-    correct = puzzle.check_answer(
-    {
-        "employment_verified": answer.employment_verified,
-        "transfer_verified": answer.transfer_verified
-    }
-=======
             detail="Asset tracing puzzle not found"
         )
 
@@ -558,19 +436,13 @@ def solve_asset_tracing(session_id: str, answer: dict):
         attempt_number,
         "success" if correct else "failure",
         None
->>>>>>> theirs
     )
 
     if correct:
 
-<<<<<<< ours
-        if "employment" not in game_state.solved_puzzles:
-            game_state.solved_puzzles.append("employment")
-=======
         # Save puzzle as solved
         if "asset_tracing" not in game_state.solved_puzzles:
             game_state.solved_puzzles.append("asset_tracing")
->>>>>>> theirs
 
         # Unlock evidence
         for evidence_id in puzzle.get_unlocked_evidence():
@@ -578,18 +450,12 @@ def solve_asset_tracing(session_id: str, answer: dict):
             if evidence_id not in game_state.unlocked_evidence:
                 game_state.unlocked_evidence.append(evidence_id)
 
-<<<<<<< ours
-        return {
-            "correct": True,
-            "message": "Correct! Employment history verified.",
-=======
         # Move to Case 013 P03
         game_state.current_puzzle = "relationship_mapping"
 
         return {
             "correct": True,
             "message": "Correct! Weapon and radio traced.",
->>>>>>> theirs
             "solved_puzzles": game_state.solved_puzzles,
             "unlocked_evidence": game_state.unlocked_evidence,
             "mistakes": game_state.mistakes
@@ -601,20 +467,12 @@ def solve_asset_tracing(session_id: str, answer: dict):
 
         return {
             "correct": False,
-<<<<<<< ours
-            "message": "Incorrect verification. Try again.",
-            "mistakes": game_state.mistakes
-        }
-@app.post("/sessions/{session_id}/puzzles/connection")
-def solve_connection(session_id: str, answer: ConnectionAnswer):
-=======
             "message": "Incorrect asset tracing. Try again.",
             "mistakes": game_state.mistakes
         }
 
 @app.post("/sessions/{session_id}/puzzles/case013-relationship-mapping")
 def solve_case013_relationship_mapping(session_id: str, answer: dict):
->>>>>>> theirs
 
     if session_id not in sessions:
         raise HTTPException(
@@ -625,22 +483,6 @@ def solve_case013_relationship_mapping(session_id: str, answer: dict):
     session = sessions[session_id]
     game_state = session["game_state"]
 
-<<<<<<< ours
-    if not is_puzzle_unlocked(game_state, "connection"):
-        raise HTTPException(
-            status_code=403,
-            detail="Connection puzzle is locked. Solve the employment puzzle first."
-        )
-
-    # Load case
-    case = load_case()
-
-    # Find P03
-    puzzle_data = None
-
-    for puzzle in case.puzzles:
-        if puzzle.get("id") == "P03":
-=======
     if session["case_id"] != "013":
         raise HTTPException(
             status_code=400,
@@ -656,37 +498,12 @@ def solve_case013_relationship_mapping(session_id: str, answer: dict):
 
     for puzzle in case.puzzles:
         if puzzle.get("type") == "relationship_mapping":
->>>>>>> theirs
             puzzle_data = puzzle
             break
 
     if puzzle_data is None:
         raise HTTPException(
             status_code=404,
-<<<<<<< ours
-            detail="Connection puzzle not found"
-        )
-
-    # Create puzzle
-    puzzle = ConnectionPuzzle(puzzle_data)
-
-    # Check player's answer
-    correct = puzzle.check_answer(
-    [
-        {
-            "from": connection.from_node,
-            "to": connection.to_node,
-            "status": connection.status
-        }
-        for connection in answer.connections
-    ]
-)
-
-    if correct:
-
-        if "connection" not in game_state.solved_puzzles:
-            game_state.solved_puzzles.append("connection")
-=======
             detail="Relationship mapping puzzle not found"
         )
 
@@ -715,7 +532,6 @@ def solve_case013_relationship_mapping(session_id: str, answer: dict):
 
         if "relationship_mapping" not in game_state.solved_puzzles:
             game_state.solved_puzzles.append("relationship_mapping")
->>>>>>> theirs
 
         # Unlock evidence
         for evidence_id in puzzle.get_unlocked_evidence():
@@ -723,18 +539,12 @@ def solve_case013_relationship_mapping(session_id: str, answer: dict):
             if evidence_id not in game_state.unlocked_evidence:
                 game_state.unlocked_evidence.append(evidence_id)
 
-<<<<<<< ours
-        return {
-            "correct": True,
-            "message": "Correct! Connection established.",
-=======
         # Move to Case 013 P04
         game_state.current_puzzle = "narrative_synthesis"
 
         return {
             "correct": True,
             "message": "Correct! Financial and contact connections mapped.",
->>>>>>> theirs
             "solved_puzzles": game_state.solved_puzzles,
             "unlocked_evidence": game_state.unlocked_evidence,
             "mistakes": game_state.mistakes
@@ -746,20 +556,12 @@ def solve_case013_relationship_mapping(session_id: str, answer: dict):
 
         return {
             "correct": False,
-<<<<<<< ours
-            "message": "Incorrect connection. Try again.",
-            "mistakes": game_state.mistakes
-        }
-@app.post("/sessions/{session_id}/puzzles/contradictory")
-def solve_contradictory(session_id: str, answer: ContradictoryAnswer):
-=======
             "message": "Incorrect relationship mapping. Try again.",
             "mistakes": game_state.mistakes
         }
 
 @app.post("/sessions/{session_id}/puzzles/case013-narrative-synthesis")
 def solve_case013_narrative_synthesis(session_id: str, answer: dict):
->>>>>>> theirs
 
     if session_id not in sessions:
         raise HTTPException(
@@ -770,23 +572,6 @@ def solve_case013_narrative_synthesis(session_id: str, answer: dict):
     session = sessions[session_id]
     game_state = session["game_state"]
 
-<<<<<<< ours
-    if not is_puzzle_unlocked(game_state, "contradictory"):
-        raise HTTPException(
-            status_code=403,
-            detail="Contradictory witness puzzle is locked. Solve the connection puzzle first."
-        )
-
-    # Load case
-    case = load_case()
-
-    # Find P04
-    puzzle_data = None
-
-    for puzzle in case.puzzles:
-        if puzzle.get("id") == "P04":
-            puzzle_data = puzzle
-=======
     if session["case_id"] != "013":
         raise HTTPException(
             status_code=400,
@@ -803,31 +588,11 @@ def solve_case013_narrative_synthesis(session_id: str, answer: dict):
     for puzzle_data_item in case.puzzles:
         if puzzle_data_item.get("type") == "narrative_synthesis":
             puzzle_data = puzzle_data_item
->>>>>>> theirs
             break
 
     if puzzle_data is None:
         raise HTTPException(
             status_code=404,
-<<<<<<< ours
-            detail="Contradictory puzzle not found"
-        )
-
-    # Create puzzle
-    puzzle = ContradictoryPuzzle(puzzle_data)
-
-    # Check player's answer
-    correct = puzzle.check_answer(
-    {
-        "unreliable_witness": answer.unreliable_witness
-    }
-)
-
-    if correct:
-
-        if "contradictory" not in game_state.solved_puzzles:
-            game_state.solved_puzzles.append("contradictory")
-=======
             detail="Narrative synthesis puzzle not found"
         )
 
@@ -856,7 +621,6 @@ def solve_case013_narrative_synthesis(session_id: str, answer: dict):
 
         if "narrative_synthesis" not in game_state.solved_puzzles:
             game_state.solved_puzzles.append("narrative_synthesis")
->>>>>>> theirs
 
         # Unlock evidence
         for evidence_id in puzzle.get_unlocked_evidence():
@@ -864,18 +628,12 @@ def solve_case013_narrative_synthesis(session_id: str, answer: dict):
             if evidence_id not in game_state.unlocked_evidence:
                 game_state.unlocked_evidence.append(evidence_id)
 
-<<<<<<< ours
-        return {
-            "correct": True,
-            "message": "Correct! Witness contradiction identified.",
-=======
         # Move to Case 013 P05
         game_state.current_puzzle = "hypothesis_management"
 
         return {
             "correct": True,
             "message": "Correct! Secret life reconstructed.",
->>>>>>> theirs
             "solved_puzzles": game_state.solved_puzzles,
             "unlocked_evidence": game_state.unlocked_evidence,
             "mistakes": game_state.mistakes
@@ -887,20 +645,12 @@ def solve_case013_narrative_synthesis(session_id: str, answer: dict):
 
         return {
             "correct": False,
-<<<<<<< ours
-            "message": "Incorrect analysis. Try again.",
-            "mistakes": game_state.mistakes
-        }
-@app.post("/sessions/{session_id}/evidence/{evidence_id}")
-def inspect_evidence(session_id: str, evidence_id: str):
-=======
             "message": "Incorrect narrative reconstruction. Try again.",
             "mistakes": game_state.mistakes
         }
 
 @app.post("/sessions/{session_id}/puzzles/case013-hypothesis")
 def solve_case013_hypothesis(session_id: str, answer: dict):
->>>>>>> theirs
 
     if session_id not in sessions:
         raise HTTPException(
@@ -911,28 +661,6 @@ def solve_case013_hypothesis(session_id: str, answer: dict):
     session = sessions[session_id]
     game_state = session["game_state"]
 
-<<<<<<< ours
-    # Check whether evidence has been unlocked
-    if evidence_id not in game_state.unlocked_evidence:
-        raise HTTPException(
-            status_code=403,
-            detail="Evidence not unlocked"
-        )
-
-    # Avoid adding the same evidence twice
-    if evidence_id not in game_state.inspected_evidence:
-        game_state.inspected_evidence.append(evidence_id)
-
-    return {
-        "evidence_id": evidence_id,
-        "message": "Evidence inspected successfully.",
-        "inspected_evidence": game_state.inspected_evidence
-    }
-@app.post("/sessions/{session_id}/puzzles/missing-record")
-def solve_missing_record(
-    session_id: str,
-    answer: MissingRecordAnswer
-=======
     if session["case_id"] != "013":
         raise HTTPException(
             status_code=400,
@@ -1096,7 +824,6 @@ def solve_document_analysis(
 def solve_employment(
     session_id: str,
     answer: dict
->>>>>>> theirs
 ):
 
     if session_id not in sessions:
@@ -1108,22 +835,6 @@ def solve_employment(
     session = sessions[session_id]
     game_state = session["game_state"]
 
-<<<<<<< ours
-    if not is_puzzle_unlocked(game_state, "missing_record"):
-        raise HTTPException(
-            status_code=403,
-            detail="Missing record puzzle is locked. Solve the contradictory witness puzzle first."
-        )
-
-    # Load case
-    case = load_case()
-
-    # Find P05
-    puzzle_data = None
-
-    for puzzle in case.puzzles:
-        if puzzle.get("id") == "P05":
-=======
     if not is_puzzle_unlocked(game_state, "employment"):
         raise HTTPException(
             status_code=403,
@@ -1139,35 +850,12 @@ def solve_employment(
 
     for puzzle in case.puzzles:
         if puzzle.get("id") == "P02":
->>>>>>> theirs
             puzzle_data = puzzle
             break
 
     if puzzle_data is None:
         raise HTTPException(
             status_code=404,
-<<<<<<< ours
-            detail="Missing record puzzle not found"
-        )
-
-    # Create puzzle
-    puzzle = MissingRecordPuzzle(puzzle_data)
-
-    # Check player's answer
-    correct = puzzle.check_answer(
-    {
-        "missing_record": answer.missing_record,
-        "location": answer.location,
-        "credential_use": answer.credential_use,
-        "avoids_direct_accusation": answer.avoids_direct_accusation
-    }
-)
-
-    if correct:
-
-        if "missing_record" not in game_state.solved_puzzles:
-            game_state.solved_puzzles.append("missing_record")
-=======
             detail="P02 puzzle not found"
         )
 
@@ -1209,7 +897,6 @@ def solve_employment(
 
         if "P02" not in game_state.solved_puzzles:
             game_state.solved_puzzles.append("employment")
->>>>>>> theirs
 
         # Unlock evidence
         for evidence_id in puzzle.get_unlocked_evidence():
@@ -1217,18 +904,12 @@ def solve_employment(
             if evidence_id not in game_state.unlocked_evidence:
                 game_state.unlocked_evidence.append(evidence_id)
 
-<<<<<<< ours
-        return {
-            "correct": True,
-            "message": "Correct! Missing record identified.",
-=======
         # Move to next puzzle
         game_state.current_puzzle = "connection"
 
         return {
             "correct": True,
             "message": "Correct! P02 solved.",
->>>>>>> theirs
             "solved_puzzles": game_state.solved_puzzles,
             "unlocked_evidence": game_state.unlocked_evidence,
             "mistakes": game_state.mistakes
@@ -1240,11 +921,6 @@ def solve_employment(
 
         return {
             "correct": False,
-<<<<<<< ours
-            "message": "Incorrect investigation gap. Try again.",
-            "mistakes": game_state.mistakes
-        }
-=======
             "message": "Incorrect answer. Try again.",
             "mistakes": game_state.mistakes
         }
@@ -2443,6 +2119,7 @@ def solve_case009_hypothesis_management(session_id: str, answer: dict):
             "message": "Incorrect final hypothesis analysis. Try again.",
             "mistakes": game_state.mistakes
         }
+
 
 @app.post("/sessions/{session_id}/puzzles/case001-timeline-maintenance")
 def solve_case001_timeline_maintenance(session_id: str, answer: dict):
@@ -5908,4 +5585,3 @@ def solve_case012_motive_analysis(session_id: str, answer: dict):
         "mistakes": game_state.mistakes,
         "game_over": game_state.game_over
     }
->>>>>>> theirs
