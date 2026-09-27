@@ -1,16 +1,28 @@
 from urllib import request
+
 from uuid import uuid4
 
 from fastapi import FastAPI, HTTPException
+
 from pydantic import BaseModel
 
 from src.case.case_loader import load_case
+
 from src.database.player_session import add_player_to_session, create_game_session, create_player
+from src.database.action_logger import log_player_action
+from src.database.puzzle_logger import log_puzzle_attempt
+from src.database.behaviour import calculate_player_behaviour
+
 from src.game.game_state import GameState
+
 from src.game.timeline_puzzle import TimelinePuzzle
+
 from src.game.employment_puzzle import EmploymentPuzzle
+
 from src.game.connection_puzzle import ConnectionPuzzle
+
 from src.game.contradictory_puzzle import ContradictoryPuzzle
+
 from src.game.missing_record_puzzle import MissingRecordPuzzle
 
 app = FastAPI(title="Convestigate API")
@@ -106,19 +118,6 @@ def get_case(case_id: str):
             status_code=404,
             detail=f"Case {case_id} not found"
         )
-    case = load_case()
-
-    return {
-        "case_id": case.case_id,
-        "title": case.title,
-        "victim": case.victim,
-        "suspects": case.suspects,
-        "timeline": case.timeline,
-        "evidence": case.evidence,
-        "puzzles": case.puzzles
-    }
-
-
 # -------------------------
 # SESSION API
 # -------------------------
@@ -249,6 +248,18 @@ def solve_timeline(session_id: str, answer: TimelineAnswer):
 
     # Check player's answer
     correct = puzzle.check_answer(answer.order)
+    log_puzzle_attempt(
+    session_id=session["db_session_id"],
+    player_id=session["player_id"],
+    puzzle_id="P01",
+    attempt_number=1,
+    result="success" if correct else "failure",
+    time_taken=0
+)
+    calculate_player_behaviour(
+    session["db_session_id"],
+    session["player_id"]
+)
 
     if correct:
 
@@ -300,7 +311,7 @@ def solve_employment(session_id: str, answer: EmploymentAnswer):
         )
 
     # Load case
-    case = load_case()
+    case = load_case(session["case_id"])
 
     # Find P02
     puzzle_data = None
@@ -326,6 +337,18 @@ def solve_employment(session_id: str, answer: EmploymentAnswer):
         "transfer_verified": answer.transfer_verified
     }
     )
+    log_puzzle_attempt(
+    session_id=session["db_session_id"],
+    player_id=session["player_id"],
+    puzzle_id="P02",
+    attempt_number=1,
+    result="success" if correct else "failure",
+    time_taken=0
+)
+    calculate_player_behaviour(
+    session["db_session_id"],
+    session["player_id"]
+)
 
     if correct:
 
@@ -374,7 +397,7 @@ def solve_connection(session_id: str, answer: ConnectionAnswer):
         )
 
     # Load case
-    case = load_case()
+    case = load_case(session["case_id"])
 
     # Find P03
     puzzle_data = None
@@ -403,6 +426,19 @@ def solve_connection(session_id: str, answer: ConnectionAnswer):
         }
         for connection in answer.connections
     ]
+)
+    log_puzzle_attempt(
+    session_id=session["db_session_id"],
+    player_id=session["player_id"],
+    puzzle_id="P03",
+    attempt_number=1,
+    result="success" if correct else "failure",
+    time_taken=0
+)
+
+    calculate_player_behaviour(
+    session["db_session_id"],
+    session["player_id"]
 )
 
     if correct:
@@ -452,7 +488,7 @@ def solve_contradictory(session_id: str, answer: ContradictoryAnswer):
         )
 
     # Load case
-    case = load_case()
+    case = load_case(session["case_id"])
 
     # Find P04
     puzzle_data = None
@@ -478,6 +514,19 @@ def solve_contradictory(session_id: str, answer: ContradictoryAnswer):
     }
 )
 
+    log_puzzle_attempt(
+    session_id=session["db_session_id"],
+    player_id=session["player_id"],
+    puzzle_id="P04",
+    attempt_number=1,
+    result="success" if correct else "failure",
+    time_taken=0
+)
+
+    calculate_player_behaviour(
+    session["db_session_id"],
+    session["player_id"]
+)
     if correct:
 
         if "contradictory" not in game_state.solved_puzzles:
@@ -527,7 +576,16 @@ def inspect_evidence(session_id: str, evidence_id: str):
 
     # Avoid adding the same evidence twice
     if evidence_id not in game_state.inspected_evidence:
-        game_state.inspected_evidence.append(evidence_id)
+     game_state.inspected_evidence.append(evidence_id)
+
+    log_player_action(
+        session_id=session["db_session_id"],
+        player_id=session["player_id"],
+        action_type="inspect_evidence",
+        target_id=evidence_id,
+        stage=game_state.current_puzzle,
+        result="success"
+    )
 
     return {
         "evidence_id": evidence_id,
@@ -556,7 +614,7 @@ def solve_missing_record(
         )
 
     # Load case
-    case = load_case()
+    case = load_case(session["case_id"])
 
     # Find P05
     puzzle_data = None
@@ -582,7 +640,21 @@ def solve_missing_record(
         "location": answer.location,
         "credential_use": answer.credential_use,
         "avoids_direct_accusation": answer.avoids_direct_accusation
+        
     }
+)
+    log_puzzle_attempt(
+    session_id=session["db_session_id"],
+    player_id=session["player_id"],
+    puzzle_id="P05",
+    attempt_number=1,
+    result="success" if correct else "failure",
+    time_taken=0
+)
+
+    calculate_player_behaviour(
+    session["db_session_id"],
+    session["player_id"]
 )
 
     if correct:
