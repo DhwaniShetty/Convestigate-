@@ -1,15 +1,23 @@
 from urllib import request
+
 from uuid import uuid4
 from fastapi.middleware.cors import CORSMiddleware
 
 from fastapi import FastAPI, HTTPException
+
 from pydantic import BaseModel
 from src import case
 from src.case.case_loader import load_case
 from src.game import game_state
+
+from src.database.player_session import add_player_to_session, create_game_session, create_player
+from src.database.action_logger import log_player_action
+from src.database.puzzle_logger import log_puzzle_attempt
+from src.database.behaviour import calculate_player_behaviour
 from src.game.game_state import GameState
 
 from src.game.timeline_puzzle import TimelinePuzzle
+
 from src.game.employment_puzzle import EmploymentPuzzle
 from src.game.document_analysis_puzzle import DocumentAnalysisPuzzle
 from src.game.behavior_comparison_puzzle import BehaviorComparisonPuzzle
@@ -18,6 +26,7 @@ from src.game.relationship_mapping_puzzle import RelationshipMappingPuzzle
 from src.game.forensic_analysis_puzzle import ForensicAnalysisPuzzle
 from src.game.field_evidence_analysis_puzzle import FieldEvidenceAnalysisPuzzle
 from src.game.contradictory_puzzle import ContradictoryPuzzle
+
 from src.game.missing_record_puzzle import MissingRecordPuzzle
 from src.game.hypothesis_management_puzzle import HypothesisManagementPuzzle
 from src.game.timeline_reconstruction_puzzle import TimelineReconstructionPuzzle
@@ -196,7 +205,7 @@ def home():
 @app.get("/cases/{case_id}")
 def get_case(case_id: str):
 
-    file_path = f"data/case_{case_id.zfill(3)}.json"
+    case_file = f"data/case_{case_id.zfill(3)}.json"
 
     try:
         case = load_case(file_path)
@@ -205,7 +214,6 @@ def get_case(case_id: str):
             status_code=404,
             detail="Case not found"
         )
-
     return {
         "case_id": case.case_id,
         "title": case.title,
@@ -359,6 +367,11 @@ def solve_timeline(session_id: str, answer: TimelineAnswer):
     "success" if correct else "failure",
     None
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
     if correct:
 
         # Save puzzle as solved
@@ -448,6 +461,11 @@ def solve_asset_tracing(session_id: str, answer: dict):
         "success" if correct else "failure",
         None
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
 
@@ -538,6 +556,11 @@ def solve_case013_relationship_mapping(session_id: str, answer: dict):
         "success" if correct else "failure",
         None
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
 
@@ -627,6 +650,11 @@ def solve_case013_narrative_synthesis(session_id: str, answer: dict):
         "success" if correct else "failure",
         None
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
 
@@ -716,6 +744,11 @@ def solve_case013_hypothesis(session_id: str, answer: dict):
         "success" if correct else "failure",
         None
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
 
@@ -798,6 +831,11 @@ def solve_document_analysis(
             "success" if correct else "failure",
             None
         )
+        calculate_player_behaviour(
+            session["db_session_id"],
+            session["player_id"]
+        )
+
 
         if correct:
 
@@ -903,6 +941,11 @@ def solve_employment(
         "success" if correct else "failure",
         None
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
 
@@ -1006,19 +1049,24 @@ def solve_connection(
         )
 
     attempt_number = get_puzzle_attempt_count(
-    session["db_session_id"],
-    session["player_id"],
-    "P03"
+        session["db_session_id"],
+        session["player_id"],
+        "P03"
     ) + 1
 
     log_puzzle_attempt(
-    session["db_session_id"],
-    session["player_id"],
-    "P03",
-    attempt_number,
-    "success" if correct else "failure",
-    None
+        session["db_session_id"],
+        session["player_id"],
+        "P03",
+        attempt_number,
+        "success" if correct else "failure",
+        None
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
 
@@ -1130,6 +1178,10 @@ def solve_contradictory(session_id: str, answer: ContradictoryAnswer):
     "success" if correct else "failure",
     None
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
 
     if correct:
 
@@ -1183,7 +1235,16 @@ def inspect_evidence(session_id: str, evidence_id: str):
 
     # Avoid adding the same evidence twice
     if evidence_id not in game_state.inspected_evidence:
-        game_state.inspected_evidence.append(evidence_id)
+     game_state.inspected_evidence.append(evidence_id)
+
+    log_player_action(
+        session_id=session["db_session_id"],
+        player_id=session["player_id"],
+        action_type="inspect_evidence",
+        target_id=evidence_id,
+        stage=game_state.current_puzzle,
+        result="success"
+    )
 
     log_player_action(
         session_id=session["db_session_id"],
@@ -1272,19 +1333,24 @@ def solve_missing_record(
         )
 
     attempt_number = get_puzzle_attempt_count(
-    session["db_session_id"],
-    session["player_id"],
-    "P05"
+        session["db_session_id"],
+        session["player_id"],
+        "P05"
     ) + 1
 
     log_puzzle_attempt(
-    session["db_session_id"],
-    session["player_id"],
-    "P05",
-    attempt_number,
-    "success" if correct else "failure",
-    None
+        session["db_session_id"],
+        session["player_id"],
+        "P05",
+        attempt_number,
+        "success" if correct else "failure",
+        None
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
 
@@ -1392,6 +1458,11 @@ def solve_relationship_mapping(
         "success" if correct else "failure",
         None
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
 
@@ -1478,6 +1549,11 @@ def solve_timeline_reconstruction(
         "success" if correct else "failure",
         None
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
 
@@ -1563,6 +1639,11 @@ def solve_physical_evidence_analysis(
         "success" if correct else "failure",
         None
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
 
@@ -1651,6 +1732,11 @@ def solve_case015_hypothesis(
         "success" if correct else "failure",
         None
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
 
@@ -1740,6 +1826,11 @@ def solve_object_analysis(session_id: str, answer: dict):
         "success" if correct else "failure",
         None
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
 
@@ -1830,6 +1921,11 @@ def solve_pattern_mapping(session_id: str, answer: dict):
         "success" if correct else "failure",
         None
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
 
@@ -1921,6 +2017,11 @@ def solve_case009_timeline_reconstruction(session_id: str, answer: dict):
         "success" if correct else "failure",
         None
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
 
@@ -2012,6 +2113,11 @@ def solve_case009_hypothesis_test(session_id: str, answer: dict):
         "success" if correct else "failure",
         None
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
 
@@ -2099,6 +2205,11 @@ def solve_case009_hypothesis_management(session_id: str, answer: dict):
         "success" if correct else "failure",
         None
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
 
@@ -2189,6 +2300,11 @@ def solve_case001_timeline_maintenance(session_id: str, answer: dict):
         "success" if correct else "failure",
         None
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
 
@@ -2274,6 +2390,11 @@ def solve_case001_motive_analysis(session_id: str, answer: dict):
         "success" if correct else "failure",
         None
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
         if "motive_analysis" not in game_state.solved_puzzles:
@@ -2352,6 +2473,11 @@ def solve_case001_damage_analysis(session_id: str, answer: dict):
         "success" if correct else "failure",
         None
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
         if "forensic_analysis" not in game_state.solved_puzzles:
@@ -2430,6 +2556,11 @@ def solve_case001_communication_analysis(session_id: str, answer: dict):
         "success" if correct else "failure",
         None
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
         if "timeline_and_document_analysis" not in game_state.solved_puzzles:
@@ -2510,6 +2641,11 @@ def solve_case001_hypothesis_management(session_id: str, answer: dict):
         "success" if correct else "failure",
         None
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
         if "hypothesis_management" not in game_state.solved_puzzles:
@@ -2592,6 +2728,11 @@ def solve_case002_contradiction_analysis(session_id: str, answer: dict):
         "success" if correct else "failure",
         None
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
         if "contradiction_analysis" not in game_state.solved_puzzles:
@@ -2672,6 +2813,11 @@ def solve_case002_forensic_analysis(session_id: str, answer: dict):
         "success" if correct else "failure",
         None
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
         if "forensic_analysis" not in game_state.solved_puzzles:
@@ -2752,6 +2898,11 @@ def solve_case002_provenance_review(session_id: str, answer: dict):
         "success" if correct else "failure",
         None
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
         if "provenance_review" not in game_state.solved_puzzles:
@@ -2832,6 +2983,11 @@ def solve_case002_timeline_access(session_id: str, answer: dict):
         "success" if correct else "failure",
         None
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
         if "timeline_and_access_mapping" not in game_state.solved_puzzles:
@@ -2913,6 +3069,11 @@ def solve_case002_hypothesis_management(session_id: str, answer: dict):
         "success" if correct else "failure",
         None
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
         if "hypothesis_management" not in game_state.solved_puzzles:
@@ -2996,6 +3157,11 @@ def solve_case003_timeline_reconstruction(session_id: str, answer: dict):
         "success" if correct else "failure",
         None
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
         if "timeline_reconstruction" not in game_state.solved_puzzles:
@@ -3057,6 +3223,11 @@ def solve_case003_evidence_classification(session_id: str, answer: dict):
         "correct" if correct else "incorrect",
         0
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
         if "evidence_classification" not in game_state.solved_puzzles:
@@ -3117,6 +3288,11 @@ def solve_case003_field_investigation(session_id: str, answer: dict):
         "correct" if correct else "incorrect",
         0
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
         if "field_investigation" not in game_state.solved_puzzles:
@@ -3177,6 +3353,11 @@ def solve_case003_institutional_review(session_id: str, answer: dict):
         "correct" if correct else "incorrect",
         0
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
         if "institutional_review" not in game_state.solved_puzzles:
@@ -3237,6 +3418,11 @@ def solve_case003_hypothesis_management(session_id: str, answer: dict):
         "correct" if correct else "incorrect",
         0
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
         if "hypothesis_management" not in game_state.solved_puzzles:
@@ -3308,6 +3494,11 @@ def solve_case004_digital_alibi_map(session_id: str, answer: dict):
         "correct" if correct else "incorrect",
         0
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
 
@@ -3377,6 +3568,11 @@ def solve_case004_time_of_death_reconciliation(session_id: str, answer: dict):
         "correct" if correct else "incorrect",
         0
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
 
@@ -3448,6 +3644,11 @@ def solve_case004_metadata_authentication(session_id: str, answer: dict):
         "correct" if correct else "incorrect",
         0
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
 
@@ -3519,6 +3720,11 @@ def solve_case004_financial_motive_audit(session_id: str, answer: dict):
         "correct" if correct else "incorrect",
         0
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
 
@@ -3590,6 +3796,11 @@ def solve_case004_final_reconstruction(session_id: str, answer: dict):
         "correct" if correct else "incorrect",
         0
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
 
@@ -3656,6 +3867,11 @@ def solve_case005_comparative_analysis(session_id: str, answer: dict):
         "correct" if correct else "incorrect",
         0
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
         if "comparative_analysis" not in game_state.solved_puzzles:
@@ -3716,6 +3932,11 @@ def solve_case005_provenance_tracing(session_id: str, answer: dict):
         "correct" if correct else "incorrect",
         0
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
         if "provenance_tracing" not in game_state.solved_puzzles:
@@ -3776,6 +3997,11 @@ def solve_case005_chain_analysis(session_id: str, answer: dict):
         "correct" if correct else "incorrect",
         0
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
         if "chain_analysis" not in game_state.solved_puzzles:
@@ -3836,6 +4062,11 @@ def solve_case005_evidentiary_standard(session_id: str, answer: dict):
         "correct" if correct else "incorrect",
         0
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
         if "evidentiary_standard" not in game_state.solved_puzzles:
@@ -3896,6 +4127,11 @@ def solve_case005_hypothesis_management(session_id: str, answer: dict):
         "correct" if correct else "incorrect",
         0
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
         if "hypothesis_management" not in game_state.solved_puzzles:
@@ -3964,6 +4200,11 @@ def solve_case006_evidence_generation(session_id: str, answer: dict):
         "correct" if correct else "incorrect",
         0
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
         game_state.solved_puzzles.append("evidence_generation")
@@ -4028,6 +4269,11 @@ def solve_case006_evidence_classification(session_id: str, answer: dict):
         "correct" if correct else "incorrect",
         0
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
         game_state.solved_puzzles.append("evidence_classification")
@@ -4092,6 +4338,11 @@ def solve_case006_timeline_reconstruction(session_id: str, answer: dict):
         "correct" if correct else "incorrect",
         0
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
         game_state.solved_puzzles.append("timeline_reconstruction")
@@ -4156,6 +4407,11 @@ def solve_case006_hypothesis_test(session_id: str, answer: dict):
         "correct" if correct else "incorrect",
         0
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
         game_state.solved_puzzles.append("hypothesis_test")
@@ -4220,6 +4476,11 @@ def solve_case006_hypothesis_management(session_id: str, answer: dict):
         "correct" if correct else "incorrect",
         0
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
         game_state.solved_puzzles.append("hypothesis_management")
@@ -4285,6 +4546,11 @@ def solve_case007_timeline_reconstruction(session_id: str, answer: dict):
         "correct" if correct else "incorrect",
         0
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
         game_state.solved_puzzles.append("timeline_reconstruction")
@@ -4349,6 +4615,11 @@ def solve_case007_forensic_analysis(session_id: str, answer: dict):
         "correct" if correct else "incorrect",
         0
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
         game_state.solved_puzzles.append("forensic_analysis")
@@ -4413,6 +4684,11 @@ def solve_case007_trace_evidence_analysis(session_id: str, answer: dict):
         "correct" if correct else "incorrect",
         0
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
         game_state.solved_puzzles.append("trace_evidence_analysis")
@@ -4477,6 +4753,11 @@ def solve_case007_forensic_reconstruction(session_id: str, answer: dict):
         "correct" if correct else "incorrect",
         0
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
         game_state.solved_puzzles.append("forensic_reconstruction")
@@ -4541,6 +4822,11 @@ def solve_case007_hypothesis_management(session_id: str, answer: dict):
         "correct" if correct else "incorrect",
         0
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
         game_state.solved_puzzles.append("hypothesis_management")
@@ -4606,6 +4892,11 @@ def solve_case010_comparative_analysis(session_id: str, answer: dict):
         "correct" if correct else "incorrect",
         0
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
         game_state.solved_puzzles.append("comparative_analysis")
@@ -4670,6 +4961,11 @@ def solve_case010_comparative_similarity(session_id: str, answer: dict):
         "correct" if correct else "incorrect",
         0
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
         game_state.solved_puzzles.append("comparative_similarity")
@@ -4734,6 +5030,11 @@ def solve_case010_source_analysis(session_id: str, answer: dict):
         "correct" if correct else "incorrect",
         0
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
         game_state.solved_puzzles.append("source_analysis")
@@ -4798,6 +5099,11 @@ def solve_case010_hypothesis_management(session_id: str, answer: dict):
         "correct" if correct else "incorrect",
         0
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
         game_state.solved_puzzles.append("hypothesis_management")
@@ -4862,6 +5168,11 @@ def solve_case010_conclusion_writing(session_id: str, answer: dict):
         "correct" if correct else "incorrect",
         0
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
         game_state.solved_puzzles.append("conclusion_writing")
@@ -4927,6 +5238,11 @@ def solve_case011_spatial_analysis(session_id: str, answer: dict):
         "correct" if correct else "incorrect",
         0
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
         game_state.solved_puzzles.append("spatial_analysis")
@@ -4991,6 +5307,11 @@ def solve_case011_document_reconstruction(session_id: str, answer: dict):
         "correct" if correct else "incorrect",
         0
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
         game_state.solved_puzzles.append("document_reconstruction")
@@ -5055,6 +5376,11 @@ def solve_case011_source_analysis(session_id: str, answer: dict):
         "correct" if correct else "incorrect",
         0
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
         game_state.solved_puzzles.append("source_analysis")
@@ -5119,6 +5445,11 @@ def solve_case011_comparative_analysis(session_id: str, answer: dict):
         "correct" if correct else "incorrect",
         0
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
         game_state.solved_puzzles.append("comparative_analysis")
@@ -5183,6 +5514,11 @@ def solve_case011_social_dynamics_model(session_id: str, answer: dict):
         "correct" if correct else "incorrect",
         0
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
         game_state.solved_puzzles.append("social_dynamics_model")
@@ -5248,6 +5584,11 @@ def solve_case012_fact_listing(session_id: str, answer: dict):
         "correct" if correct else "incorrect",
         0
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
         game_state.solved_puzzles.append("fact_listing")
@@ -5312,6 +5653,11 @@ def solve_case012_identity_verification(session_id: str, answer: dict):
         "correct" if correct else "incorrect",
         0
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
         game_state.solved_puzzles.append("identity_verification")
@@ -5376,6 +5722,80 @@ def solve_case012_field_investigation(session_id: str, answer: dict):
         "correct" if correct else "incorrect",
         0
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
+
+    if correct:
+        game_state.solved_puzzles.append("field_investigation")
+        game_state.unlocked_evidence.extend(
+            puzzle.get_unlocked_evidence()
+        )
+        game_state.current_puzzle = "digital_forensics"
+
+        return {
+            "correct": True,
+            "message": "Correct! The isolated property and final job location have been traced.",
+            "solved_puzzles": game_state.solved_puzzles,
+            "unlocked_evidence": game_state.unlocked_evidence,
+            "mistakes": game_state.mistakes,
+            "game_over": game_state.game_over
+        }
+
+    game_state.mistakes += 1
+
+    return {
+        "correct": False,
+        "message": "Incorrect field investigation. Re-examine the isolated property, job location, property records, and booking history.",
+        "solved_puzzles": game_state.solved_puzzles,
+        "unlocked_evidence": game_state.unlocked_evidence,
+        "mistakes": game_state.mistakes,
+        "game_over": game_state.game_over
+    }
+
+@app.post("/sessions/{session_id}/puzzles/case012-field-investigation")
+def solve_case012_field_investigation(session_id: str, answer: dict):
+
+    if session_id not in sessions:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    session = sessions[session_id]
+    game_state = session["game_state"]
+
+    if game_state.current_puzzle != "field_investigation":
+        raise HTTPException(
+            status_code=400,
+            detail="This puzzle is not the current puzzle"
+        )
+
+    case = load_case(
+        f"data/case_{session['case_id'].zfill(3)}.json"
+    )
+
+    puzzle_data = next(
+        p for p in case.puzzles
+        if p["id"] == "P03"
+    )
+
+    puzzle = Case012FieldInvestigationPuzzle(puzzle_data)
+
+    correct = puzzle.check_answer(answer)
+
+    log_puzzle_attempt(
+        session["db_session_id"],
+        session["player_id"],
+        "P03",
+        1,
+        "correct" if correct else "incorrect",
+        0
+    )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
         game_state.solved_puzzles.append("field_investigation")
@@ -5440,6 +5860,11 @@ def solve_case012_digital_forensics(session_id: str, answer: dict):
         "correct" if correct else "incorrect",
         0
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
         game_state.solved_puzzles.append("digital_forensics")
@@ -5504,6 +5929,11 @@ def solve_case012_motive_analysis(session_id: str, answer: dict):
         "correct" if correct else "incorrect",
         0
     )
+    calculate_player_behaviour(
+        session["db_session_id"],
+        session["player_id"]
+    )
+
 
     if correct:
         game_state.solved_puzzles.append("motive_analysis")
