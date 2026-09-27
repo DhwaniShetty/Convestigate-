@@ -1,23 +1,36 @@
 from urllib import request
+
 from uuid import uuid4
 from fastapi.middleware.cors import CORSMiddleware
 
 from fastapi import FastAPI, HTTPException
+
 from pydantic import BaseModel
 from src import case
 from src.case.case_loader import load_case
+
+from src.database.player_session import add_player_to_session, create_game_session, create_player
+from src.database.action_logger import log_player_action
+from src.database.puzzle_logger import log_puzzle_attempt
+from src.database.behaviour import calculate_player_behaviour
+
 from src.game import game_state
 from src.game.game_state import GameState
 
+
 from src.game.timeline_puzzle import TimelinePuzzle
+
 from src.game.employment_puzzle import EmploymentPuzzle
+
 from src.game.document_analysis_puzzle import DocumentAnalysisPuzzle
 from src.game.behavior_comparison_puzzle import BehaviorComparisonPuzzle
 from src.game.connection_puzzle import ConnectionPuzzle
+
 from src.game.relationship_mapping_puzzle import RelationshipMappingPuzzle
 from src.game.forensic_analysis_puzzle import ForensicAnalysisPuzzle
 from src.game.field_evidence_analysis_puzzle import FieldEvidenceAnalysisPuzzle
 from src.game.contradictory_puzzle import ContradictoryPuzzle
+
 from src.game.missing_record_puzzle import MissingRecordPuzzle
 from src.game.hypothesis_management_puzzle import HypothesisManagementPuzzle
 from src.game.timeline_reconstruction_puzzle import TimelineReconstructionPuzzle
@@ -342,6 +355,18 @@ def solve_timeline(session_id: str, answer: TimelineAnswer):
 
     # Check player's answer
     correct = puzzle.check_answer(answer.order)
+    log_puzzle_attempt(
+    session_id=session["db_session_id"],
+    player_id=session["player_id"],
+    puzzle_id="P01",
+    attempt_number=1,
+    result="success" if correct else "failure",
+    time_taken=0
+)
+    calculate_player_behaviour(
+    session["db_session_id"],
+    session["player_id"]
+)
 
     attempt_number = get_puzzle_attempt_count(
     session["db_session_id"],
@@ -850,6 +875,8 @@ def solve_employment(
             detail="P02 puzzle is locked. Solve the timeline puzzle first."
         )
 
+    # Load case
+    case = load_case(session["case_id"])
     # Load the case selected for this session
     case_file = f"data/case_{session['case_id'].zfill(3)}.json"
     case = load_case(case_file)
@@ -884,6 +911,24 @@ def solve_employment(
         )
 
     # Check player's answer
+    correct = puzzle.check_answer(
+    {
+        "employment_verified": answer.employment_verified,
+        "transfer_verified": answer.transfer_verified
+    }
+    )
+    log_puzzle_attempt(
+    session_id=session["db_session_id"],
+    player_id=session["player_id"],
+    puzzle_id="P02",
+    attempt_number=1,
+    result="success" if correct else "failure",
+    time_taken=0
+)
+    calculate_player_behaviour(
+    session["db_session_id"],
+    session["player_id"]
+)
     correct = puzzle.check_answer(answer)
 
     # Log attempt
@@ -954,6 +999,8 @@ def solve_connection(
             detail="Connection puzzle is locked. Solve the employment puzzle first."
         )
 
+    # Load case
+    case = load_case(session["case_id"])
     # Load the case selected for this session
     case_file = f"data/case_{session['case_id'].zfill(3)}.json"
     case = load_case(case_file)
@@ -988,6 +1035,29 @@ def solve_connection(
         )
 
     # Check player's answer
+    correct = puzzle.check_answer(
+    [
+        {
+            "from": connection.from_node,
+            "to": connection.to_node,
+            "status": connection.status
+        }
+        for connection in answer.connections
+    ]
+)
+    log_puzzle_attempt(
+    session_id=session["db_session_id"],
+    player_id=session["player_id"],
+    puzzle_id="P03",
+    attempt_number=1,
+    result="success" if correct else "failure",
+    time_taken=0
+)
+
+    calculate_player_behaviour(
+    session["db_session_id"],
+    session["player_id"]
+)
     if puzzle_type == "forensic_analysis":
         correct = puzzle.check_answer(answer)
 
@@ -1067,6 +1137,8 @@ def solve_contradictory(session_id: str, answer: ContradictoryAnswer):
             detail="Contradictory witness puzzle is locked. Solve the connection puzzle first."
         )
 
+    # Load case
+    case = load_case(session["case_id"])
     # Load session-specific case
     case_file = f"data/case_{session['case_id'].zfill(3)}.json"
     case = load_case(case_file)
@@ -1129,6 +1201,19 @@ def solve_contradictory(session_id: str, answer: ContradictoryAnswer):
     None
     )
 
+    log_puzzle_attempt(
+    session_id=session["db_session_id"],
+    player_id=session["player_id"],
+    puzzle_id="P04",
+    attempt_number=1,
+    result="success" if correct else "failure",
+    time_taken=0
+)
+
+    calculate_player_behaviour(
+    session["db_session_id"],
+    session["player_id"]
+)
     if correct:
 
         if "contradictory" not in game_state.solved_puzzles:
@@ -1181,7 +1266,16 @@ def inspect_evidence(session_id: str, evidence_id: str):
 
     # Avoid adding the same evidence twice
     if evidence_id not in game_state.inspected_evidence:
-        game_state.inspected_evidence.append(evidence_id)
+     game_state.inspected_evidence.append(evidence_id)
+
+    log_player_action(
+        session_id=session["db_session_id"],
+        player_id=session["player_id"],
+        action_type="inspect_evidence",
+        target_id=evidence_id,
+        stage=game_state.current_puzzle,
+        result="success"
+    )
 
     log_player_action(
         session_id=session["db_session_id"],
@@ -1218,6 +1312,8 @@ def solve_missing_record(
             detail="Missing record puzzle is locked. Solve the contradictory witness puzzle first."
         )
 
+    # Load case
+    case = load_case(session["case_id"])
     # Load session-specific case
     case_file = f"data/case_{session['case_id'].zfill(3)}.json"
     case = load_case(case_file)
@@ -1250,6 +1346,28 @@ def solve_missing_record(
         )
 
     # Check player's answer
+    correct = puzzle.check_answer(
+    {
+        "missing_record": answer.missing_record,
+        "location": answer.location,
+        "credential_use": answer.credential_use,
+        "avoids_direct_accusation": answer.avoids_direct_accusation
+        
+    }
+)
+    log_puzzle_attempt(
+    session_id=session["db_session_id"],
+    player_id=session["player_id"],
+    puzzle_id="P05",
+    attempt_number=1,
+    result="success" if correct else "failure",
+    time_taken=0
+)
+
+    calculate_player_behaviour(
+    session["db_session_id"],
+    session["player_id"]
+)
     if puzzle_type == "hypothesis_management":
 
         correct = puzzle.check_answer(
