@@ -1,5 +1,6 @@
 from urllib import request
 from uuid import uuid4
+from fastapi.middleware.cors import CORSMiddleware
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
@@ -95,6 +96,14 @@ from src.database.action_logger import log_player_action
 from src.database.behaviour import calculate_player_behaviour
 
 app = FastAPI(title="Convestigate API")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://127.0.0.1:5500", "http://localhost:5500"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Puzzle progression
 PUZZLE_ORDER = [

@@ -1,4 +1,5 @@
 import { gameState } from '../../state/gameState.js';
+import { submitWitnessPuzzle } from '../../utils/api.js';
 import { eventBus, EVENTS } from '../../state/eventBus.js';
 import { setDashboardTab } from '../dashboard.js';
 import { sound } from '../../effects/soundSystem.js';
@@ -118,10 +119,52 @@ export function renderP04Witness(container) {
     });
   });
 
-  container.querySelector('#btn-submit-p04')?.addEventListener('click', () => {
-    eventBus.emit(EVENTS.CONTRADICTION_FOUND, { selectedWitnesses });
-    gameState.completePuzzle('P04');
-    renderP04Witness(container);
+  container.querySelector('#btn-submit-p04')?.addEventListener('click', async () => {
+    const sessionId = gameState.getState().sessionId;
+
+    if (!sessionId) {
+      alert('No active backend session found.');
+      return;
+    }
+
+    console.log('P04 SELECTED WITNESSES:', selectedWitnesses);
+
+    if (selectedWitnesses.length !== 2) {
+      alert('Please select exactly two witness statements.');
+      return;
+    }
+
+    if (!selectedWitnesses.includes('W02')) {
+      alert('Your selection does not identify the unreliable witness.');
+      return;
+    }
+
+    const unreliableWitness = selectedWitnesses.find(id => id === 'W02');
+
+    try {
+      const result = await submitWitnessPuzzle(
+        sessionId,
+        '014',
+        unreliableWitness,
+        '',
+        ''
+      );
+
+      console.log('P04 BACKEND RESULT:', result);
+
+      if (result.correct) {
+        eventBus.emit(EVENTS.CONTRADICTION_FOUND, { selectedWitnesses });
+
+        gameState.completePuzzle('P04');
+        renderP04Witness(container);
+      } else {
+        alert(result.message || 'Incorrect witness analysis. Try again.');
+      }
+
+    } catch (error) {
+      console.error('P04 submission failed:', error);
+      alert(`P04 submission failed: ${error.message}`);
+    }
   });
 
   container.querySelector('#btn-next-p05')?.addEventListener('click', () => {

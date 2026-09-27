@@ -6,13 +6,23 @@ def create_player(username):
     cursor = connection.cursor()
 
     cursor.execute("""
-        INSERT INTO players (username)
-        VALUES (?)
+        SELECT player_id
+        FROM players
+        WHERE username = ?
     """, (username,))
 
-    connection.commit()
+    existing_player = cursor.fetchone()
 
-    player_id = cursor.lastrowid
+    if existing_player:
+        player_id = existing_player[0]
+    else:
+        cursor.execute("""
+            INSERT INTO players (username)
+            VALUES (?)
+        """, (username,))
+
+        connection.commit()
+        player_id = cursor.lastrowid
 
     connection.close()
 

@@ -1,11 +1,13 @@
 import { gameState } from '../../state/gameState.js';
 import { setDashboardTab } from '../dashboard.js';
 import { sound } from '../../effects/soundSystem.js';
+import { submitConnectionPuzzle } from '../../utils/api.js';
 
 export function renderP03Connection(container) {
   const state = gameState.getState();
   const isCompleted = state.puzzleProgress.P03;
   const connections = state.connections || [];
+  const connectionsData = connections;
 
   container.innerHTML = `
     <div class="puzzle-box">
@@ -34,15 +36,35 @@ export function renderP03Connection(container) {
       </div>
 
       <div class="connection-list">
-        ${connections.slice(0, 5).map(conn => `
+        ${connections.map((conn, index) => `
           <div class="connection-item">
-            <div>
-              <strong style="color: #ffffff; font-size: 0.9rem;">${conn.connection}</strong>
-              <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px;">${conn.reasoning || 'Audit trail under review.'}</p>
+            <div style="flex: 1;">
+              <strong style="color: #ffffff; font-size: 0.9rem;">
+                ${conn.connection}
+              </strong>
+
+              <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px;">
+                ${conn.reasoning || 'Audit trail under review.'}
+              </p>
             </div>
-            <div>
-              <span class="conn-status-tag status-${conn.status}">${conn.status}</span>
-            </div>
+
+            ${!isCompleted ? `
+              <select
+                class="p03-status-select"
+                data-connection-index="${index}"
+                style="background: var(--bg-dark); color: #ffffff; border: 1px solid var(--border-subtle); padding: 6px; border-radius: 4px;"
+              >
+                <option value="">SELECT</option>
+                <option value="CONFIRMED">CONFIRMED</option>
+                <option value="RELEVANT">RELEVANT</option>
+                <option value="UNKNOWN">UNKNOWN</option>
+                <option value="NOT_ESTABLISHED">NOT ESTABLISHED</option>
+              </select>
+            ` : `
+              <span class="conn-status-tag status-${conn.status}">
+                ${conn.status}
+              </span>
+            `}
           </div>
         `).join('')}
       </div>
@@ -65,10 +87,52 @@ export function renderP03Connection(container) {
     </div>
   `;
 
-  container.querySelector('#btn-submit-p03')?.addEventListener('click', () => {
-    gameState.completePuzzle('P03');
-    renderP03Connection(container);
+  container.querySelector('#btn-submit-p03')?.addEventListener('click', async () => {
+  const sessionId = gameState.getState().sessionId;
+
+  if (!sessionId) {
+    alert('No active backend session found.');
+    return;
+  }
+
+  const statusSelects = container.querySelectorAll('.p03-status-select');
+
+  const connections = Array.from(statusSelects).map(select => {
+    const index = Number(select.dataset.connectionIndex);
+    const connection = connectionsData[index];
+
+    return {
+      from: connection.from,
+      to: connection.to,
+      status: select.value
+    };
   });
+
+  if (connections.some(connection => !connection.status)) {
+    alert('Please classify all six connections before submitting.');
+    return;
+  }
+
+  try {
+    const result = await submitConnectionPuzzle(
+      sessionId,
+      connections
+    );
+
+    console.log('P03 BACKEND RESULT:', result);
+
+    if (result.correct) {
+      gameState.completePuzzle('P03');
+      renderP03Connection(container);
+    } else {
+      alert(result.message || 'Incorrect connection analysis. Try again.');
+    }
+
+  } catch (error) {
+    console.error('P03 submission failed:', error);
+    alert(`P03 submission failed: ${error.message}`);
+  }
+});
 
   container.querySelector('#btn-next-p04')?.addEventListener('click', () => {
     sound.playStamp();

@@ -8,6 +8,7 @@ class GameState {
   constructor() {
     this.state = {
       currentCaseId: '014',
+      sessionId: null,
       currentCase: null,
       currentScreen: 'LANDING', // LANDING, LOBBY, BRIEFING, DASHBOARD, EVIDENCE, SUSPECTS, BOARD, PUZZLES, FINAL_INVESTIGATION, FINAL_ANSWER, RESULTS
       activeDashboardTab: 'overview',

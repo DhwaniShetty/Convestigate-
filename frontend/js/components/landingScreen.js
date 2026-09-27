@@ -2,6 +2,7 @@ import { gameState } from '../state/gameState.js';
 import { ALL_CASES, getCaseById } from '../data/caseLoader.js';
 import { cinematic } from '../effects/cinematic.js';
 import { sound } from '../effects/soundSystem.js';
+import { createSession } from '../utils/api.js';
 
 let caseSearchQuery = '';
 
