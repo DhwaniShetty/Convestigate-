@@ -7,11 +7,6 @@ export function renderAIPanel(container) {
   const ai = state.ai;
   const isVanished = ai.state === 'VANISHED';
 
-  // Format countdown mm:ss
-  const mins = Math.floor(ai.countdownSeconds / 60);
-  const secs = ai.countdownSeconds % 60;
-  const timeFormatted = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-
   if (isVanished) {
     container.innerHTML = `
       <div class="ai-vanished-overlay">
@@ -20,17 +15,8 @@ export function renderAIPanel(container) {
         <h2 style="font-family: var(--font-headline); font-size: 1.5rem; letter-spacing: 2px; color: var(--blood-red-bright);">
           AI INVESTIGATOR OFFLINE
         </h2>
-        
-        <div class="countdown-box-active">
-          <div class="countdown-digits">
-            ${timeFormatted}
-          </div>
-          <span style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted); letter-spacing: 2px;">
-            EMERGENCY BUFFER COUNTDOWN
-          </span>
-        </div>
 
-        <p style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-secondary); max-width: 260px; line-height: 1.4; margin-bottom: 16px;">
+        <p style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-secondary); max-width: 260px; line-height: 1.4; margin: 16px 0;">
           The AI advisor has disconnected. You must complete the final investigation on your own.
         </p>
 

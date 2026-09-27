@@ -1,4 +1,5 @@
 import { gameState } from '../state/gameState.js';
+import { sound } from '../effects/soundSystem.js';
 
 let editingNoteId = null;
 
@@ -47,13 +48,22 @@ export function renderNotesPanel(container) {
   `;
 
   // Add note listener
-  container.querySelector('#btn-save-note')?.addEventListener('click', () => {
-    const input = container.querySelector('#note-input-field');
-    const text = input?.value.trim();
+  const noteInput = container.querySelector('#note-input-field');
+  const handleSave = () => {
+    const text = noteInput?.value.trim();
     if (text) {
+      sound.playStamp();
       gameState.addNote(text);
-      input.value = '';
+      noteInput.value = '';
       renderNotesPanel(container);
+    }
+  };
+
+  container.querySelector('#btn-save-note')?.addEventListener('click', handleSave);
+  noteInput?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSave();
     }
   });
 

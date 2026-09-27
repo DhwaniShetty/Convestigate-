@@ -249,6 +249,12 @@ class GameState {
     this.notify();
   }
 
+  clearConnections() {
+    this.state.connections = [];
+    this.notify();
+  }
+
+
   addNote(text) {
     if (!text.trim()) return;
     this.state.notes.unshift({

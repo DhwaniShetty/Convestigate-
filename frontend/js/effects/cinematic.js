@@ -211,23 +211,8 @@ class CinematicOrchestrator {
       icon: '⚠️',
       tag: 'CONNECTION SEVERED',
       title: 'AI Advisor Offline',
-      desc: 'Emergency security buffer active. The clock is running.'
+      desc: 'Security protocol disconnected. Complete the final investigation on your own.'
     });
-
-    // Start heartbeat audio loop while vanished
-    this.startHeartbeatAudio();
-  }
-
-  startHeartbeatAudio() {
-    if (this.heartbeatInterval) clearInterval(this.heartbeatInterval);
-    this.heartbeatInterval = setInterval(() => {
-      const state = gameState.getState();
-      if (state.ai?.state === 'VANISHED') {
-        sound.playHeartbeat();
-      } else {
-        clearInterval(this.heartbeatInterval);
-      }
-    }, 2000);
   }
 
   /**

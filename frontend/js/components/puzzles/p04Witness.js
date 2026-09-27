@@ -1,5 +1,7 @@
 import { gameState } from '../../state/gameState.js';
 import { eventBus, EVENTS } from '../../state/eventBus.js';
+import { setDashboardTab } from '../dashboard.js';
+import { sound } from '../../effects/soundSystem.js';
 
 let selectedWitnesses = [];
 
@@ -80,15 +82,20 @@ export function renderP04Witness(container) {
         </div>
       ` : ''}
 
-      <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 16px; margin-top: 12px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 16px; margin-top: 12px; flex-wrap: wrap; gap: 12px;">
         <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted);">
           UNLOCKS: E04 (PHONE TOWER LOG)
         </span>
-        ${!isCompleted ? `
-          <button class="btn btn-primary" id="btn-submit-p04">CONFIRM CONTRADICTION →</button>
-        ` : `
-          <button class="btn btn-disabled" disabled>PUZZLE SOLVED</button>
-        `}
+        <div style="display: flex; gap: 10px;">
+          ${!isCompleted ? `
+            <button class="btn btn-primary" id="btn-submit-p04">CONFIRM CONTRADICTION →</button>
+          ` : `
+            <button class="btn btn-disabled" disabled>PUZZLE SOLVED</button>
+          `}
+          <button class="btn btn-primary" id="btn-next-p05" style="padding: 10px 20px;">
+            NEXT PUZZLE (P05) →
+          </button>
+        </div>
       </div>
     </div>
   `;
@@ -115,5 +122,10 @@ export function renderP04Witness(container) {
     eventBus.emit(EVENTS.CONTRADICTION_FOUND, { selectedWitnesses });
     gameState.completePuzzle('P04');
     renderP04Witness(container);
+  });
+
+  container.querySelector('#btn-next-p05')?.addEventListener('click', () => {
+    sound.playStamp();
+    setDashboardTab('p05');
   });
 }

@@ -1,4 +1,5 @@
 import { gameState } from '../../state/gameState.js';
+import { sound } from '../../effects/soundSystem.js';
 
 let auditActionTaken = false;
 
@@ -65,15 +66,20 @@ export function renderP05Missing(container) {
         </p>
       </div>
 
-      <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 16px; margin-top: 8px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 16px; margin-top: 8px; flex-wrap: wrap; gap: 12px;">
         <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted);">
           UNLOCKS: E07, E08 (REDACTED LEDGER & CREDENTIAL AUDIT)
         </span>
-        ${!isCompleted ? `
-          <button class="btn btn-primary" id="btn-submit-p05">RESOLVE INVESTIGATIVE GAP →</button>
-        ` : `
-          <button class="btn btn-disabled" disabled>PUZZLE SOLVED // AI UNSTABLE</button>
-        `}
+        <div style="display: flex; gap: 10px;">
+          ${!isCompleted ? `
+            <button class="btn btn-primary" id="btn-submit-p05">RESOLVE INVESTIGATIVE GAP →</button>
+          ` : `
+            <button class="btn btn-disabled" disabled>PUZZLE SOLVED // GAP RESOLVED</button>
+          `}
+          <button class="btn btn-primary" id="btn-next-verdict" style="padding: 10px 20px;">
+            PROCEED TO FINAL VERDICT →
+          </button>
+        </div>
       </div>
     </div>
   `;
@@ -81,5 +87,10 @@ export function renderP05Missing(container) {
   container.querySelector('#btn-submit-p05')?.addEventListener('click', () => {
     gameState.completePuzzle('P05');
     renderP05Missing(container);
+  });
+
+  container.querySelector('#btn-next-verdict')?.addEventListener('click', () => {
+    sound.playStamp();
+    gameState.setScreen('FINAL_INVESTIGATION');
   });
 }
