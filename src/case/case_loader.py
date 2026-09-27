@@ -14,5 +14,7 @@ def load_case(file_path="data/case_014.json"):
         case_data["suspects"],
         case_data["timeline"],
         case_data["evidence"],
-        case_data["puzzles"]
+        case_data["puzzles"],
+        hypotheses=case_data.get("hypotheses", []),
+        related_persons=case_data.get("related_persons", [])
     )
