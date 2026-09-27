@@ -208,8 +208,7 @@ def get_case(case_id: str):
     case_file = f"data/case_{case_id.zfill(3)}.json"
 
     try:
-        case = load_case(file_path)
-    except FileNotFoundError:
+        case = load_case(case_file)`r`n    except FileNotFoundError:
         raise HTTPException(
             status_code=404,
             detail="Case not found"
@@ -5823,7 +5822,6 @@ def solve_case012_field_investigation(session_id: str, answer: dict):
         "mistakes": game_state.mistakes,
         "game_over": game_state.game_over
     }
-
 @app.post("/sessions/{session_id}/puzzles/case012-digital-forensics")
 def solve_case012_digital_forensics(session_id: str, answer: dict):
 
@@ -5962,3 +5960,6 @@ def solve_case012_motive_analysis(session_id: str, answer: dict):
         "mistakes": game_state.mistakes,
         "game_over": game_state.game_over
     }
+
+
+
