@@ -48,12 +48,8 @@ class AdaptiveAI:
             return "HELP"
 
         if behavior_profile == "HINT_DEPENDENT":
-
-            # Clamp trust at zero — never go negative.
-            game_state.ai_trust = max(0, game_state.ai_trust - 1)
             game_state.ai_threat += 1
             game_state.last_ai_decision = "REDUCE_HELP"
-
             return "REDUCE_HELP"
 
         if behavior_profile == "FAST_AND_ACCURATE":
