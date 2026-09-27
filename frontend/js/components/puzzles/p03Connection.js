@@ -114,8 +114,10 @@ export function renderP03Connection(container) {
   }
 
   try {
+    const caseId = gameState.getState().currentCase.case_id;
     const result = await submitConnectionPuzzle(
       sessionId,
+      caseId,
       connections
     );
 

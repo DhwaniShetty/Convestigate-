@@ -83,7 +83,7 @@ export async function submitEmploymentPuzzle(
   return await response.json();
 }
 
-export async function submitConnectionPuzzle(sessionId, connections) {
+export async function submitConnectionPuzzle(sessionId, caseId, connections) {
   const response = await fetch(
     `${API_BASE_URL}/sessions/${sessionId}/puzzles/connection`,
     {
@@ -92,6 +92,7 @@ export async function submitConnectionPuzzle(sessionId, connections) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
+        case_id: caseId,
         connections: connections
       })
     }
@@ -172,6 +173,20 @@ export async function submitMissingRecordPuzzle(
     );
   }
 
+  return await response.json();
+}
+
+
+export async function submitDynamicPuzzle(sessionId, endpoint, payload) {
+  const response = await fetch(`${API_BASE_URL}/sessions/${sessionId}/puzzles/${endpoint}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.detail || "Failed to submit puzzle");
+  }
   return await response.json();
 }
 

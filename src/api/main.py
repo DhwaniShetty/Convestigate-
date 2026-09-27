@@ -66,6 +66,8 @@ from src.game.case006_hypothesis_management_puzzle import Case006HypothesisManag
 from src.game.case007_timeline_reconstruction_puzzle import Case007TimelineReconstructionPuzzle
 from src.game.case007_forensic_analysis_puzzle import Case007ForensicAnalysisPuzzle
 from src.game.case007_trace_evidence_analysis_puzzle import Case007TraceEvidenceAnalysisPuzzle
+from src.game.case007_forensic_reconstruction_puzzle import Case007ForensicReconstructionPuzzle
+from src.game.case007_hypothesis_management_puzzle import Case007HypothesisManagementPuzzle
 
 from src.game.case010_comparative_analysis_puzzle import Case010ComparativeAnalysisPuzzle
 from src.game.case010_comparative_similarity_puzzle import Case010ComparativeSimilarityPuzzle
@@ -197,7 +199,7 @@ def get_case(case_id: str):
     file_path = f"data/case_{case_id.zfill(3)}.json"
 
     try:
-        case = load_case(case_file)
+        case = load_case(file_path)
     except FileNotFoundError:
         raise HTTPException(
             status_code=404,
@@ -5332,70 +5334,6 @@ def solve_case012_identity_verification(session_id: str, answer: dict):
     return {
         "correct": False,
         "message": "Incorrect identity verification. Re-examine the government, financial, and independent witness records.",
-        "solved_puzzles": game_state.solved_puzzles,
-        "unlocked_evidence": game_state.unlocked_evidence,
-        "mistakes": game_state.mistakes,
-        "game_over": game_state.game_over
-    }
-
-@app.post("/sessions/{session_id}/puzzles/case012-field-investigation")
-def solve_case012_field_investigation(session_id: str, answer: dict):
-
-    if session_id not in sessions:
-        raise HTTPException(status_code=404, detail="Session not found")
-
-    session = sessions[session_id]
-    game_state = session["game_state"]
-
-    if game_state.current_puzzle != "field_investigation":
-        raise HTTPException(
-            status_code=400,
-            detail="This puzzle is not the current puzzle"
-        )
-
-    case = load_case(
-        f"data/case_{session['case_id'].zfill(3)}.json"
-    )
-
-    puzzle_data = next(
-        p for p in case.puzzles
-        if p["id"] == "P03"
-    )
-
-    puzzle = Case012FieldInvestigationPuzzle(puzzle_data)
-
-    correct = puzzle.check_answer(answer)
-
-    log_puzzle_attempt(
-        session["db_session_id"],
-        session["player_id"],
-        "P03",
-        1,
-        "correct" if correct else "incorrect",
-        0
-    )
-
-    if correct:
-        game_state.solved_puzzles.append("field_investigation")
-        game_state.unlocked_evidence.extend(
-            puzzle.get_unlocked_evidence()
-        )
-        game_state.current_puzzle = "digital_forensics"
-
-        return {
-            "correct": True,
-            "message": "Correct! The isolated property and final job location have been traced.",
-            "solved_puzzles": game_state.solved_puzzles,
-            "unlocked_evidence": game_state.unlocked_evidence,
-            "mistakes": game_state.mistakes,
-            "game_over": game_state.game_over
-        }
-
-    game_state.mistakes += 1
-
-    return {
-        "correct": False,
-        "message": "Incorrect field investigation. Re-examine the isolated property, job location, property records, and booking history.",
         "solved_puzzles": game_state.solved_puzzles,
         "unlocked_evidence": game_state.unlocked_evidence,
         "mistakes": game_state.mistakes,

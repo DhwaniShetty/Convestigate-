@@ -6,6 +6,8 @@ import { renderP02Employment } from './puzzles/p02Employment.js';
 import { renderP03Connection } from './puzzles/p03Connection.js';
 import { renderP04Witness } from './puzzles/p04Witness.js';
 import { renderP05Missing } from './puzzles/p05Missing.js';
+import { renderP0XGeneric } from './puzzles/p0XGenericPuzzle.js';
+import { CASE_SCHEMAS } from '../utils/puzzle_schemas.js';
 import { renderAIPanel } from './aiPanel.js';
 import { renderNotesPanel } from './notesPanel.js';
 import { sound } from '../effects/soundSystem.js';
@@ -48,26 +50,17 @@ export function renderDashboard(container) {
 
         <div class="sidebar-heading" style="margin-top: 16px;">CRITICAL PUZZLES</div>
         <ul class="sidebar-menu">
-          <li class="sidebar-item ${activeTab === 'p01' ? 'active' : ''}" data-tab="p01">
-            <span>P01 TIMELINE</span>
-            <span class="sidebar-badge ${state.puzzleProgress.P01 ? 'highlight' : ''}">${state.puzzleProgress.P01 ? '✓' : '1'}</span>
-          </li>
-          <li class="sidebar-item ${activeTab === 'p02' ? 'active' : ''}" data-tab="p02">
-            <span>P02 EMPLOYMENT</span>
-            <span class="sidebar-badge ${state.puzzleProgress.P02 ? 'highlight' : ''}">${state.puzzleProgress.P02 ? '✓' : '2'}</span>
-          </li>
-          <li class="sidebar-item ${activeTab === 'p03' ? 'active' : ''}" data-tab="p03">
-            <span>P03 CONNECTION</span>
-            <span class="sidebar-badge ${state.puzzleProgress.P03 ? 'highlight' : ''}">${state.puzzleProgress.P03 ? '✓' : '3'}</span>
-          </li>
-          <li class="sidebar-item ${activeTab === 'p04' ? 'active' : ''}" data-tab="p04">
-            <span>P04 WITNESSES</span>
-            <span class="sidebar-badge ${state.puzzleProgress.P04 ? 'highlight' : ''}">${state.puzzleProgress.P04 ? '✓' : '4'}</span>
-          </li>
-          <li class="sidebar-item ${activeTab === 'p05' ? 'active' : ''}" data-tab="p05">
-            <span>P05 MISSING RECORD</span>
-            <span class="sidebar-badge ${state.puzzleProgress.P05 ? 'highlight' : ''}">${state.puzzleProgress.P05 ? '✓' : '5'}</span>
-          </li>
+          ${c ? c.puzzles.map((p, idx) => {
+            const pId = p.id.toLowerCase();
+            const pNum = idx + 1;
+            const isCompleted = state.puzzleProgress[p.id];
+            return `
+              <li class="sidebar-item ${activeTab === pId ? 'active' : ''}" data-tab="${pId}">
+                <span style="text-transform: uppercase;">${p.id} ${p.name.substring(0, 15)}...</span>
+                <span class="sidebar-badge ${isCompleted ? 'highlight' : ''}">${isCompleted ? '✓' : pNum}</span>
+              </li>
+            `;
+          }).join('') : ''}
         </ul>
 
         <div style="margin-top: auto; padding: 16px;">
@@ -159,19 +152,23 @@ export function renderDashboard(container) {
         renderInvestigationBoard(stage);
         break;
       case 'p01':
-        renderP01Timeline(stage);
-        break;
       case 'p02':
-        renderP02Employment(stage);
-        break;
       case 'p03':
-        renderP03Connection(stage);
-        break;
       case 'p04':
-        renderP04Witness(stage);
-        break;
       case 'p05':
-        renderP05Missing(stage);
+        const pId = activeTab.toUpperCase();
+        const schemaInfo = CASE_SCHEMAS[c.case_id] && CASE_SCHEMAS[c.case_id][pId];
+        if (schemaInfo && schemaInfo.schema && schemaInfo.schema.type === 'generic') {
+          const comp = schemaInfo.schema.component;
+          if (comp === 'p01Timeline') renderP01Timeline(stage);
+          else if (comp === 'p02Employment') renderP02Employment(stage);
+          else if (comp === 'p03Connection') renderP03Connection(stage);
+          else if (comp === 'p04Witness') renderP04Witness(stage);
+          else if (comp === 'p05Missing') renderP05Missing(stage);
+          else renderP0XGeneric(stage, pId);
+        } else {
+          renderP0XGeneric(stage, pId);
+        }
         break;
       default:
         renderOverviewStage(stage, c, solvedCount, totalPuzzles);

@@ -141,10 +141,12 @@ export function renderP04Witness(container) {
 
     const unreliableWitness = selectedWitnesses.find(id => id === 'W02');
 
+    const caseId = gameState.getState().currentCase.case_id;
+
     try {
       const result = await submitWitnessPuzzle(
         sessionId,
-        '014',
+        caseId,
         unreliableWitness,
         '',
         ''

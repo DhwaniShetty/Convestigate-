@@ -171,10 +171,12 @@ export function renderP05Missing(container) {
       return;
     }
 
+    const caseId = gameState.getState().currentCase.case_id;
+
     try {
       const result = await submitMissingRecordPuzzle(
         sessionId,
-        '014',
+        caseId,
         missingRecord,
         location,
         credentialUse === 'true',
