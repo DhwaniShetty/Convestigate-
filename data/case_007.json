@@ -1,0 +1,249 @@
+{
+  "case_id": "007",
+  "title": "THE LAST DRIVE",
+  "genre": "forensic_reconstruction",
+  "status": "prototype",
+  "difficulty": "medium",
+  "victim": {
+    "name": "Daniel Cross",
+    "occupation": "prosecutor",
+    "status": "deceased",
+    "note": "Found drowned beside a stabbed, partially submerged car. Suicide and homicide interpretations compete. Note: shares a name with a suspect in Case 014 ('The Man Who Moved') \u2014 a different, unrelated character in this case's fiction."
+  },
+  "suspects": [
+    {
+      "id": "501",
+      "name": "Unidentified Second Occupant",
+      "occupation": "unknown",
+      "relationship_to_victim": "unknown",
+      "note": "Represented by the second blood type and the partial fingerprint recovered from the vehicle; identity not established."
+    },
+    {
+      "id": "502",
+      "name": "Case-Related Contact (Unidentified)",
+      "occupation": "unknown",
+      "relationship_to_victim": "possible connection through one of Daniel's prosecutions",
+      "note": "Represents the hypothesis that Daniel's professional work as a prosecutor created a motive for someone else."
+    }
+  ],
+  "timeline": [
+    {
+      "time": "afternoon",
+      "event": "Daniel is last seen leaving his office"
+    },
+    {
+      "time": "evening",
+      "event": "Toll-ticket records place his vehicle on a specific route"
+    },
+    {
+      "time": "night",
+      "event": "The vehicle's final recorded movement occurs before it enters the water"
+    },
+    {
+      "time": "following morning",
+      "event": "Daniel is found drowned beside the partially submerged, stabbed vehicle"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "E01",
+      "name": "Toll-Ticket Timeline Record",
+      "type": "official_record",
+      "description": "Independent chronology testing Daniel's movements on his last drive.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Toll authority records",
+      "supports": [],
+      "contradicts": [],
+      "unlocked_by": "P01"
+    },
+    {
+      "id": "E02",
+      "name": "Rear-Seat Blood Sample (Daniel's)",
+      "type": "forensic_record",
+      "description": "Blood matching Daniel found in the rear seat, suggesting an event occurred inside the vehicle.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Vehicle forensic sweep",
+      "supports": [
+        "H2"
+      ],
+      "contradicts": [
+        "H1"
+      ],
+      "unlocked_by": "P02"
+    },
+    {
+      "id": "E03",
+      "name": "Second Blood-Type Sample",
+      "type": "forensic_record",
+      "description": "A second blood type recovered from the vehicle, introducing another contributor to the scene.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Vehicle forensic sweep",
+      "supports": [
+        "H2"
+      ],
+      "contradicts": [
+        "H1"
+      ],
+      "unlocked_by": "P02"
+    },
+    {
+      "id": "E04",
+      "name": "Partial Fingerprint",
+      "type": "trace_evidence",
+      "description": "An incomplete print providing a possible second-person connection, though not conclusive on its own.",
+      "reliability": "low",
+      "status": "locked",
+      "source": "Vehicle forensic sweep",
+      "supports": [
+        "H2"
+      ],
+      "contradicts": [],
+      "unlocked_by": "P03"
+    },
+    {
+      "id": "E05",
+      "name": "Vehicle Submersion/Damage Report",
+      "type": "forensic_record",
+      "description": "Documents the condition of the partially submerged vehicle and stab damage.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Vehicle recovery and forensic examination",
+      "supports": [
+        "H2"
+      ],
+      "contradicts": [
+        "H1"
+      ],
+      "unlocked_by": "P04"
+    },
+    {
+      "id": "E06",
+      "name": "Scene Position/Stab-Pattern Analysis",
+      "type": "forensic_record",
+      "description": "Reconstructs the vehicle's final movement and the positioning consistent with the stab damage.",
+      "reliability": "medium",
+      "status": "locked",
+      "source": "Forensic reconstruction unit",
+      "supports": [
+        "H2"
+      ],
+      "contradicts": [
+        "H1"
+      ],
+      "unlocked_by": "P04"
+    },
+    {
+      "id": "E07",
+      "name": "Suicide-vs-Homicide Comparative Report",
+      "type": "forensic_synthesis",
+      "description": "Compares the competing suicide and homicide explanations against the full physical and timeline record.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Independent forensic review",
+      "supports": [
+        "H3"
+      ],
+      "contradicts": [],
+      "unlocked_by": "P05"
+    }
+  ],
+  "puzzles": [
+    {
+      "id": "P01",
+      "name": "Drive Timeline",
+      "type": "timeline_reconstruction",
+      "description": "Reconstruct Daniel's movements on his final drive using independent records.",
+      "unlocks": [
+        "E01"
+      ]
+    },
+    {
+      "id": "P02",
+      "name": "Blood Pattern",
+      "type": "forensic_analysis",
+      "description": "Interpret the two blood sources recovered from the vehicle.",
+      "unlocks": [
+        "E02",
+        "E03"
+      ]
+    },
+    {
+      "id": "P03",
+      "name": "Partial Print",
+      "type": "trace_evidence_analysis",
+      "description": "Assess what the incomplete fingerprint can and cannot establish.",
+      "unlocks": [
+        "E04"
+      ]
+    },
+    {
+      "id": "P04",
+      "name": "Vehicle Reconstruction",
+      "type": "forensic_reconstruction",
+      "description": "Reconstruct the vehicle's final movement and damage pattern.",
+      "unlocks": [
+        "E05",
+        "E06"
+      ]
+    },
+    {
+      "id": "P05",
+      "name": "Suicide vs Homicide Audit",
+      "type": "hypothesis_management",
+      "critical": true,
+      "description": "Compare the competing explanations directly and submit a reconstruction that explicitly separates established facts, plausible inferences, and unresolved questions.",
+      "ai_initial_behavior": "Acts as a devil's advocate, challenging a player who becomes committed too early to either explanation, pushing a strong player toward chronology and physical reconstruction rather than motive-only reasoning.",
+      "unlocks": [
+        "E07"
+      ]
+    }
+  ],
+  "hypotheses": [
+    {
+      "id": "H1",
+      "statement": "Daniel died by suicide.",
+      "supporting_evidence": [
+        "E01"
+      ],
+      "contradicting_evidence": [
+        "E02",
+        "E03",
+        "E05",
+        "E06"
+      ],
+      "insufficient_evidence": [
+        "E01"
+      ],
+      "final_status": "contradicted"
+    },
+    {
+      "id": "H2",
+      "statement": "Daniel was killed by an unidentified second person present in the vehicle.",
+      "supporting_evidence": [
+        "E02",
+        "E03",
+        "E04",
+        "E05",
+        "E06"
+      ],
+      "contradicting_evidence": [],
+      "insufficient_evidence": [
+        "E04"
+      ],
+      "final_status": "unresolved"
+    },
+    {
+      "id": "H3",
+      "statement": "The physical evidence is ambiguous enough that neither suicide nor homicide can be conclusively established from what is currently known.",
+      "supporting_evidence": [
+        "E07"
+      ],
+      "contradicting_evidence": [],
+      "insufficient_evidence": [],
+      "final_status": "supported"
+    }
+  ]
+}

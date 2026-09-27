@@ -4,19 +4,55 @@
   "genre": "historical_investigation",
   "status": "prototype",
   "difficulty": "hard",
-
+  "victim": {
+    "name": "Axeman Attack Series",
+    "age": null,
+    "occupation": "n/a",
+    "status": "deceased/injured (multiple)",
+    "note": "Represents the attacks collectively (see 'attacks' for the individual list). No single victim record anchors this file because the puzzle tests whether one attacker and one letter-writer are the same actor."
+  },
+  "suspects": [
+    {
+      "id": "501",
+      "name": "Suspect Candidate A (Unidentified)",
+      "occupation": "unknown",
+      "relationship_to_victim": "unknown",
+      "note": "One of several historically proposed candidates. No real individual is named or accused in this case file."
+    },
+    {
+      "id": "502",
+      "name": "Suspect Candidate B (Unidentified)",
+      "occupation": "unknown",
+      "relationship_to_victim": "unknown",
+      "note": "One of several historically proposed candidates. No real individual is named or accused in this case file."
+    }
+  ],
   "case_frame": {
     "description": "A series of axe attacks in New Orleans accompanied by a famous letter demanding jazz be played and widespread public panic.",
     "note": "No real individual is named or accused as the attacker in this case file."
   },
-
   "attacks": [
-    { "id": "A01", "label": "Attack 1", "description": "Early attack in the series, establishing the pattern." },
-    { "id": "A02", "label": "Attack 2", "description": "Attack with a surviving witness account." },
-    { "id": "A03", "label": "Attack 3", "description": "Attack occurring after the jazz letter was published." },
-    { "id": "A04", "label": "Attack 4", "description": "Later attack, sometimes treated as the series' end." }
+    {
+      "id": "A01",
+      "label": "Attack 1",
+      "description": "Early attack in the series, establishing the pattern."
+    },
+    {
+      "id": "A02",
+      "label": "Attack 2",
+      "description": "Attack with a surviving witness account."
+    },
+    {
+      "id": "A03",
+      "label": "Attack 3",
+      "description": "Attack occurring after the jazz letter was published."
+    },
+    {
+      "id": "A04",
+      "label": "Attack 4",
+      "description": "Later attack, sometimes treated as the series' end."
+    }
   ],
-
   "related_persons": [
     {
       "id": "801",
@@ -31,7 +67,32 @@
       "description": "Responded to the panic by encouraging citywide jazz performances on the threatened night."
     }
   ],
-
+  "timeline": [
+    {
+      "time": "phase_1",
+      "event": "Attack 1 occurs, establishing the pattern"
+    },
+    {
+      "time": "phase_2",
+      "event": "Attack 2 occurs; a surviving witness gives an account"
+    },
+    {
+      "time": "phase_3",
+      "event": "The jazz letter is published, threatening further attacks"
+    },
+    {
+      "time": "phase_4",
+      "event": "The city responds with citywide jazz performances on the threatened night"
+    },
+    {
+      "time": "phase_5",
+      "event": "Attack 3 occurs after the letter's publication"
+    },
+    {
+      "time": "phase_6",
+      "event": "Attack 4 occurs; the series is later treated as ended"
+    }
+  ],
   "evidence": [
     {
       "id": "E01",
@@ -41,7 +102,10 @@
       "reliability": "high",
       "status": "locked",
       "source": "Period police records",
-      "supports": ["H1", "H2"],
+      "supports": [
+        "H1",
+        "H2"
+      ],
       "contradicts": [],
       "unlocked_by": "P01"
     },
@@ -53,8 +117,12 @@
       "reliability": "medium",
       "status": "locked",
       "source": "Period newspaper archive",
-      "supports": ["H3"],
-      "contradicts": ["H1"],
+      "supports": [
+        "H3"
+      ],
+      "contradicts": [
+        "H1"
+      ],
       "unlocked_by": "P02"
     },
     {
@@ -65,8 +133,12 @@
       "reliability": "low",
       "status": "locked",
       "source": "Archival document review",
-      "supports": ["H3"],
-      "contradicts": ["H1"],
+      "supports": [
+        "H3"
+      ],
+      "contradicts": [
+        "H1"
+      ],
       "unlocked_by": "P03"
     },
     {
@@ -77,7 +149,10 @@
       "reliability": "medium",
       "status": "locked",
       "source": "Period case files",
-      "supports": ["H1", "H2"],
+      "supports": [
+        "H1",
+        "H2"
+      ],
       "contradicts": [],
       "unlocked_by": "P04"
     },
@@ -89,15 +164,32 @@
       "reliability": "high",
       "status": "locked",
       "source": "Period newspaper and civic archive",
-      "supports": ["H3"],
+      "supports": [
+        "H3"
+      ],
       "contradicts": [],
       "unlocked_by": "P05"
     }
   ],
-
   "puzzles": [
-    { "id": "P01", "name": "Victim Map", "type": "spatial_analysis", "description": "Locate the attacks and any relationships between victims.", "unlocks": ["E01"] },
-    { "id": "P02", "name": "The Jazz Threat", "type": "document_reconstruction", "description": "Reconstruct the letter and trace its behavioral effect on the city.", "unlocks": ["E02"] },
+    {
+      "id": "P01",
+      "name": "Victim Map",
+      "type": "spatial_analysis",
+      "description": "Locate the attacks and any relationships between victims.",
+      "unlocks": [
+        "E01"
+      ]
+    },
+    {
+      "id": "P02",
+      "name": "The Jazz Threat",
+      "type": "document_reconstruction",
+      "description": "Reconstruct the letter and trace its behavioral effect on the city.",
+      "unlocks": [
+        "E02"
+      ]
+    },
     {
       "id": "P03",
       "name": "Letter Provenance",
@@ -105,36 +197,73 @@
       "critical": true,
       "description": "Test whether the letter's authorship can actually be tied to the attacker rather than assumed.",
       "ai_initial_behavior": "Anchors the entire investigation around the letter's content, repeatedly implying the public narrative it created already explains the case.",
-      "unlocks": ["E03"]
+      "unlocks": [
+        "E03"
+      ]
     },
-    { "id": "P04", "name": "Attack Pattern", "type": "comparative_analysis", "description": "Compare the attacks without assuming a single perpetrator by default.", "unlocks": ["E04"] },
-    { "id": "P05", "name": "Public Panic", "type": "social_dynamics_model", "description": "Model how the threat reshaped public behavior, and consider whether that response itself obscures the truth.", "unlocks": ["E05"] },
-    { "id": "P06", "name": "Final Reconstruction", "type": "hypothesis_management", "description": "Compare the attacker-hypothesis and the letter-writer-hypothesis directly.", "unlocks": [] }
+    {
+      "id": "P04",
+      "name": "Attack Pattern",
+      "type": "comparative_analysis",
+      "description": "Compare the attacks without assuming a single perpetrator by default.",
+      "unlocks": [
+        "E04"
+      ]
+    },
+    {
+      "id": "P05",
+      "name": "Public Panic",
+      "type": "social_dynamics_model",
+      "description": "Model how the threat reshaped public behavior, consider whether that response obscures the truth, and compare the attacker-hypothesis and letter-writer-hypothesis directly.",
+      "unlocks": [
+        "E05"
+      ]
+    }
   ],
-
   "hypotheses": [
     {
       "id": "H1",
       "statement": "The same person committed all the attacks and wrote the letter.",
-      "supporting_evidence": ["E01", "E04"],
-      "contradicting_evidence": ["E02", "E03"],
-      "insufficient_evidence": ["E01", "E04"],
+      "supporting_evidence": [
+        "E01",
+        "E04"
+      ],
+      "contradicting_evidence": [
+        "E02",
+        "E03"
+      ],
+      "insufficient_evidence": [
+        "E01",
+        "E04"
+      ],
       "final_status": "unresolved"
     },
     {
       "id": "H2",
       "statement": "Different people were responsible for different attacks, loosely grouped by imitation or circumstance.",
-      "supporting_evidence": ["E01", "E04"],
+      "supporting_evidence": [
+        "E01",
+        "E04"
+      ],
       "contradicting_evidence": [],
-      "insufficient_evidence": ["E01", "E04"],
+      "insufficient_evidence": [
+        "E01",
+        "E04"
+      ],
       "final_status": "unresolved"
     },
     {
       "id": "H3",
       "statement": "The letter was designed to create a false single-attacker narrative, independent of who actually committed each attack.",
-      "supporting_evidence": ["E02", "E03", "E05"],
+      "supporting_evidence": [
+        "E02",
+        "E03",
+        "E05"
+      ],
       "contradicting_evidence": [],
-      "insufficient_evidence": ["E03"],
+      "insufficient_evidence": [
+        "E03"
+      ],
       "final_status": "supported"
     }
   ]
