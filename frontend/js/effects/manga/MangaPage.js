@@ -122,6 +122,11 @@ export class MangaPage {
         if (idx !== targetIndex) b.classList.remove('active-revealed');
       });
 
+      // Bring the newly revealed block fully into view, clear of the
+      // fixed top/bottom HUD bars (scroll-margin on .manga-grid-block
+      // handles the offset so it never ends up hidden behind them).
+      blockEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
       setTimeout(() => {
         blockEl.classList.remove('just-revealed');
       }, 500);
@@ -156,6 +161,7 @@ export class MangaPage {
     const prevBlock = this.blockElements[this.revealedCount - 1];
     if (prevBlock) {
       prevBlock.classList.add('active-revealed');
+      prevBlock.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
     if (typeof this.options.onReveal === 'function') {
@@ -183,6 +189,7 @@ export class MangaPage {
     if (block1) {
       block1.classList.remove('hidden');
       block1.classList.add('revealed', 'active-revealed');
+      block1.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
     this.revealedCount = 1;

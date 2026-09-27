@@ -208,7 +208,8 @@ def get_case(case_id: str):
     case_file = f"data/case_{case_id.zfill(3)}.json"
 
     try:
-        case = load_case(case_file)`r`n    except FileNotFoundError:
+        case = load_case(case_file)
+    except FileNotFoundError:
         raise HTTPException(
             status_code=404,
             detail="Case not found"

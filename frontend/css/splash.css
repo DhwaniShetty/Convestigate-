@@ -32,7 +32,7 @@
 .boot-splash-bg {
   position: absolute;
   inset: -20px;
-  background-image: url('../assets/intro_evidence.jpg');
+  background-image: url('../assets/intro_evidence.jpeg');
   background-size: cover;
   background-position: center;
   filter: brightness(0.5) contrast(1.15) saturate(0.85);
