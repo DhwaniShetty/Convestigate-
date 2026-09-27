@@ -1,6 +1,7 @@
 import { gameState } from '../../state/gameState.js';
 import { setDashboardTab } from '../dashboard.js';
 import { sound } from '../../effects/soundSystem.js';
+import { submitEmploymentPuzzle } from '../../utils/api.js';
 
 let selectedPattern = null;
 
@@ -84,11 +85,43 @@ export function renderP02Employment(container) {
     });
   });
 
-  container.querySelector('#btn-submit-p02')?.addEventListener('click', () => {
-    gameState.completePuzzle('P02');
-    renderP02Employment(container);
-  });
+  container.querySelector('#btn-submit-p02')?.addEventListener('click', async () => {
+    const sessionId = gameState.getState().sessionId;
 
+    if (!sessionId) {
+      alert('No active backend session found.');
+      return;
+    }
+
+    if (!selectedPattern) {
+      alert('Please select an option before submitting.');
+      return;
+    }
+
+    const employmentVerified = selectedPattern === 'opt2';
+    const transferVerified = selectedPattern === 'opt2';
+
+    try {
+      const result = await submitEmploymentPuzzle(
+        sessionId,
+        employmentVerified,
+        transferVerified
+      );
+
+      console.log('P02 BACKEND RESULT:', result);
+
+      if (result.correct) {
+        gameState.completePuzzle('P02');
+        renderP02Employment(container);
+      } else {
+        alert(result.message || 'Incorrect deduction. Try again.');
+      }
+
+    } catch (error) {
+      console.error('P02 submission failed:', error);
+      alert(`P02 submission failed: ${error.message}`);
+    }
+  });
   container.querySelector('#btn-next-p03')?.addEventListener('click', () => {
     sound.playStamp();
     setDashboardTab('p03');

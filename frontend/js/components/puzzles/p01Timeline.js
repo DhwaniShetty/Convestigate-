@@ -1,6 +1,7 @@
 import { gameState } from '../../state/gameState.js';
 import { setDashboardTab } from '../dashboard.js';
 import { sound } from '../../effects/soundSystem.js';
+import { submitTimelinePuzzle } from '../../utils/api.js';
 
 let localOrder = null;
 
@@ -9,8 +10,10 @@ export function renderP01Timeline(container) {
   const isCompleted = state.puzzleProgress.P01;
 
   if (!localOrder) {
-    localOrder = [...state.timeline];
-    // Shuffle slightly if not completed yet
+    localOrder = [...state.timeline].filter(
+      ev => ev.time !== '22:15'
+    );
+
     if (!isCompleted && localOrder.length > 2) {
       localOrder = [localOrder[1], localOrder[0], ...localOrder.slice(2)];
     }
@@ -97,13 +100,33 @@ export function renderP01Timeline(container) {
     });
   });
 
-  container.querySelector('#btn-submit-p01')?.addEventListener('click', () => {
-    // Sort local order by originalIndex to mark correct
-    localOrder.sort((a, b) => (a.originalIndex ?? 0) - (b.originalIndex ?? 0));
-    gameState.completePuzzle('P01');
-    renderP01Timeline(container);
-  });
+  container.querySelector('#btn-submit-p01')?.addEventListener('click', async () => {
+    const sessionId = gameState.getState().sessionId;
 
+    if (!sessionId) {
+      alert('No active backend session found.');
+      return;
+    }
+
+    const order = localOrder.map(ev => ev.time);
+
+    try {
+      const result = await submitTimelinePuzzle(sessionId, order);
+
+      console.log('P01 BACKEND RESULT:', result);
+
+      if (result.correct) {
+        gameState.completePuzzle('P01');
+        renderP01Timeline(container);
+      } else {
+        alert(result.message || 'Incorrect order. Try again.');
+      }
+
+    } catch (error) {
+      console.error('P01 submission failed:', error);
+      alert(`P01 submission failed: ${error.message}`);
+    }
+  });
   container.querySelector('#btn-next-p02')?.addEventListener('click', () => {
     sound.playStamp();
     setDashboardTab('p02');

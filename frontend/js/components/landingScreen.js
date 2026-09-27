@@ -2,6 +2,7 @@ import { gameState } from '../state/gameState.js';
 import { ALL_CASES, getCaseById } from '../data/caseLoader.js';
 import { cinematic } from '../effects/cinematic.js';
 import { sound } from '../effects/soundSystem.js';
+import { createSession } from '../utils/api.js';
 
 let caseSearchQuery = '';
 
@@ -172,15 +173,45 @@ export function renderLandingScreen(container) {
   });
 
   // Main CTA Button -> Launches Cinematic Case Opening sequence and enters Case Briefing!
-  container.querySelector('#btn-quick-start')?.addEventListener('click', () => {
+  container.querySelector('#btn-quick-start')?.addEventListener('click', async () => {
+
     sound.playStamp();
+
     const currentCaseId = gameState.getState().currentCaseId || '014';
+
     const caseData = getCaseById(currentCaseId);
-    gameState.loadCase(caseData);
-    cinematic.playCinematicCaseOpening(caseData, () => {
-      gameState.setScreen('BRIEFING');
-    });
-  });
+
+    const playerName =
+      gameState.getState().lobby.playerName || 'Detective Cross';
+
+    try {
+      const session = await createSession(
+        currentCaseId,
+        2,
+        playerName
+      );
+
+      gameState.state.sessionId = session.session_id;
+
+      gameState.loadCase(caseData);
+
+      console.log('BACKEND SESSION CREATED:', session);
+
+      cinematic.playCinematicCaseOpening(caseData, () => {
+
+        gameState.setScreen('BRIEFING');
+
+      });
+
+    } catch (error) {
+
+      console.error('Failed to create backend session:', error);
+
+      alert(`Unable to start investigation: ${error.message}`);
+
+    }
+
+});
 
   // Modal controls
   container.querySelector('#btn-close-case-intro')?.addEventListener('click', () => {

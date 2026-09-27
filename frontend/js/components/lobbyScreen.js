@@ -1,7 +1,9 @@
 import { gameState } from '../state/gameState.js';
+import { getSessionState } from '../utils/api.js';
 
 export function renderLobbyScreen(container) {
   const state = gameState.getState();
+  const sessionId = state.sessionId;
   const lobby = state.lobby;
 
   container.innerHTML = `
@@ -32,7 +34,7 @@ export function renderLobbyScreen(container) {
               <div class="lobby-player-row">
                 <div class="lobby-player-info">
                   <div class="status-dot active"></div>
-                  <strong style="color: #ffffff;">${p.name}</strong>
+                  <strong style="color: #ffffff;">${p.isHost ? lobby.playerName : p.name}</strong>
                   ${p.isHost ? '<span class="stamp stamp-white" style="font-size: 0.6rem; transform: none;">LEAD</span>' : ''}
                 </div>
                 <div style="display: flex; align-items: center; gap: 12px;">

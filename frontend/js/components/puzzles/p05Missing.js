@@ -1,5 +1,6 @@
 import { gameState } from '../../state/gameState.js';
 import { sound } from '../../effects/soundSystem.js';
+import { submitMissingRecordPuzzle } from '../../utils/api.js';
 
 let auditActionTaken = false;
 
@@ -66,6 +67,62 @@ export function renderP05Missing(container) {
         </p>
       </div>
 
+      ${!isCompleted ? `
+        <div style="background: var(--bg-dark); border: 1px solid var(--border-medium); padding: 16px; margin-top: 12px;">
+          
+          <h4 style="font-family: var(--font-mono); font-size: 0.85rem; color: #ffffff; margin-bottom: 12px;">
+            INVESTIGATOR'S AUDIT
+          </h4>
+
+          <label style="display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 6px;">
+            Which record is missing?
+          </label>
+
+          <select id="p05-missing-record"
+            style="width: 100%; background: var(--bg-card); color: #ffffff; border: 1px solid var(--border-subtle); padding: 8px; margin-bottom: 12px;">
+            <option value="">SELECT RECORD</option>
+            <option value="Case Assignment Log">Case Assignment Log</option>
+            <option value="Medical Report">Medical Report</option>
+            <option value="Security Footage">Security Footage</option>
+          </select>
+
+          <label style="display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 6px;">
+            Where is the missing record located?
+          </label>
+
+          <select id="p05-location"
+            style="width: 100%; background: var(--bg-card); color: #ffffff; border: 1px solid var(--border-subtle); padding: 8px; margin-bottom: 12px;">
+            <option value="">SELECT LOCATION</option>
+            <option value="weekly assignment ledger">Weekly Assignment Ledger</option>
+            <option value="security archive">Security Archive</option>
+            <option value="medical records">Medical Records</option>
+          </select>
+
+          <label style="display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 6px;">
+            Does the evidence indicate credential misuse?
+          </label>
+
+          <select id="p05-credential-use"
+            style="width: 100%; background: var(--bg-card); color: #ffffff; border: 1px solid var(--border-subtle); padding: 8px; margin-bottom: 12px;">
+            <option value="">SELECT</option>
+            <option value="true">YES</option>
+            <option value="false">NO</option>
+          </select>
+
+          <label style="display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 6px;">
+            Does the conclusion avoid directly accusing Daniel?
+          </label>
+
+          <select id="p05-avoids-accusation"
+            style="width: 100%; background: var(--bg-card); color: #ffffff; border: 1px solid var(--border-subtle); padding: 8px;">
+            <option value="">SELECT</option>
+            <option value="true">YES</option>
+            <option value="false">NO</option>
+          </select>
+
+        </div>
+      ` : ''}
+
       <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 16px; margin-top: 8px; flex-wrap: wrap; gap: 12px;">
         <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted);">
           UNLOCKS: E07, E08 (REDACTED LEDGER & CREDENTIAL AUDIT)
@@ -84,11 +141,65 @@ export function renderP05Missing(container) {
     </div>
   `;
 
-  container.querySelector('#btn-submit-p05')?.addEventListener('click', () => {
-    gameState.completePuzzle('P05');
-    renderP05Missing(container);
-  });
+  container.querySelector('#btn-submit-p05')?.addEventListener('click', async () => {
+    const sessionId = gameState.getState().sessionId;
 
+    if (!sessionId) {
+      alert('No active backend session found.');
+      return;
+    }
+
+    const missingRecord =
+      container.querySelector('#p05-missing-record')?.value;
+
+    const location =
+      container.querySelector('#p05-location')?.value;
+
+    const credentialUse =
+      container.querySelector('#p05-credential-use')?.value;
+
+    const avoidsDirectAccusation =
+      container.querySelector('#p05-avoids-accusation')?.value;
+
+    if (
+      !missingRecord ||
+      !location ||
+      !credentialUse ||
+      !avoidsDirectAccusation
+    ) {
+      alert('Please complete all four investigative fields.');
+      return;
+    }
+
+    const caseId = gameState.getState().currentCase.case_id;
+
+    try {
+      const result = await submitMissingRecordPuzzle(
+        sessionId,
+        caseId,
+        missingRecord,
+        location,
+        credentialUse === 'true',
+        avoidsDirectAccusation === 'true'
+      );
+
+      console.log('P05 BACKEND RESULT:', result);
+
+      if (result.correct) {
+        gameState.completePuzzle('P05');
+        renderP05Missing(container);
+      } else {
+        alert(
+          result.message ||
+          'Incorrect missing record analysis. Try again.'
+        );
+      }
+
+    } catch (error) {
+      console.error('P05 submission failed:', error);
+      alert(`P05 submission failed: ${error.message}`);
+    }
+  });
   container.querySelector('#btn-next-verdict')?.addEventListener('click', () => {
     sound.playStamp();
     gameState.setScreen('FINAL_INVESTIGATION');
