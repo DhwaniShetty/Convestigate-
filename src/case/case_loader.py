@@ -24,5 +24,8 @@ def load_case(case_id="014"):
         case_data["evidence"],
         case_data["puzzles"],
         hypotheses=case_data.get("hypotheses", []),
-        related_persons=case_data.get("related_persons", [])
+        related_persons=case_data.get("related_persons", []),
+        metadata={k: v for k, v in case_data.items() if k not in {
+            "case_id", "title", "victim", "suspects", "timeline", "evidence", "puzzles", "hypotheses"
+        }}
     )

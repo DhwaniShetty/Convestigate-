@@ -6,36 +6,19 @@ import { sound } from '../../effects/soundSystem.js';
 
 let selectedWitnesses = [];
 
+let draftVersion = -1;
+
 export function renderP04Witness(container) {
   const state = gameState.getState();
+  if (draftVersion !== gameState.caseVersion) {
+    draftVersion = gameState.caseVersion;
+    selectedWitnesses = [];
+  }
   const isCompleted = state.puzzleProgress.P04;
 
-  const statements = [
-    {
-      id: 'W01',
-      witness: 'Marcus Reed (Friend)',
-      time: '21:47 - 21:50',
-      text: 'I walked Lena to the library exit and watched her head off alone toward the park side of campus. I didn\'t see anyone with her.'
-    },
-    {
-      id: 'W02',
-      witness: 'Anonymous Jogger',
-      time: '22:10 (Inside Park)',
-      text: 'I saw a young woman matching Lena\'s description walking with an unidentified man on the east path of the park in the dark.'
-    },
-    {
-      id: 'W03',
-      witness: 'Elena Hart (Mother)',
-      time: '22:15 (Phone Call)',
-      text: 'Lena called me at quarter past ten and said she was almost home, just a few minutes away on the residential road. She was alone and sounded completely normal.'
-    },
-    {
-      id: 'W04',
-      witness: 'Night Security Guard',
-      time: '21:40 - 22:00',
-      text: 'I remember Daniel Cross\'s car in the staff lot dropping off paperwork. Nothing unusual, he drove off before ten.'
-    }
-  ];
+  const statements = (state.currentCase.puzzles.find(p => p.id === 'P04').witnesses || []).map(w => ({
+    id: w.id, witness: w.name, time: w.related_event, text: w.statement
+  }));
 
   container.innerHTML = `
     <div class="puzzle-box">
@@ -144,20 +127,21 @@ export function renderP04Witness(container) {
     const caseId = gameState.getState().currentCase.case_id;
 
     try {
-      const result = await submitWitnessPuzzle(
+      const result = await gameState.submitPuzzle('P04', () => submitWitnessPuzzle(
         sessionId,
         caseId,
         unreliableWitness,
         '',
         ''
-      );
+      ));
+      if (!result) return;
 
       console.log('P04 BACKEND RESULT:', result);
 
       if (result.correct) {
         eventBus.emit(EVENTS.CONTRADICTION_FOUND, { selectedWitnesses });
 
-        gameState.completePuzzle('P04');
+
         renderP04Witness(container);
       } else {
         alert(result.message || 'Incorrect witness analysis. Try again.');

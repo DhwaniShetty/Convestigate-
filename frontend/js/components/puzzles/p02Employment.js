@@ -5,8 +5,14 @@ import { submitEmploymentPuzzle } from '../../utils/api.js';
 
 let selectedPattern = null;
 
+let draftVersion = -1;
+
 export function renderP02Employment(container) {
   const state = gameState.getState();
+  if (draftVersion !== gameState.caseVersion) {
+    draftVersion = gameState.caseVersion;
+    selectedPattern = null;
+  }
   const isCompleted = state.puzzleProgress.P02;
 
   container.innerHTML = `
@@ -29,12 +35,9 @@ export function renderP02Employment(container) {
       <!-- Record Excerpt -->
       <div class="evidence-doc-view">
         <div style="font-family: var(--font-mono); font-size: 0.85rem; line-height: 1.5;">
-          <p><strong>DOCUMENT:</strong> CIVIL SERVICE PERSONNEL TRANSFER ORDER #4489</p>
-          <p><strong>EMPLOYEE:</strong> DANIEL CROSS (BENEFITS ADMINISTRATOR II)</p>
-          <p><strong>ORIGIN DEPT:</strong> CENTRAL MUNICIPAL RELIEF BRANCH</p>
-          <p><strong>ASSIGNED BRANCH:</strong> NORTHBRIDGE CIVIC ANNEX (0.2 MILES FROM NORTHBRIDGE PARK)</p>
-          <p><strong>EFFECTIVE DATE:</strong> 1ST OF CURRENT MONTH</p>
-          <p><strong>NOTE:</strong> TRANSFER WAS VOLUNTARY, REQUESTED 60 DAYS PRIOR TO POSITION VACANCY.</p>
+          <p><strong>DOCUMENT:</strong> ${state.currentCase.evidence.find(e => e.id === 'E03')?.name}</p>
+          <p>${state.currentCase.evidence.find(e => e.id === 'E03')?.description}</p>
+          <p>${state.currentCase.puzzles.find(p => p.id === 'P02')?.description}</p>
         </div>
       </div>
 
@@ -102,16 +105,17 @@ export function renderP02Employment(container) {
     const transferVerified = selectedPattern === 'opt2';
 
     try {
-      const result = await submitEmploymentPuzzle(
+      const result = await gameState.submitPuzzle('P02', () => submitEmploymentPuzzle(
         sessionId,
         employmentVerified,
         transferVerified
-      );
+      ));
+      if (!result) return;
 
       console.log('P02 BACKEND RESULT:', result);
 
       if (result.correct) {
-        gameState.completePuzzle('P02');
+
         renderP02Employment(container);
       } else {
         alert(result.message || 'Incorrect deduction. Try again.');

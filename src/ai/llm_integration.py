@@ -1,6 +1,7 @@
 import os
 import json
 import time
+import ssl
 
 from dotenv import load_dotenv
 from google import genai
@@ -20,7 +21,14 @@ class LLMIntegration:
                 "Please check your .env file."
             )
 
-        self.client = genai.Client(api_key=api_key)
+        # Use OS-trusted roots, retaining hostname/certificate verification.
+        # This includes Windows enterprise roots without global SSL patching.
+        tls_context = ssl.create_default_context()
+        self.client = genai.Client(api_key=api_key, http_options={
+            "client_args": {"verify": tls_context},
+            "async_client_args": {"verify": tls_context},
+            "timeout": 30000,
+        })
 
         # Primary model for the project
         self.model = "gemini-3.8-flash"

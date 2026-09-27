@@ -69,7 +69,7 @@ export function renderP05Missing(container) {
 
       ${!isCompleted ? `
         <div style="background: var(--bg-dark); border: 1px solid var(--border-medium); padding: 16px; margin-top: 12px;">
-          
+
           <h4 style="font-family: var(--font-mono); font-size: 0.85rem; color: #ffffff; margin-bottom: 12px;">
             INVESTIGATOR'S AUDIT
           </h4>
@@ -174,19 +174,20 @@ export function renderP05Missing(container) {
     const caseId = gameState.getState().currentCase.case_id;
 
     try {
-      const result = await submitMissingRecordPuzzle(
+      const result = await gameState.submitPuzzle('P05', () => submitMissingRecordPuzzle(
         sessionId,
         caseId,
         missingRecord,
         location,
         credentialUse === 'true',
         avoidsDirectAccusation === 'true'
-      );
+      ));
+      if (!result) return;
 
       console.log('P05 BACKEND RESULT:', result);
 
       if (result.correct) {
-        gameState.completePuzzle('P05');
+
         renderP05Missing(container);
       } else {
         alert(

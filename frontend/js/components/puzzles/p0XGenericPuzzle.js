@@ -8,7 +8,7 @@ export function renderP0XGeneric(container, puzzleId) {
   const state = gameState.getState();
   const caseId = state.currentCase.case_id;
   const isCompleted = state.puzzleProgress[puzzleId];
-  
+
   const pData = state.currentCase.puzzles.find(p => p.id === puzzleId);
   if (!pData) return;
 
@@ -36,7 +36,7 @@ export function renderP0XGeneric(container, puzzleId) {
           ${isCompleted ? '<span class="stamp stamp-white">COMPLETED // VERIFIED</span>' : '<span class="status-pill">PENDING VERIFICATION</span>'}
         </div>
       </div>
-      
+
       <div class="dynamic-form" style="margin-top: 20px; padding: 16px; background: var(--bg-dark); border: 1px solid var(--border-medium);">
         ${renderFormFields(schema, isCompleted, '')}
       </div>
@@ -66,13 +66,14 @@ export function renderP0XGeneric(container, puzzleId) {
       sound.playClick();
       const sessionId = gameState.getState().sessionId;
       if (!sessionId) return;
-      
+
       const payload = collectPayload(container, schema, caseId);
-      
+
       try {
-        const result = await submitDynamicPuzzle(sessionId, endpoint, payload);
+        const result = await gameState.submitPuzzle(puzzleId, () => submitDynamicPuzzle(sessionId, endpoint, payload));
+      if (!result) return;
         if (result.correct) {
-          gameState.completePuzzle(puzzleId);
+
           renderP0XGeneric(container, puzzleId); // re-render as completed
         } else {
           alert(result.message || 'Incorrect. Please review the evidence and try again.');
@@ -98,7 +99,7 @@ function renderFormFields(schema, isCompleted, prefix) {
     return Object.entries(schema.fields).map(([key, field]) => {
       const fullKey = prefix ? `${prefix}.${key}` : key;
       const label = key.replace(/_/g, ' ').toUpperCase();
-      
+
       if (field.type === 'boolean') {
         return `
           <div style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 6px;">
@@ -150,7 +151,7 @@ function renderFormFields(schema, isCompleted, prefix) {
 
 function collectPayload(container, schema, caseId) {
   const payload = { case_id: caseId };
-  
+
   function collectFields(schemaObj, prefix, targetObj) {
     if (schemaObj.type === 'compound' || schemaObj.type === 'dict') {
       Object.entries(schemaObj.fields).forEach(([key, field]) => {
@@ -176,7 +177,7 @@ function collectPayload(container, schema, caseId) {
       targetObj[key] = val ? val.split(',').map(s => s.trim()) : [];
     }
   }
-  
+
   collectFields(schema, '', payload);
   return payload;
 }

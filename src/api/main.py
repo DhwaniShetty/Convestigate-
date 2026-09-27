@@ -1,6 +1,7 @@
 from urllib import request
 
 from uuid import uuid4
+from pathlib import Path
 from typing import Optional
 from src.player.player_model import PlayerModel
 from src.ai.adaptive_ai import AdaptiveAI
@@ -208,6 +209,26 @@ def home():
 # CASE API
 # -------------------------
 
+@app.get("/cases")
+def list_cases():
+    return [get_case(path.stem.removeprefix("case_")) for path in sorted(Path("data").glob("case_[0-9][0-9][0-9].json"))]
+
+
+def solved_puzzle_ids(session):
+    case = load_case(session["case_id"])
+    # Older routes store completion slugs rather than the JSON puzzle type.
+    legacy_keys = {
+        "004": ["digital_alibi_map", "time_of_death_reconciliation",
+                "metadata_authentication", "financial_motive_audit", "final_reconstruction"],
+        "008": PUZZLE_ORDER,
+        "010": ["comparative_analysis", "comparative_similarity", "source_analysis",
+                "hypothesis_management", "conclusion_writing"],
+        "014": PUZZLE_ORDER,
+    }
+    keys = legacy_keys.get(case.case_id, [p["type"] for p in case.puzzles])
+    return [p["id"] for p, key in zip(case.puzzles, keys) if key in session["game_state"].solved_puzzles]
+
+
 @app.get("/cases/{case_id}")
 def get_case(case_id: str):
 
@@ -223,11 +244,16 @@ def get_case(case_id: str):
     return {
         "case_id": case.case_id,
         "title": case.title,
+        **case.metadata,
         "victim": case.victim,
         "suspects": case.suspects,
         "timeline": case.timeline,
         "evidence": case.evidence,
-        "puzzles": case.puzzles
+        "puzzles": case.puzzles,
+        "hypotheses": [
+            {"id": h["id"], "statement": h.get("statement", "")}
+            for h in case.hypotheses
+        ]
     }
 
 
@@ -247,6 +273,8 @@ def create_session(request: CreateSessionRequest):
             status_code=404,
             detail="Case not found"
         )
+
+    request.case_id = case.case_id
 
     if request.player_count < 1 or request.player_count > 6:
         raise HTTPException(
@@ -285,6 +313,7 @@ def create_session(request: CreateSessionRequest):
         "player_count": request.player_count,
         "current_puzzle": game_state.current_puzzle,
         "solved_puzzles": game_state.solved_puzzles,
+        "solved_puzzle_ids": solved_puzzle_ids(sessions[session_id]),
         "unlocked_evidence": game_state.unlocked_evidence,
         "inspected_evidence": game_state.inspected_evidence,
         "hints_used": game_state.hints_used,
@@ -324,6 +353,7 @@ def get_session(session_id: str):
         "current_puzzle": game_state.current_puzzle,
 
         "solved_puzzles": game_state.solved_puzzles,
+        "solved_puzzle_ids": solved_puzzle_ids(session),
 
         "unlocked_evidence": game_state.unlocked_evidence,
 
@@ -1816,6 +1846,7 @@ def solve_case015_hypothesis(
             if evidence_id not in game_state.unlocked_evidence:
                 game_state.unlocked_evidence.append(evidence_id)
 
+        game_state.current_puzzle = None
         game_state.game_over = True
 
         return {
@@ -6106,6 +6137,38 @@ def get_session_or_404(session_id: str):
     return sessions[session_id]
 
 
+def build_ai_case_context(session):
+    """Share only unlocked evidence with the AI for this session."""
+    game_state = session["game_state"]
+    case = load_case(session["case_id"])
+
+    victim_name = case.victim.get("name", "the victim")
+
+    suspect_names = [
+        s.get("name", "") for s in case.suspects
+    ]
+
+    # Map evidence IDs to names for readability.
+    evidence_by_id = {
+        e["id"]: e["name"] for e in case.evidence
+    }
+
+    unlocked_names = [
+        evidence_by_id[eid]
+        for eid in game_state.unlocked_evidence
+        if eid in evidence_by_id
+    ]
+
+    case_context = {
+        "victim": victim_name,
+        "suspects": suspect_names,
+        "unlocked_evidence": unlocked_names,
+        "solved_puzzles": list(game_state.solved_puzzles),
+    }
+
+    return case_context
+
+
 @app.post("/sessions/{session_id}/ai")
 def get_ai_response(
     session_id: str,
@@ -6168,41 +6231,21 @@ def get_ai_response(
     # evidence is intentionally excluded.
     # -----------------------------------------------------
 
-    case = load_case(session["case_id"])
-
-    victim_name = case.victim.get("name", "the victim")
-
-    suspect_names = [
-        s.get("name", "") for s in case.suspects
-    ]
-
-    # Map evidence IDs to names for readability.
-    evidence_by_id = {
-        e["id"]: e["name"] for e in case.evidence
-    }
-
-    unlocked_names = [
-        evidence_by_id[eid]
-        for eid in game_state.unlocked_evidence
-        if eid in evidence_by_id
-    ]
-
-    case_context = {
-        "victim": victim_name,
-        "suspects": suspect_names,
-        "unlocked_evidence": unlocked_names,
-        "solved_puzzles": list(game_state.solved_puzzles),
-    }
+    case_context = build_ai_case_context(session)
 
     # -----------------------------------------------------
     # GENERATE AI RESPONSE
     # -----------------------------------------------------
 
-    response = adaptive_ai.generate_ai_response(
-        game_state,
-        request.message,
-        case_context=case_context
-    )
+    try:
+        response = adaptive_ai.generate_ai_response(
+            game_state, request.message, case_context=case_context
+        )
+    except Exception:
+        # Provider errors may contain credentials or internal request details.
+        raise HTTPException(
+            status_code=503, detail="The AI service is unavailable. Please try again."
+        ) from None
 
     # -----------------------------------------------------
     # CHECK WHETHER AI SHOULD VANISH
@@ -6282,16 +6325,44 @@ def request_hint(
             detail="The AI has vanished."
         )
 
-    # Record on both tracking objects.
-    game_state.hints_used += 1
+    if game_state.hints_used >= 3:
+        raise HTTPException(status_code=400, detail="No hints remaining.")
 
-    player.record_hint()
+    case = load_case(session["case_id"])
+    puzzle = next(
+        (p for p in case.puzzles if p["id"] == request.puzzle_id),
+        None
+    ) if request.puzzle_id else next(
+        (p for p in case.puzzles if p.get("type") == game_state.current_puzzle),
+        None
+    )
+    if request.puzzle_id and puzzle is None:
+        raise HTTPException(status_code=404, detail="Puzzle not found")
+
+    puzzle_label = puzzle.get("name", puzzle["id"]) if puzzle else game_state.current_puzzle
+    try:
+        hint = adaptive_ai.generate_ai_response(
+            game_state,
+            f"Give one concise procedural hint for the current investigation stage: {puzzle_label}. "
+            "Suggest a next investigative step without revealing the answer or locked evidence.",
+            case_context=build_ai_case_context(session)
+        )
+    except Exception:
+        # A failed generation must not consume a hint or create a hint log.
+        raise HTTPException(
+            status_code=503, detail="The AI service is unavailable. No hint was used."
+        ) from None
+
+    # Persist the successful request before consuming its in-memory allowance.
     log_player_action(
         session["db_session_id"], session["player_id"],
         "hint", target_id=request.puzzle_id,
         stage=game_state.current_puzzle, result="success"
     )
     calculate_player_behaviour(session["db_session_id"], session["player_id"])
+
+    game_state.hints_used += 1
+    player.record_hint()
 
     # Re-evaluate behaviour and update AI state.
     behavior = player.get_behavior_profile()
@@ -6300,7 +6371,11 @@ def request_hint(
 
     return {
 
+        "hint": hint,
         "hints_used": game_state.hints_used,
+        "hints_remaining": max(0, 3 - game_state.hints_used),
+        "ai_vanished": game_state.ai_vanished,
+        "countdown_active": game_state.countdown_active,
 
         "player_behavior": behavior,
 
@@ -6375,6 +6450,10 @@ def submit_final_reasoning(
             )
         )
 
+    required = {p["id"] for p in case.puzzles}
+    if len(required) != 5 or set(solved_puzzle_ids(session)) != required:
+        raise HTTPException(status_code=403, detail="Complete all five puzzles before submitting final reasoning.")
+
     # Evaluate the hypothesis outcome.
     final_status = selected.get("final_status", "unknown")
 
@@ -6434,7 +6513,14 @@ def submit_final_reasoning(
 
 
 def record_player_attempt(session, puzzle_data, correct, answer):
-    """Keep adaptive AI tracking in sync with the multi-case puzzle handlers."""
+    """Validate progression before logging or applying puzzle side effects."""
+    case = load_case(session["case_id"])
+    ids = [p["id"] for p in case.puzzles]
+    index = ids.index(puzzle_data["id"])
+    if not set(ids[:index]).issubset(solved_puzzle_ids(session)):
+        raise HTTPException(status_code=403, detail="Complete the preceding puzzles first.")
+    if session.get("final_reasoning_submitted"):
+        raise HTTPException(status_code=400, detail="Game is already over.")
     player = session["player"]
     game_state = session["game_state"]
     puzzle_id = puzzle_data["id"]

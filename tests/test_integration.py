@@ -731,6 +731,7 @@ class TestAPIEndpoints:
         sid = client.post(
             "/sessions", json={"case_id": "014"}
         ).json()["session_id"]
+        solve_case014_until(client, sid, 5)
 
         # H4 has final_status == "supported"
         r = client.post(
@@ -749,6 +750,7 @@ class TestAPIEndpoints:
         sid = client.post(
             "/sessions", json={"case_id": "014"}
         ).json()["session_id"]
+        solve_case014_until(client, sid, 5)
 
         # H1 has final_status == "contradicted"
         r = client.post(
@@ -767,6 +769,7 @@ class TestAPIEndpoints:
         sid = client.post(
             "/sessions", json={"case_id": "014"}
         ).json()["session_id"]
+        solve_case014_until(client, sid, 5)
 
         r = client.post(
             f"/sessions/{sid}/final-reasoning",
@@ -778,6 +781,7 @@ class TestAPIEndpoints:
         sid = client.post(
             "/sessions", json={"case_id": "014"}
         ).json()["session_id"]
+        solve_case014_until(client, sid, 5)
 
         client.post(
             f"/sessions/{sid}/final-reasoning",
@@ -924,3 +928,89 @@ class TestMergeIntegration:
         import src.api.main as api
         keys = [(method, route.path) for route in api.app.routes for method in getattr(route, "methods", [])]
         assert len(keys) == len(set(keys))
+
+class TestFrontendBackendContracts:
+    @pytest.mark.parametrize("case_id", [f"{i:03d}" for i in range(1, 16)])
+    def test_case_api_exposes_canonical_hypotheses_without_outcomes(self, client, case_id):
+        from src.case.case_loader import load_case
+        result = client.get(f"/cases/{case_id}").json()
+        expected = [{"id": h["id"], "statement": h.get("statement", "")} for h in load_case(case_id).hypotheses]
+        assert result["hypotheses"] == expected
+
+    def test_hint_returns_generated_text_and_server_allowance(self, client, monkeypatch):
+        import src.api.main as api
+        sid = client.post("/sessions", json={"case_id": "014"}).json()["session_id"]
+        captured = {}
+        def generate(state, message, case_context=None):
+            captured.update(case_context)
+            assert "procedural hint" in message
+            return "Compare the independent timestamps."
+        monkeypatch.setattr(api.sessions[sid]["adaptive_ai"], "generate_ai_response", generate)
+        result = client.post(f"/sessions/{sid}/hint", json={"puzzle_id": "P01"})
+        assert result.status_code == 200
+        assert result.json()["hint"] == "Compare the independent timestamps."
+        assert result.json()["hints_remaining"] == 2
+        assert captured["unlocked_evidence"] == []
+
+    def test_failed_hint_consumes_no_allowance_or_database_log(self, client, monkeypatch):
+        import src.api.main as api
+        from src.database.db import get_connection
+        sid = client.post("/sessions", json={"case_id": "014"}).json()["session_id"]
+        def fail(*args, **kwargs):
+            raise RuntimeError("private provider diagnostic")
+        monkeypatch.setattr(api.sessions[sid]["adaptive_ai"], "generate_ai_response", fail)
+        result = client.post(f"/sessions/{sid}/hint", json={"puzzle_id": "P01"})
+        assert result.status_code == 503
+        assert "private provider diagnostic" not in result.text
+        assert api.sessions[sid]["game_state"].hints_used == 0
+        assert api.sessions[sid]["player"].hints_used == 0
+        connection = get_connection()
+        try:
+            assert connection.execute("SELECT COUNT(*) FROM player_actions WHERE action_type='hint'").fetchone()[0] == 0
+        finally:
+            connection.close()
+
+    def test_hint_limit_and_invalid_puzzle(self, client):
+        sid = client.post("/sessions", json={"case_id": "014"}).json()["session_id"]
+        assert client.post(f"/sessions/{sid}/hint", json={"puzzle_id": "P99"}).status_code == 404
+        for count in range(1, 4):
+            result = client.post(f"/sessions/{sid}/hint", json={"puzzle_id": "P01"})
+            assert result.status_code == 200
+            assert result.json()["hints_used"] == count
+            assert result.json()["hints_remaining"] == 3 - count
+        assert client.post(f"/sessions/{sid}/hint", json={"puzzle_id": "P01"}).status_code == 400
+
+    def test_chat_provider_failure_returns_safe_api_error(self, client, monkeypatch):
+        import src.api.main as api
+        sid = client.post("/sessions", json={"case_id": "014"}).json()["session_id"]
+        def fail(*args, **kwargs):
+            raise RuntimeError("private provider diagnostic")
+        monkeypatch.setattr(api.sessions[sid]["adaptive_ai"], "generate_ai_response", fail)
+        result = client.post(f"/sessions/{sid}/ai", json={"message": "Help me investigate"})
+        assert result.status_code == 503
+        assert "private provider diagnostic" not in result.text
+
+    def test_case015_last_puzzle_allows_final_reasoning(self, client):
+        import src.api.main as api
+        from src.case.case_loader import load_case
+        sid = client.post("/sessions", json={"case_id": "015"}).json()["session_id"]
+        state = api.sessions[sid]["game_state"]
+        case = load_case("015")
+        state.solved_puzzles = [p["type"] for p in case.puzzles[:4]]
+        state.current_puzzle = case.puzzles[4]["type"]
+        payload = {
+            "sequence_is_not_causation": True,
+            "letter_writer_distinct_from_killer": True,
+            "trap_setter_distinct_from_letter_writer": True,
+            "killer_identity_unresolved": True
+        }
+        response = client.post(f"/sessions/{sid}/puzzles/case015-hypothesis", json=payload)
+        assert response.status_code == 200
+        assert response.json()["correct"] is True
+        assert state.current_puzzle is None
+        assert state.game_over is True
+        assert len(state.solved_puzzles) == 5
+        response = client.post(f"/sessions/{sid}/final-reasoning",
+                               json={"hypothesis_id": "H1", "reasoning": "Independent evidence matters."})
+        assert response.status_code == 200
+        assert response.json()["hypothesis_result"] == "SUPPORTED"

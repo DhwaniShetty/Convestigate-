@@ -2,7 +2,6 @@ import { gameState } from '../state/gameState.js';
 import { ALL_CASES, getCaseById } from '../data/caseLoader.js';
 import { cinematic } from '../effects/cinematic.js';
 import { sound } from '../effects/soundSystem.js';
-import { createSession } from '../utils/api.js';
 
 let caseSearchQuery = '';
 
@@ -21,7 +20,7 @@ export function renderLandingScreen(container) {
 
   container.innerHTML = `
     <div class="landing-hero">
-      <div class="stamp stamp-red" style="margin-bottom: 12px; animation: stamp-pop 0.4s ease-out;">CONVESTIGATE // 14 ARCHIVED DOCKETS</div>
+      <div class="stamp stamp-red" style="margin-bottom: 12px; animation: stamp-pop 0.4s ease-out;">CONVESTIGATE // ${ALL_CASES.length} ARCHIVED DOCKETS</div>
       <h1 class="landing-title">CONV<span>ESTIGATE</span></h1>
       <p class="landing-tagline">SELECT A CASE DOCKET // REASON FROM EVIDENCE, NOT SPECULATION</p>
       
@@ -181,21 +180,9 @@ export function renderLandingScreen(container) {
 
     const caseData = getCaseById(currentCaseId);
 
-    const playerName =
-      gameState.getState().lobby.playerName || 'Detective Cross';
-
     try {
-      const session = await createSession(
-        currentCaseId,
-        2,
-        playerName
-      );
-
-      gameState.state.sessionId = session.session_id;
-
       gameState.loadCase(caseData);
-
-      console.log('BACKEND SESSION CREATED:', session);
+      await gameState.ensureSession();
 
       cinematic.playCinematicCaseOpening(caseData, () => {
 

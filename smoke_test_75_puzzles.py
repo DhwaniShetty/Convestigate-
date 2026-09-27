@@ -2,15 +2,15 @@ import json
 import sys
 import os
 
-sys.path.append(r'c:\Users\Dhwani Shetty\OneDrive\Attachments\Convestigate\src')
+from pathlib import Path
 
 from fastapi.testclient import TestClient
-from api.main import app
+from src.api.main import app
 
 client = TestClient(app)
 
 def load_schemas():
-    path = r'c:\Users\Dhwani Shetty\OneDrive\Attachments\Convestigate\frontend\js\utils\puzzle_schemas.js'
+    path = Path(__file__).parent / 'frontend/js/utils/puzzle_schemas.js'
     with open(path, 'r', encoding='utf-8') as f:
         text = f.read().replace('export const CASE_SCHEMAS = ', '').strip().rstrip(';')
         return json.loads(text)
