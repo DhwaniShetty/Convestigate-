@@ -1,11 +1,13 @@
 import { gameState } from '../state/gameState.js';
-import { eventBus, EVENTS } from '../state/eventBus.js';
+import { escapeHTML } from '../utils/text.js';
 import { sound } from '../effects/soundSystem.js';
 
 export function renderAIPanel(container) {
   const state = gameState.getState();
   const ai = state.ai;
   const isVanished = ai.state === 'VANISHED';
+  const busy = ai.chatPending || ai.hintPending;
+  const disabled = busy || ai.gameOver;
 
   if (isVanished) {
     container.innerHTML = `
@@ -24,6 +26,7 @@ export function renderAIPanel(container) {
           "The perfect disappearance isn't one where nobody sees you leave. It's one where everyone agrees on why you left."
         </div>
 
+        ${ai.error ? `<p role="alert">${escapeHTML(ai.error)}</p>` : ''}
         <button class="btn btn-outline-red" id="btn-reconnect-ai" style="margin-top: 20px; font-size: 0.75rem;">
           ATTEMPT PROTOCOL RESTORE
         </button>
@@ -31,8 +34,7 @@ export function renderAIPanel(container) {
     `;
 
     container.querySelector('#btn-reconnect-ai')?.addEventListener('click', () => {
-      gameState.setAIState('CALM');
-      renderAIPanel(container);
+      void gameState.refreshAI();
     });
     return;
   }
@@ -40,7 +42,7 @@ export function renderAIPanel(container) {
   // Active AI Interface
   container.innerHTML = `
     <div class="ai-panel-wrapper ai-mood-${ai.state.toLowerCase()}">
-      <!-- AI Header & Mood Switcher for testing/interaction -->
+      <!-- Backend AI state -->
       <div class="ai-header">
         <div class="ai-state-indicator">
           <div class="status-dot active"></div>
@@ -48,14 +50,7 @@ export function renderAIPanel(container) {
             AI: ${ai.state}
           </span>
         </div>
-        <div style="display: flex; gap: 4px;">
-          <button class="btn btn-mood" data-mood="CALM" style="padding: 2px 6px; font-size: 0.6rem;">CALM</button>
-          <button class="btn btn-mood" data-mood="EXCITED" style="padding: 2px 6px; font-size: 0.6rem;">EXC</button>
-          <button class="btn btn-mood" data-mood="DEFENSIVE" style="padding: 2px 6px; font-size: 0.6rem;">DEF</button>
-          <button class="btn btn-mood" data-mood="THREATENED" style="padding: 2px 6px; font-size: 0.6rem;">THR</button>
-          <button class="btn btn-mood" data-mood="PANIC" style="padding: 2px 6px; font-size: 0.6rem;">PANIC</button>
-          <button class="btn btn-mood" data-mood="VANISHED" style="padding: 2px 6px; font-size: 0.6rem; color: var(--blood-red-bright);">DISC</button>
-        </div>
+
       </div>
 
       <!-- Avatar & Mood Graphic -->
@@ -75,19 +70,21 @@ export function renderAIPanel(container) {
       <div class="ai-messages-scroll" id="ai-msg-list">
         ${ai.messages.map(m => `
           <div class="ai-msg ${m.sender === 'user' ? 'ai-msg-user' : m.sender === 'hint' ? 'ai-msg-hint' : 'ai-msg-assistant'}">
-            ${m.text}
+            ${escapeHTML(m.text)}
           </div>
         `).join('')}
       </div>
 
+      ${ai.error ? `<p role="alert" style="color: var(--blood-red-bright);">${escapeHTML(ai.error)}</p>` : ''}
+      ${busy ? '<p role="status" aria-live="polite">Waiting for the AI investigator...</p>' : ''}
       <!-- Bottom Chat & Hint Controls -->
       <div class="ai-controls">
-        <button class="btn btn-outline-red" id="btn-ai-hint" style="font-size: 0.75rem; width: 100%;">
-          REQUEST PROCEDURAL HINT (${ai.hintsRemaining} REMAINING)
+        <button class="btn btn-outline-red" id="btn-ai-hint" ${disabled || ai.hintsRemaining <= 0 ? 'disabled' : ''} style="font-size: 0.75rem; width: 100%;">
+          ${ai.hintPending ? 'REQUESTING HINT...' : `REQUEST PROCEDURAL HINT (${ai.hintsRemaining} REMAINING)`}
         </button>
         <div class="ai-input-row">
-          <input type="text" class="form-input" id="input-ai-msg" placeholder="Query investigation advisor..." style="flex: 1; padding: 6px 10px; font-size: 0.8rem;" />
-          <button class="btn btn-primary" id="btn-send-ai-msg" style="padding: 6px 14px;">SEND</button>
+          <input type="text" class="form-input" id="input-ai-msg" value="${escapeHTML(ai.draft)}" ${disabled ? 'disabled' : ''} placeholder="Query investigation advisor..." style="flex: 1; padding: 6px 10px; font-size: 0.8rem;" />
+          <button class="btn btn-primary" id="btn-send-ai-msg" ${disabled ? 'disabled' : ''} style="padding: 6px 14px;">${ai.chatPending ? 'SENDING...' : 'SEND'}</button>
         </div>
       </div>
     </div>
@@ -97,51 +94,22 @@ export function renderAIPanel(container) {
   const msgList = container.querySelector('#ai-msg-list');
   if (msgList) msgList.scrollTop = msgList.scrollHeight;
 
-  // Mood switchers
-  container.querySelectorAll('.btn-mood').forEach(btn => {
-    btn.addEventListener('click', () => {
-      sound.playClick();
-      const mood = btn.getAttribute('data-mood');
-      gameState.setAIState(mood);
-      renderAIPanel(container);
-    });
-  });
-
-  // Hint button
   container.querySelector('#btn-ai-hint')?.addEventListener('click', () => {
     sound.playDiscovery();
-    gameState.requestAIHint('P01');
-    renderAIPanel(container);
+    const puzzleId = Object.keys(state.puzzleProgress).find(id => !state.puzzleProgress[id]) || null;
+    void gameState.requestAIHint(puzzleId);
   });
 
-  // Send message
+  const input = container.querySelector('#input-ai-msg');
+  input?.addEventListener('input', () => { ai.draft = input.value; });
   const handleSend = () => {
-    const input = container.querySelector('#input-ai-msg');
-    const text = input?.value.trim();
-    if (text) {
+    if (input?.value.trim()) {
       sound.playClick();
-      gameState.addAIMessage('user', text);
-      input.value = '';
-
-      // Mock advisor reply
-      setTimeout(() => {
-        sound.playTypewriter();
-        let reply = 'Examining the docket records. Notice any inconsistencies between stated time windows and physical logs.';
-        if (text.toLowerCase().includes('daniel') || text.toLowerCase().includes('cross')) {
-          reply = 'Daniel Cross has a verified administrative connection, but be careful not to conflate geographic proximity with direct homicide culpability.';
-        } else if (text.toLowerCase().includes('jogger')) {
-          reply = 'The jogger only caught a brief glimpse in poor lighting. Compare their 22:10 sighting with the cellular triangulation log.';
-        }
-        gameState.addAIMessage('assistant', reply);
-        renderAIPanel(container);
-      }, 500);
-
-      renderAIPanel(container);
+      void gameState.sendAIMessage(input.value);
     }
   };
-
   container.querySelector('#btn-send-ai-msg')?.addEventListener('click', handleSend);
-  container.querySelector('#input-ai-msg')?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') handleSend();
+  input?.addEventListener('keydown', event => {
+    if (event.key === 'Enter') handleSend();
   });
 }

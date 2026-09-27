@@ -1,5 +1,5 @@
 import { gameState } from './state/gameState.js';
-import { getCaseById } from './data/caseLoader.js';
+import { getCaseById, loadCases } from './data/caseLoader.js';
 import { renderNavigation } from './components/navigation.js';
 import { renderLandingScreen } from './components/landingScreen.js';
 import { renderLobbyScreen } from './components/lobbyScreen.js';
@@ -28,7 +28,16 @@ class App {
     this.init();
   }
 
-  init() {
+  async init() {
+    const landing = this.screenContainers.LANDING;
+    landing.innerHTML = '<p role="status">Loading case dockets…</p>';
+    try {
+      await loadCases();
+    } catch {
+      landing.innerHTML = '<p role="alert">Unable to load cases. Check the investigation server and retry.</p><button id="retry-cases" class="btn">RETRY</button>';
+      landing.querySelector('#retry-cases').addEventListener('click', () => this.init());
+      return;
+    }
     // Initialize cinematic atmosphere and effects
     cinematic.init();
 

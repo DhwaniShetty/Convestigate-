@@ -6,8 +6,15 @@ import { setDashboardTab } from './dashboard.js';
 let currentFilter = 'ALL';
 let activeEvidenceModal = null;
 let evidenceSearchQuery = '';
+let evidenceVersion = -1;
 
 export function renderEvidenceRoom(container) {
+  if (evidenceVersion !== gameState.caseVersion) {
+    evidenceVersion = gameState.caseVersion;
+    activeEvidenceModal = null;
+    evidenceSearchQuery = '';
+    currentFilter = 'ALL';
+  }
   const state = gameState.getState();
   const currentCase = state.currentCase;
   const caseIdNum = String(currentCase?.case_id || '014').padStart(3, '0');
@@ -16,93 +23,7 @@ export function renderEvidenceRoom(container) {
   // Base evidence from state
   const baseEvidenceList = Object.values(state.evidenceMap);
 
-  // Case-specific photographic evidence strictly tied to currentCase assets
-  const casePhotoEvidence = [
-    {
-      id: `PH01`,
-      name: `${caseTitle} // Crime Scene Overview`,
-      category: 'photos',
-      type: 'Forensic Photograph',
-      image: `assets/cases/case_${caseIdNum}.jpg`,
-      description: `Primary archival forensic scene overview photograph documenting the incident environment for Case #${caseIdNum}.`,
-      reliability: 'HIGH (CRIME SCENE UNIT)',
-      status: 'unlocked',
-      source: 'Forensic Identification Unit',
-      clue: 'Establishes verified physical layout, lighting conditions, and spatial access points.'
-    },
-    {
-      id: `PH02`,
-      name: `Incident Discovery // Photo 01`,
-      category: 'photos',
-      type: 'Crime Scene Photo',
-      image: `assets/manga/cases/case_${caseIdNum}/panel_1.jpg`,
-      description: `Forensic capture of initial discovery context and victim proximity in Case #${caseIdNum}.`,
-      reliability: 'HIGH',
-      status: 'unlocked',
-      source: 'First Responding Officers',
-      clue: 'Corroborates the earliest timeline window and physical orientation.'
-    },
-    {
-      id: `PH03`,
-      name: `Person of Interest Surveillance // Photo 02`,
-      category: 'photos',
-      type: 'Surveillance Still',
-      image: `assets/manga/cases/case_${caseIdNum}/panel_2.jpg`,
-      description: `Surveillance still capturing key subject movements and transit near the perimeter in Case #${caseIdNum}.`,
-      reliability: 'HIGH',
-      status: 'unlocked',
-      source: 'Municipal Transit Feed',
-      clue: 'Provides timestamped visual verification of subject arrival and presence.'
-    },
-    {
-      id: `PH04`,
-      name: `Physical Trace & Mechanical Audit // Photo 03`,
-      category: 'photos',
-      type: 'Forensic Macro Photo',
-      image: `assets/manga/cases/case_${caseIdNum}/panel_3.jpg`,
-      description: `High-contrast macro photograph of physical trace evidence recovered on site for Case #${caseIdNum}.`,
-      reliability: 'HIGH (LAB AUDIT)',
-      status: 'unlocked',
-      source: 'Central Forensics Laboratory',
-      clue: 'Direct physical proof contradicting narrative assumptions.'
-    },
-    {
-      id: `PH05`,
-      name: `Perimeter & Approach Checkpoint // Photo 04`,
-      category: 'photos',
-      type: 'Field Inspection Photo',
-      image: `assets/manga/cases/case_${caseIdNum}/panel_4.jpg`,
-      description: `Site investigation photograph of the surrounding perimeter and lighting conditions for Case #${caseIdNum}.`,
-      reliability: 'HIGH',
-      status: 'unlocked',
-      source: 'Investigation Field Unit',
-      clue: 'Excludes speculative alternate paths claimed in unverified testimonies.'
-    },
-    {
-      id: `PH06`,
-      name: `Contradiction Anomaly // Photo 05`,
-      category: 'photos',
-      type: 'Forensic Macro Still',
-      image: `assets/manga/cases/case_${caseIdNum}/panel_5.jpg`,
-      description: `Critical physical contradiction photograph exposing discrepancies in stated accounts for Case #${caseIdNum}.`,
-      reliability: 'HIGH',
-      status: 'unlocked',
-      source: 'Evidence Archive',
-      clue: 'Materially breaks the false pattern construct.'
-    },
-    {
-      id: `PH07`,
-      name: `Ballistics & Synthesis Telemetry // Photo 06`,
-      category: 'photos',
-      type: 'Laboratory Analysis Photo',
-      image: `assets/manga/cases/case_${caseIdNum}/panel_6.jpg`,
-      description: `Final forensic laboratory photographic analysis corroborating custodial provenance in Case #${caseIdNum}.`,
-      reliability: 'HIGH (AUDITED)',
-      status: 'unlocked',
-      source: 'Ballistics & Forensics Division',
-      clue: 'Demonstrates conclusive physical validation.'
-    }
-  ];
+  const casePhotoEvidence = [];
 
   // Merge items: in PHOTOS tab show casePhotoEvidence. In ALL tab show both.
   let allCombinedEvidence = [...baseEvidenceList];
@@ -528,7 +449,7 @@ function renderPhysicalEvidenceDetail(item) {
 
   // Evidence card click
   container.querySelectorAll('.evidence-card').forEach(card => {
-    card.addEventListener('click', () => {
+    card.addEventListener('click', async () => {
       if (card.classList.contains('locked')) {
         sound.playClick();
         return;
@@ -545,7 +466,24 @@ function renderPhysicalEvidenceDetail(item) {
       // Surrounding UI subtly dims
       roomContainer?.classList.add('evidence-inspecting-active');
 
-      gameState.openEvidence(evId);
+      const context = gameState.requestContext();
+      card.setAttribute('aria-busy', 'true');
+      const notice = document.createElement('p');
+      notice.setAttribute('role', 'status');
+      notice.textContent = 'Recording evidence inspection…';
+      card.appendChild(notice);
+      const inspected = await gameState.openEvidence(evId);
+      if (!gameState.isCurrentRequest(context)) return;
+      card.removeAttribute('aria-busy');
+      notice.remove();
+      if (!inspected) {
+        roomContainer?.classList.remove('evidence-inspecting-active');
+        const error = document.createElement('p');
+        error.setAttribute('role', 'alert');
+        error.textContent = gameState.getState().evidenceErrors?.[evId] || 'Unable to inspect evidence. Please retry.';
+        card.appendChild(error);
+        return;
+      }
       activeEvidenceModal = item;
 
       // Populate modal

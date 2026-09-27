@@ -1,6 +1,10 @@
 from urllib import request
 
 from uuid import uuid4
+from pathlib import Path
+from typing import Optional
+from src.player.player_model import PlayerModel
+from src.ai.adaptive_ai import AdaptiveAI
 from fastapi.middleware.cors import CORSMiddleware
 
 from fastapi import FastAPI, HTTPException
@@ -145,10 +149,11 @@ def is_puzzle_unlocked(game_state, puzzle_name):
 class CreateSessionRequest(BaseModel):
     case_id: str
     player_count: int = 1
-    username: str
+    username: Optional[str] = None
 
 class TimelineAnswer(BaseModel):
     order: list[str]
+    solve_time: Optional[float] = None
 
 class EmploymentAnswer(BaseModel):
     employment_verified: bool
@@ -178,12 +183,14 @@ class FieldEvidenceAnalysisAnswer(BaseModel):
     limitation: str
 
 class ContradictoryAnswer(BaseModel):
+    solve_time: Optional[float] = None
     case_id: str
     unreliable_witness: str | None = None
     significance: str | None = None
     limitation: str | None = None
 
 class MissingRecordAnswer(BaseModel):
+    solve_time: Optional[float] = None
     case_id: str
     missing_record: str | None = None
     location: str | None = None
@@ -202,6 +209,26 @@ def home():
 # CASE API
 # -------------------------
 
+@app.get("/cases")
+def list_cases():
+    return [get_case(path.stem.removeprefix("case_")) for path in sorted(Path("data").glob("case_[0-9][0-9][0-9].json"))]
+
+
+def solved_puzzle_ids(session):
+    case = load_case(session["case_id"])
+    # Older routes store completion slugs rather than the JSON puzzle type.
+    legacy_keys = {
+        "004": ["digital_alibi_map", "time_of_death_reconciliation",
+                "metadata_authentication", "financial_motive_audit", "final_reconstruction"],
+        "008": PUZZLE_ORDER,
+        "010": ["comparative_analysis", "comparative_similarity", "source_analysis",
+                "hypothesis_management", "conclusion_writing"],
+        "014": PUZZLE_ORDER,
+    }
+    keys = legacy_keys.get(case.case_id, [p["type"] for p in case.puzzles])
+    return [p["id"] for p, key in zip(case.puzzles, keys) if key in session["game_state"].solved_puzzles]
+
+
 @app.get("/cases/{case_id}")
 def get_case(case_id: str):
 
@@ -217,11 +244,16 @@ def get_case(case_id: str):
     return {
         "case_id": case.case_id,
         "title": case.title,
+        **case.metadata,
         "victim": case.victim,
         "suspects": case.suspects,
         "timeline": case.timeline,
         "evidence": case.evidence,
-        "puzzles": case.puzzles
+        "puzzles": case.puzzles,
+        "hypotheses": [
+            {"id": h["id"], "statement": h.get("statement", "")}
+            for h in case.hypotheses
+        ]
     }
 
 
@@ -242,6 +274,8 @@ def create_session(request: CreateSessionRequest):
             detail="Case not found"
         )
 
+    request.case_id = case.case_id
+
     if request.player_count < 1 or request.player_count > 6:
         raise HTTPException(
             status_code=400,
@@ -255,8 +289,11 @@ def create_session(request: CreateSessionRequest):
     if case.puzzles:
         game_state.current_puzzle = case.puzzles[0].get("type")
 
+    player = PlayerModel()
+    adaptive_ai = AdaptiveAI()
+
     db_session_id = create_game_session(request.case_id)
-    player_id = create_player(request.username)
+    player_id = create_player(request.username or f"guest_{session_id}")
     add_player_to_session(db_session_id, player_id)
 
     sessions[session_id] = {
@@ -265,7 +302,9 @@ def create_session(request: CreateSessionRequest):
     "player_id": player_id,
     "case_id": request.case_id,
     "player_count": request.player_count,
-    "game_state": game_state
+    "game_state": game_state,
+    "player": player,
+    "adaptive_ai": adaptive_ai
     }
 
     return {
@@ -274,6 +313,7 @@ def create_session(request: CreateSessionRequest):
         "player_count": request.player_count,
         "current_puzzle": game_state.current_puzzle,
         "solved_puzzles": game_state.solved_puzzles,
+        "solved_puzzle_ids": solved_puzzle_ids(sessions[session_id]),
         "unlocked_evidence": game_state.unlocked_evidence,
         "inspected_evidence": game_state.inspected_evidence,
         "hints_used": game_state.hints_used,
@@ -281,6 +321,10 @@ def create_session(request: CreateSessionRequest):
         "ai_trust": game_state.ai_trust,
         "ai_thrill": game_state.ai_thrill,
         "ai_threat": game_state.ai_threat,
+        "ai_state": adaptive_ai.get_state(game_state),
+        "ai_action": adaptive_ai.choose_action(game_state),
+        "ai_vanished": game_state.ai_vanished,
+        "countdown_active": game_state.countdown_active,
         "game_over": game_state.game_over
     }
 
@@ -288,29 +332,57 @@ def create_session(request: CreateSessionRequest):
 @app.get("/sessions/{session_id}")
 def get_session(session_id: str):
 
-    if session_id not in sessions:
-        raise HTTPException(
-            status_code=404,
-            detail="Session not found"
-        )
+    session = get_session_or_404(
+        session_id
+    )
 
-    session = sessions[session_id]
     game_state = session["game_state"]
 
+    player = session["player"]
+
+    adaptive_ai = session["adaptive_ai"]
+
     return {
+
         "session_id": session["session_id"],
+
         "case_id": session["case_id"],
+
         "player_count": session["player_count"],
+
         "current_puzzle": game_state.current_puzzle,
+
         "solved_puzzles": game_state.solved_puzzles,
+        "solved_puzzle_ids": solved_puzzle_ids(session),
+
         "unlocked_evidence": game_state.unlocked_evidence,
+
         "inspected_evidence": game_state.inspected_evidence,
+
         "hints_used": game_state.hints_used,
+
         "mistakes": game_state.mistakes,
+
+        "player_skill_level": player.get_skill_level(),
+
+        "player_behavior_profile": player.get_behavior_profile(),
+
         "ai_trust": game_state.ai_trust,
+
         "ai_thrill": game_state.ai_thrill,
+
         "ai_threat": game_state.ai_threat,
+
+        "ai_state": adaptive_ai.get_state(game_state),
+
+        "ai_action": adaptive_ai.choose_action(game_state),
+
+        "ai_vanished": game_state.ai_vanished,
+
+        "countdown_active": game_state.countdown_active,
+
         "game_over": game_state.game_over,
+
         "player_observations": game_state.player_observations
     }
 @app.post("/sessions/{session_id}/puzzles/timeline")
@@ -359,13 +431,15 @@ def solve_timeline(session_id: str, answer: TimelineAnswer):
     "P01"
     ) + 1
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
     session["db_session_id"],
     session["player_id"],
     "P01",
     attempt_number,
     "success" if correct else "failure",
-    None
+    get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -453,13 +527,15 @@ def solve_asset_tracing(session_id: str, answer: dict):
         "P02"
     ) + 1
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P02",
         attempt_number,
         "success" if correct else "failure",
-        None
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -548,13 +624,15 @@ def solve_case013_relationship_mapping(session_id: str, answer: dict):
         "P03"
     ) + 1
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P03",
         attempt_number,
         "success" if correct else "failure",
-        None
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -642,13 +720,15 @@ def solve_case013_narrative_synthesis(session_id: str, answer: dict):
         "P04"
     ) + 1
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P04",
         attempt_number,
         "success" if correct else "failure",
-        None
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -736,13 +816,15 @@ def solve_case013_hypothesis(session_id: str, answer: dict):
         "P05"
     ) + 1
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P05",
         attempt_number,
         "success" if correct else "failure",
-        None
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -823,13 +905,15 @@ def solve_document_analysis(
             "P01"
         ) + 1
 
+        record_player_attempt(session, puzzle_data, correct, answer)
+
         log_puzzle_attempt(
             session["db_session_id"],
             session["player_id"],
             "P01",
             attempt_number,
             "success" if correct else "failure",
-            None
+            get_solve_time(answer)
         )
         calculate_player_behaviour(
             session["db_session_id"],
@@ -868,7 +952,7 @@ def solve_document_analysis(
                 "message": "Incorrect analysis. Try again.",
                 "mistakes": game_state.mistakes
             }
-    
+
 @app.post("/sessions/{session_id}/puzzles/employment")
 def solve_employment(
     session_id: str,
@@ -933,13 +1017,15 @@ def solve_employment(
         "P02"
     ) + 1
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P02",
         attempt_number,
         "success" if correct else "failure",
-        None
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -949,7 +1035,7 @@ def solve_employment(
 
     if correct:
 
-        if "P02" not in game_state.solved_puzzles:
+        if "employment" not in game_state.solved_puzzles:
             game_state.solved_puzzles.append("employment")
 
         # Unlock evidence
@@ -978,7 +1064,7 @@ def solve_employment(
             "message": "Incorrect answer. Try again.",
             "mistakes": game_state.mistakes
         }
-    
+
 @app.post("/sessions/{session_id}/puzzles/connection")
 def solve_connection(
     session_id: str,
@@ -1054,13 +1140,15 @@ def solve_connection(
         "P03"
     ) + 1
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P03",
         attempt_number,
         "success" if correct else "failure",
-        None
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -1170,13 +1258,15 @@ def solve_contradictory(session_id: str, answer: ContradictoryAnswer):
     "P04"
     ) + 1
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
     session["db_session_id"],
     session["player_id"],
     "P04",
     attempt_number,
     "success" if correct else "failure",
-    None
+    get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -1195,7 +1285,7 @@ def solve_contradictory(session_id: str, answer: ContradictoryAnswer):
                 game_state.unlocked_evidence.append(evidence_id)
 
         # Move to next puzzle
-        game_state.current_puzzle = "missing_record"    
+        game_state.current_puzzle = "missing_record"
 
         return {
             "correct": True,
@@ -1214,50 +1304,48 @@ def solve_contradictory(session_id: str, answer: ContradictoryAnswer):
             "message": "Incorrect analysis. Try again.",
             "mistakes": game_state.mistakes
         }
-@app.post("/sessions/{session_id}/evidence/{evidence_id}")
-def inspect_evidence(session_id: str, evidence_id: str):
+@app.post(
+    "/sessions/{session_id}/evidence/{evidence_id}"
+)
+def inspect_evidence(
+    session_id: str,
+    evidence_id: str
+):
 
-    if session_id not in sessions:
-        raise HTTPException(
-            status_code=404,
-            detail="Session not found"
-        )
+    session = get_session_or_404(
+        session_id
+    )
 
-    session = sessions[session_id]
     game_state = session["game_state"]
 
-    # Check whether evidence has been unlocked
+    player = session["player"]
+
     if evidence_id not in game_state.unlocked_evidence:
+
         raise HTTPException(
             status_code=403,
             detail="Evidence not unlocked"
         )
 
-    # Avoid adding the same evidence twice
     if evidence_id not in game_state.inspected_evidence:
-     game_state.inspected_evidence.append(evidence_id)
 
-    log_player_action(
-        session_id=session["db_session_id"],
-        player_id=session["player_id"],
-        action_type="inspect_evidence",
-        target_id=evidence_id,
-        stage=game_state.current_puzzle,
-        result="success"
-    )
+        game_state.inspected_evidence.append(
+            evidence_id
+        )
 
-    log_player_action(
-        session_id=session["db_session_id"],
-        player_id=session["player_id"],
-        action_type="inspect_evidence",
-        target_id=evidence_id,
-        stage=game_state.current_puzzle,
-        result="success"
-    )
+        player.record_evidence_inspection()
+        log_player_action(
+            session["db_session_id"], session["player_id"],
+            "inspect_evidence", target_id=evidence_id,
+            stage=game_state.current_puzzle, result="success"
+        )
 
     return {
+
         "evidence_id": evidence_id,
+
         "message": "Evidence inspected successfully.",
+
         "inspected_evidence": game_state.inspected_evidence
     }
 @app.post("/sessions/{session_id}/puzzles/missing-record")
@@ -1338,13 +1426,15 @@ def solve_missing_record(
         "P05"
     ) + 1
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P05",
         attempt_number,
         "success" if correct else "failure",
-        None
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -1450,13 +1540,15 @@ def solve_relationship_mapping(
         "P02"
     ) + 1
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P02",
         attempt_number,
         "success" if correct else "failure",
-        None
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -1541,13 +1633,15 @@ def solve_timeline_reconstruction(
         "P03"
     ) + 1
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P03",
         attempt_number,
         "success" if correct else "failure",
-        None
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -1631,13 +1725,15 @@ def solve_physical_evidence_analysis(
         "P04"
     ) + 1
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P04",
         attempt_number,
         "success" if correct else "failure",
-        None
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -1724,13 +1820,15 @@ def solve_case015_hypothesis(
         "P05"
     ) + 1
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P05",
         attempt_number,
         "success" if correct else "failure",
-        None
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -1748,6 +1846,7 @@ def solve_case015_hypothesis(
             if evidence_id not in game_state.unlocked_evidence:
                 game_state.unlocked_evidence.append(evidence_id)
 
+        game_state.current_puzzle = None
         game_state.game_over = True
 
         return {
@@ -1818,13 +1917,15 @@ def solve_object_analysis(session_id: str, answer: dict):
         "P01"
     ) + 1
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P01",
         attempt_number,
         "success" if correct else "failure",
-        None
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -1913,13 +2014,15 @@ def solve_pattern_mapping(session_id: str, answer: dict):
         "P02"
     ) + 1
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P02",
         attempt_number,
         "success" if correct else "failure",
-        None
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -2009,13 +2112,15 @@ def solve_case009_timeline_reconstruction(session_id: str, answer: dict):
         "P03"
     ) + 1
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P03",
         attempt_number,
         "success" if correct else "failure",
-        None
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -2105,13 +2210,15 @@ def solve_case009_hypothesis_test(session_id: str, answer: dict):
         "P04"
     ) + 1
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P04",
         attempt_number,
         "success" if correct else "failure",
-        None
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -2197,13 +2304,15 @@ def solve_case009_hypothesis_management(session_id: str, answer: dict):
         "P05"
     ) + 1
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P05",
         attempt_number,
         "success" if correct else "failure",
-        None
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -2292,13 +2401,15 @@ def solve_case001_timeline_maintenance(session_id: str, answer: dict):
         "P01"
     ) + 1
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P01",
         attempt_number,
         "success" if correct else "failure",
-        None
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -2382,13 +2493,15 @@ def solve_case001_motive_analysis(session_id: str, answer: dict):
         "P02"
     ) + 1
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P02",
         attempt_number,
         "success" if correct else "failure",
-        None
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -2465,13 +2578,15 @@ def solve_case001_damage_analysis(session_id: str, answer: dict):
         "P03"
     ) + 1
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P03",
         attempt_number,
         "success" if correct else "failure",
-        None
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -2548,13 +2663,15 @@ def solve_case001_communication_analysis(session_id: str, answer: dict):
         "P04"
     ) + 1
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P04",
         attempt_number,
         "success" if correct else "failure",
-        None
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -2633,13 +2750,15 @@ def solve_case001_hypothesis_management(session_id: str, answer: dict):
         "P05"
     ) + 1
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P05",
         attempt_number,
         "success" if correct else "failure",
-        None
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -2720,13 +2839,15 @@ def solve_case002_contradiction_analysis(session_id: str, answer: dict):
         "P01"
     ) + 1
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P01",
         attempt_number,
         "success" if correct else "failure",
-        None
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -2805,13 +2926,15 @@ def solve_case002_forensic_analysis(session_id: str, answer: dict):
         "P02"
     ) + 1
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P02",
         attempt_number,
         "success" if correct else "failure",
-        None
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -2890,13 +3013,15 @@ def solve_case002_provenance_review(session_id: str, answer: dict):
         "P03"
     ) + 1
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P03",
         attempt_number,
         "success" if correct else "failure",
-        None
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -2975,13 +3100,15 @@ def solve_case002_timeline_access(session_id: str, answer: dict):
         "P04"
     ) + 1
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P04",
         attempt_number,
         "success" if correct else "failure",
-        None
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -3061,13 +3188,15 @@ def solve_case002_hypothesis_management(session_id: str, answer: dict):
         "P05"
     ) + 1
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P05",
         attempt_number,
         "success" if correct else "failure",
-        None
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -3149,13 +3278,15 @@ def solve_case003_timeline_reconstruction(session_id: str, answer: dict):
         "P01"
     ) + 1
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P01",
         attempt_number,
         "success" if correct else "failure",
-        None
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -3215,13 +3346,15 @@ def solve_case003_evidence_classification(session_id: str, answer: dict):
 
     game_state = session["game_state"]
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P02",
-        1,
-        "correct" if correct else "incorrect",
-        0
+        get_puzzle_attempt_count(session["db_session_id"], session["player_id"], puzzle_data["id"]) + 1,
+        "success" if correct else "failure",
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -3280,13 +3413,15 @@ def solve_case003_field_investigation(session_id: str, answer: dict):
 
     game_state = session["game_state"]
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P03",
-        1,
-        "correct" if correct else "incorrect",
-        0
+        get_puzzle_attempt_count(session["db_session_id"], session["player_id"], puzzle_data["id"]) + 1,
+        "success" if correct else "failure",
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -3345,13 +3480,15 @@ def solve_case003_institutional_review(session_id: str, answer: dict):
 
     game_state = session["game_state"]
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P04",
-        1,
-        "correct" if correct else "incorrect",
-        0
+        get_puzzle_attempt_count(session["db_session_id"], session["player_id"], puzzle_data["id"]) + 1,
+        "success" if correct else "failure",
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -3410,13 +3547,15 @@ def solve_case003_hypothesis_management(session_id: str, answer: dict):
 
     game_state = session["game_state"]
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P05",
-        1,
-        "correct" if correct else "incorrect",
-        0
+        get_puzzle_attempt_count(session["db_session_id"], session["player_id"], puzzle_data["id"]) + 1,
+        "success" if correct else "failure",
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -3486,13 +3625,15 @@ def solve_case004_digital_alibi_map(session_id: str, answer: dict):
 
     correct = puzzle.check_answer(answer)
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P01",
-        1,
-        "correct" if correct else "incorrect",
-        0
+        get_puzzle_attempt_count(session["db_session_id"], session["player_id"], puzzle_data["id"]) + 1,
+        "success" if correct else "failure",
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -3560,13 +3701,15 @@ def solve_case004_time_of_death_reconciliation(session_id: str, answer: dict):
 
     correct = puzzle.check_answer(answer)
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P02",
-        1,
-        "correct" if correct else "incorrect",
-        0
+        get_puzzle_attempt_count(session["db_session_id"], session["player_id"], puzzle_data["id"]) + 1,
+        "success" if correct else "failure",
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -3636,13 +3779,15 @@ def solve_case004_metadata_authentication(session_id: str, answer: dict):
 
     correct = puzzle.check_answer(answer)
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P03",
-        1,
-        "correct" if correct else "incorrect",
-        0
+        get_puzzle_attempt_count(session["db_session_id"], session["player_id"], puzzle_data["id"]) + 1,
+        "success" if correct else "failure",
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -3712,13 +3857,15 @@ def solve_case004_financial_motive_audit(session_id: str, answer: dict):
 
     correct = puzzle.check_answer(answer)
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P04",
-        1,
-        "correct" if correct else "incorrect",
-        0
+        get_puzzle_attempt_count(session["db_session_id"], session["player_id"], puzzle_data["id"]) + 1,
+        "success" if correct else "failure",
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -3788,13 +3935,15 @@ def solve_case004_final_reconstruction(session_id: str, answer: dict):
 
     correct = puzzle.check_answer(answer)
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P05",
-        1,
-        "correct" if correct else "incorrect",
-        0
+        get_puzzle_attempt_count(session["db_session_id"], session["player_id"], puzzle_data["id"]) + 1,
+        "success" if correct else "failure",
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -3859,13 +4008,15 @@ def solve_case005_comparative_analysis(session_id: str, answer: dict):
 
     game_state = session["game_state"]
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P01",
-        1,
-        "correct" if correct else "incorrect",
-        0
+        get_puzzle_attempt_count(session["db_session_id"], session["player_id"], puzzle_data["id"]) + 1,
+        "success" if correct else "failure",
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -3924,13 +4075,15 @@ def solve_case005_provenance_tracing(session_id: str, answer: dict):
 
     game_state = session["game_state"]
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P02",
-        1,
-        "correct" if correct else "incorrect",
-        0
+        get_puzzle_attempt_count(session["db_session_id"], session["player_id"], puzzle_data["id"]) + 1,
+        "success" if correct else "failure",
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -3989,13 +4142,15 @@ def solve_case005_chain_analysis(session_id: str, answer: dict):
 
     game_state = session["game_state"]
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P03",
-        1,
-        "correct" if correct else "incorrect",
-        0
+        get_puzzle_attempt_count(session["db_session_id"], session["player_id"], puzzle_data["id"]) + 1,
+        "success" if correct else "failure",
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -4054,13 +4209,15 @@ def solve_case005_evidentiary_standard(session_id: str, answer: dict):
 
     game_state = session["game_state"]
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P04",
-        1,
-        "correct" if correct else "incorrect",
-        0
+        get_puzzle_attempt_count(session["db_session_id"], session["player_id"], puzzle_data["id"]) + 1,
+        "success" if correct else "failure",
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -4119,13 +4276,15 @@ def solve_case005_hypothesis_management(session_id: str, answer: dict):
 
     game_state = session["game_state"]
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P05",
-        1,
-        "correct" if correct else "incorrect",
-        0
+        get_puzzle_attempt_count(session["db_session_id"], session["player_id"], puzzle_data["id"]) + 1,
+        "success" if correct else "failure",
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -4192,13 +4351,15 @@ def solve_case006_evidence_generation(session_id: str, answer: dict):
 
     correct = puzzle.check_answer(answer)
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P01",
-        1,
-        "correct" if correct else "incorrect",
-        0
+        get_puzzle_attempt_count(session["db_session_id"], session["player_id"], puzzle_data["id"]) + 1,
+        "success" if correct else "failure",
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -4261,13 +4422,15 @@ def solve_case006_evidence_classification(session_id: str, answer: dict):
 
     correct = puzzle.check_answer(answer)
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P02",
-        1,
-        "correct" if correct else "incorrect",
-        0
+        get_puzzle_attempt_count(session["db_session_id"], session["player_id"], puzzle_data["id"]) + 1,
+        "success" if correct else "failure",
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -4330,13 +4493,15 @@ def solve_case006_timeline_reconstruction(session_id: str, answer: dict):
 
     correct = puzzle.check_answer(answer)
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P03",
-        1,
-        "correct" if correct else "incorrect",
-        0
+        get_puzzle_attempt_count(session["db_session_id"], session["player_id"], puzzle_data["id"]) + 1,
+        "success" if correct else "failure",
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -4399,13 +4564,15 @@ def solve_case006_hypothesis_test(session_id: str, answer: dict):
 
     correct = puzzle.check_answer(answer)
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P04",
-        1,
-        "correct" if correct else "incorrect",
-        0
+        get_puzzle_attempt_count(session["db_session_id"], session["player_id"], puzzle_data["id"]) + 1,
+        "success" if correct else "failure",
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -4468,13 +4635,15 @@ def solve_case006_hypothesis_management(session_id: str, answer: dict):
 
     correct = puzzle.check_answer(answer)
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P05",
-        1,
-        "correct" if correct else "incorrect",
-        0
+        get_puzzle_attempt_count(session["db_session_id"], session["player_id"], puzzle_data["id"]) + 1,
+        "success" if correct else "failure",
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -4538,13 +4707,15 @@ def solve_case007_timeline_reconstruction(session_id: str, answer: dict):
 
     correct = puzzle.check_answer(answer)
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P01",
-        1,
-        "correct" if correct else "incorrect",
-        0
+        get_puzzle_attempt_count(session["db_session_id"], session["player_id"], puzzle_data["id"]) + 1,
+        "success" if correct else "failure",
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -4607,13 +4778,15 @@ def solve_case007_forensic_analysis(session_id: str, answer: dict):
 
     correct = puzzle.check_answer(answer)
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P02",
-        1,
-        "correct" if correct else "incorrect",
-        0
+        get_puzzle_attempt_count(session["db_session_id"], session["player_id"], puzzle_data["id"]) + 1,
+        "success" if correct else "failure",
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -4676,13 +4849,15 @@ def solve_case007_trace_evidence_analysis(session_id: str, answer: dict):
 
     correct = puzzle.check_answer(answer)
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P03",
-        1,
-        "correct" if correct else "incorrect",
-        0
+        get_puzzle_attempt_count(session["db_session_id"], session["player_id"], puzzle_data["id"]) + 1,
+        "success" if correct else "failure",
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -4745,13 +4920,15 @@ def solve_case007_forensic_reconstruction(session_id: str, answer: dict):
 
     correct = puzzle.check_answer(answer)
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P04",
-        1,
-        "correct" if correct else "incorrect",
-        0
+        get_puzzle_attempt_count(session["db_session_id"], session["player_id"], puzzle_data["id"]) + 1,
+        "success" if correct else "failure",
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -4814,13 +4991,15 @@ def solve_case007_hypothesis_management(session_id: str, answer: dict):
 
     correct = puzzle.check_answer(answer)
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P05",
-        1,
-        "correct" if correct else "incorrect",
-        0
+        get_puzzle_attempt_count(session["db_session_id"], session["player_id"], puzzle_data["id"]) + 1,
+        "success" if correct else "failure",
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -4884,13 +5063,15 @@ def solve_case010_comparative_analysis(session_id: str, answer: dict):
 
     correct = puzzle.check_answer(answer)
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P01",
-        1,
-        "correct" if correct else "incorrect",
-        0
+        get_puzzle_attempt_count(session["db_session_id"], session["player_id"], puzzle_data["id"]) + 1,
+        "success" if correct else "failure",
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -4953,13 +5134,15 @@ def solve_case010_comparative_similarity(session_id: str, answer: dict):
 
     correct = puzzle.check_answer(answer)
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P02",
-        1,
-        "correct" if correct else "incorrect",
-        0
+        get_puzzle_attempt_count(session["db_session_id"], session["player_id"], puzzle_data["id"]) + 1,
+        "success" if correct else "failure",
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -5022,13 +5205,15 @@ def solve_case010_source_analysis(session_id: str, answer: dict):
 
     correct = puzzle.check_answer(answer)
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P03",
-        1,
-        "correct" if correct else "incorrect",
-        0
+        get_puzzle_attempt_count(session["db_session_id"], session["player_id"], puzzle_data["id"]) + 1,
+        "success" if correct else "failure",
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -5091,13 +5276,15 @@ def solve_case010_hypothesis_management(session_id: str, answer: dict):
 
     correct = puzzle.check_answer(answer)
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P04",
-        1,
-        "correct" if correct else "incorrect",
-        0
+        get_puzzle_attempt_count(session["db_session_id"], session["player_id"], puzzle_data["id"]) + 1,
+        "success" if correct else "failure",
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -5160,13 +5347,15 @@ def solve_case010_conclusion_writing(session_id: str, answer: dict):
 
     correct = puzzle.check_answer(answer)
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P05",
-        1,
-        "correct" if correct else "incorrect",
-        0
+        get_puzzle_attempt_count(session["db_session_id"], session["player_id"], puzzle_data["id"]) + 1,
+        "success" if correct else "failure",
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -5230,13 +5419,15 @@ def solve_case011_spatial_analysis(session_id: str, answer: dict):
 
     correct = puzzle.check_answer(answer)
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P01",
-        1,
-        "correct" if correct else "incorrect",
-        0
+        get_puzzle_attempt_count(session["db_session_id"], session["player_id"], puzzle_data["id"]) + 1,
+        "success" if correct else "failure",
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -5299,13 +5490,15 @@ def solve_case011_document_reconstruction(session_id: str, answer: dict):
 
     correct = puzzle.check_answer(answer)
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P02",
-        1,
-        "correct" if correct else "incorrect",
-        0
+        get_puzzle_attempt_count(session["db_session_id"], session["player_id"], puzzle_data["id"]) + 1,
+        "success" if correct else "failure",
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -5368,13 +5561,15 @@ def solve_case011_source_analysis(session_id: str, answer: dict):
 
     correct = puzzle.check_answer(answer)
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P03",
-        1,
-        "correct" if correct else "incorrect",
-        0
+        get_puzzle_attempt_count(session["db_session_id"], session["player_id"], puzzle_data["id"]) + 1,
+        "success" if correct else "failure",
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -5437,13 +5632,15 @@ def solve_case011_comparative_analysis(session_id: str, answer: dict):
 
     correct = puzzle.check_answer(answer)
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P04",
-        1,
-        "correct" if correct else "incorrect",
-        0
+        get_puzzle_attempt_count(session["db_session_id"], session["player_id"], puzzle_data["id"]) + 1,
+        "success" if correct else "failure",
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -5506,13 +5703,15 @@ def solve_case011_social_dynamics_model(session_id: str, answer: dict):
 
     correct = puzzle.check_answer(answer)
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P05",
-        1,
-        "correct" if correct else "incorrect",
-        0
+        get_puzzle_attempt_count(session["db_session_id"], session["player_id"], puzzle_data["id"]) + 1,
+        "success" if correct else "failure",
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -5576,13 +5775,15 @@ def solve_case012_fact_listing(session_id: str, answer: dict):
 
     correct = puzzle.check_answer(answer)
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P01",
-        1,
-        "correct" if correct else "incorrect",
-        0
+        get_puzzle_attempt_count(session["db_session_id"], session["player_id"], puzzle_data["id"]) + 1,
+        "success" if correct else "failure",
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -5645,13 +5846,15 @@ def solve_case012_identity_verification(session_id: str, answer: dict):
 
     correct = puzzle.check_answer(answer)
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P02",
-        1,
-        "correct" if correct else "incorrect",
-        0
+        get_puzzle_attempt_count(session["db_session_id"], session["player_id"], puzzle_data["id"]) + 1,
+        "success" if correct else "failure",
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -5714,13 +5917,15 @@ def solve_case012_field_investigation(session_id: str, answer: dict):
 
     correct = puzzle.check_answer(answer)
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P03",
-        1,
-        "correct" if correct else "incorrect",
-        0
+        get_puzzle_attempt_count(session["db_session_id"], session["player_id"], puzzle_data["id"]) + 1,
+        "success" if correct else "failure",
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -5755,74 +5960,6 @@ def solve_case012_field_investigation(session_id: str, answer: dict):
         "game_over": game_state.game_over
     }
 
-@app.post("/sessions/{session_id}/puzzles/case012-field-investigation")
-def solve_case012_field_investigation(session_id: str, answer: dict):
-
-    if session_id not in sessions:
-        raise HTTPException(status_code=404, detail="Session not found")
-
-    session = sessions[session_id]
-    game_state = session["game_state"]
-
-    if game_state.current_puzzle != "field_investigation":
-        raise HTTPException(
-            status_code=400,
-            detail="This puzzle is not the current puzzle"
-        )
-
-    case = load_case(
-        f"data/case_{session['case_id'].zfill(3)}.json"
-    )
-
-    puzzle_data = next(
-        p for p in case.puzzles
-        if p["id"] == "P03"
-    )
-
-    puzzle = Case012FieldInvestigationPuzzle(puzzle_data)
-
-    correct = puzzle.check_answer(answer)
-
-    log_puzzle_attempt(
-        session["db_session_id"],
-        session["player_id"],
-        "P03",
-        1,
-        "correct" if correct else "incorrect",
-        0
-    )
-    calculate_player_behaviour(
-        session["db_session_id"],
-        session["player_id"]
-    )
-
-
-    if correct:
-        game_state.solved_puzzles.append("field_investigation")
-        game_state.unlocked_evidence.extend(
-            puzzle.get_unlocked_evidence()
-        )
-        game_state.current_puzzle = "digital_forensics"
-
-        return {
-            "correct": True,
-            "message": "Correct! The isolated property and final job location have been traced.",
-            "solved_puzzles": game_state.solved_puzzles,
-            "unlocked_evidence": game_state.unlocked_evidence,
-            "mistakes": game_state.mistakes,
-            "game_over": game_state.game_over
-        }
-
-    game_state.mistakes += 1
-
-    return {
-        "correct": False,
-        "message": "Incorrect field investigation. Re-examine the isolated property, job location, property records, and booking history.",
-        "solved_puzzles": game_state.solved_puzzles,
-        "unlocked_evidence": game_state.unlocked_evidence,
-        "mistakes": game_state.mistakes,
-        "game_over": game_state.game_over
-    }
 @app.post("/sessions/{session_id}/puzzles/case012-digital-forensics")
 def solve_case012_digital_forensics(session_id: str, answer: dict):
 
@@ -5851,13 +5988,15 @@ def solve_case012_digital_forensics(session_id: str, answer: dict):
 
     correct = puzzle.check_answer(answer)
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P04",
-        1,
-        "correct" if correct else "incorrect",
-        0
+        get_puzzle_attempt_count(session["db_session_id"], session["player_id"], puzzle_data["id"]) + 1,
+        "success" if correct else "failure",
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -5920,13 +6059,15 @@ def solve_case012_motive_analysis(session_id: str, answer: dict):
 
     correct = puzzle.check_answer(answer)
 
+    record_player_attempt(session, puzzle_data, correct, answer)
+
     log_puzzle_attempt(
         session["db_session_id"],
         session["player_id"],
         "P05",
-        1,
-        "correct" if correct else "incorrect",
-        0
+        get_puzzle_attempt_count(session["db_session_id"], session["player_id"], puzzle_data["id"]) + 1,
+        "success" if correct else "failure",
+        get_solve_time(answer)
     )
     calculate_player_behaviour(
         session["db_session_id"],
@@ -5964,3 +6105,449 @@ def solve_case012_motive_analysis(session_id: str, answer: dict):
 
 
 
+
+
+class AIResponseRequest(BaseModel):
+
+    message: str
+
+
+class HintRequest(BaseModel):
+    """Sent by the client when the player requests a hint."""
+
+    puzzle_id: Optional[str] = None
+
+
+class FinalReasoningRequest(BaseModel):
+    """Hypothesis submission for final case resolution."""
+
+    hypothesis_id: str
+    reasoning: str
+
+
+def get_session_or_404(session_id: str):
+
+    if session_id not in sessions:
+
+        raise HTTPException(
+            status_code=404,
+            detail="Session not found"
+        )
+
+    return sessions[session_id]
+
+
+def build_ai_case_context(session):
+    """Share only unlocked evidence with the AI for this session."""
+    game_state = session["game_state"]
+    case = load_case(session["case_id"])
+
+    victim_name = case.victim.get("name", "the victim")
+
+    suspect_names = [
+        s.get("name", "") for s in case.suspects
+    ]
+
+    # Map evidence IDs to names for readability.
+    evidence_by_id = {
+        e["id"]: e["name"] for e in case.evidence
+    }
+
+    unlocked_names = [
+        evidence_by_id[eid]
+        for eid in game_state.unlocked_evidence
+        if eid in evidence_by_id
+    ]
+
+    case_context = {
+        "victim": victim_name,
+        "suspects": suspect_names,
+        "unlocked_evidence": unlocked_names,
+        "solved_puzzles": list(game_state.solved_puzzles),
+    }
+
+    return case_context
+
+
+@app.post("/sessions/{session_id}/ai")
+def get_ai_response(
+    session_id: str,
+    request: AIResponseRequest
+):
+
+    session = get_session_or_404(
+        session_id
+    )
+
+    game_state = session["game_state"]
+
+    adaptive_ai = session["adaptive_ai"]
+
+    player = session["player"]
+
+    if game_state.game_over:
+
+        raise HTTPException(
+            status_code=400,
+            detail="Game is already over."
+        )
+
+    if game_state.ai_vanished:
+
+        raise HTTPException(
+            status_code=400,
+            detail="The AI has vanished."
+        )
+
+    # -----------------------------------------------------
+    # RECORD PLAYER INPUT
+    # -----------------------------------------------------
+
+    if request.message.strip():
+
+        game_state.player_observations.append(
+            request.message.strip()
+        )
+
+    # -----------------------------------------------------
+    # DETERMINE CURRENT PLAYER BEHAVIOR
+    # -----------------------------------------------------
+
+    behavior = player.get_behavior_profile()
+
+    # -----------------------------------------------------
+    # UPDATE ADAPTIVE AI BASED ON PLAYER BEHAVIOR
+    # (idempotent — counters only change on profile change)
+    # -----------------------------------------------------
+
+    adaptive_ai.decide(
+        behavior,
+        game_state
+    )
+
+    # -----------------------------------------------------
+    # BUILD CASE CONTEXT FOR GEMINI
+    # Only unlocked evidence names are included; locked
+    # evidence is intentionally excluded.
+    # -----------------------------------------------------
+
+    case_context = build_ai_case_context(session)
+
+    # -----------------------------------------------------
+    # GENERATE AI RESPONSE
+    # -----------------------------------------------------
+
+    try:
+        response = adaptive_ai.generate_ai_response(
+            game_state, request.message, case_context=case_context
+        )
+    except Exception:
+        # Provider errors may contain credentials or internal request details.
+        raise HTTPException(
+            status_code=503, detail="The AI service is unavailable. Please try again."
+        ) from None
+
+    # -----------------------------------------------------
+    # CHECK WHETHER AI SHOULD VANISH
+    # -----------------------------------------------------
+
+    vanish_result = adaptive_ai.trigger_vanish(
+        game_state
+    )
+
+    return {
+
+        "response": response,
+
+        "ai_state": adaptive_ai.get_state(
+            game_state
+        ),
+
+        "ai_action": adaptive_ai.choose_action(
+            game_state
+        ),
+
+        "ai_trust": game_state.ai_trust,
+
+        "ai_thrill": game_state.ai_thrill,
+
+        "ai_threat": game_state.ai_threat,
+
+        "ai_vanished": game_state.ai_vanished,
+
+        "countdown_active": game_state.countdown_active,
+
+        "vanish_result": vanish_result,
+
+        "player_behavior": behavior
+    }
+
+
+@app.post(
+    "/sessions/{session_id}/hint"
+)
+def request_hint(
+    session_id: str,
+    request: HintRequest
+):
+    """
+    Record that the player has requested a hint.
+
+    This increments hints_used on both GameState (for
+    session-level display) and PlayerModel (so that
+    get_behavior_profile() can classify the player as
+    HINT_DEPENDENT once the threshold is reached).
+
+    The endpoint also runs AdaptiveAI.decide() so that the AI
+    state is updated immediately — even before the next chat
+    message is sent.
+    """
+
+    session = get_session_or_404(session_id)
+
+    game_state = session["game_state"]
+
+    player = session["player"]
+
+    adaptive_ai = session["adaptive_ai"]
+
+    if game_state.game_over:
+
+        raise HTTPException(
+            status_code=400,
+            detail="Game is already over."
+        )
+
+    if game_state.ai_vanished:
+
+        raise HTTPException(
+            status_code=400,
+            detail="The AI has vanished."
+        )
+
+    if game_state.hints_used >= 3:
+        raise HTTPException(status_code=400, detail="No hints remaining.")
+
+    case = load_case(session["case_id"])
+    puzzle = next(
+        (p for p in case.puzzles if p["id"] == request.puzzle_id),
+        None
+    ) if request.puzzle_id else next(
+        (p for p in case.puzzles if p.get("type") == game_state.current_puzzle),
+        None
+    )
+    if request.puzzle_id and puzzle is None:
+        raise HTTPException(status_code=404, detail="Puzzle not found")
+
+    puzzle_label = puzzle.get("name", puzzle["id"]) if puzzle else game_state.current_puzzle
+    try:
+        hint = adaptive_ai.generate_ai_response(
+            game_state,
+            f"Give one concise procedural hint for the current investigation stage: {puzzle_label}. "
+            "Suggest a next investigative step without revealing the answer or locked evidence.",
+            case_context=build_ai_case_context(session)
+        )
+    except Exception:
+        # A failed generation must not consume a hint or create a hint log.
+        raise HTTPException(
+            status_code=503, detail="The AI service is unavailable. No hint was used."
+        ) from None
+
+    # Persist the successful request before consuming its in-memory allowance.
+    log_player_action(
+        session["db_session_id"], session["player_id"],
+        "hint", target_id=request.puzzle_id,
+        stage=game_state.current_puzzle, result="success"
+    )
+    calculate_player_behaviour(session["db_session_id"], session["player_id"])
+
+    game_state.hints_used += 1
+    player.record_hint()
+
+    # Re-evaluate behaviour and update AI state.
+    behavior = player.get_behavior_profile()
+
+    adaptive_ai.decide(behavior, game_state)
+
+    return {
+
+        "hint": hint,
+        "hints_used": game_state.hints_used,
+        "hints_remaining": max(0, 3 - game_state.hints_used),
+        "ai_vanished": game_state.ai_vanished,
+        "countdown_active": game_state.countdown_active,
+
+        "player_behavior": behavior,
+
+        "ai_state": adaptive_ai.get_state(game_state),
+
+        "ai_action": adaptive_ai.choose_action(game_state),
+
+        "ai_trust": game_state.ai_trust,
+
+        "ai_thrill": game_state.ai_thrill,
+
+        "ai_threat": game_state.ai_threat,
+
+        "puzzle_id": request.puzzle_id
+    }
+
+
+@app.post(
+    "/sessions/{session_id}/final-reasoning"
+)
+def submit_final_reasoning(
+    session_id: str,
+    request: FinalReasoningRequest
+):
+    """
+    Submit the player's final hypothesis and reasoning.
+
+    Validates the hypothesis_id against the case's hypothesis
+    list, evaluates whether it is supported/contradicted, feeds
+    the result into AdaptiveAI.react_to_final_reasoning(), and
+    triggers the vanish check.  Sets game_over = True.
+    """
+
+    session = get_session_or_404(session_id)
+
+    game_state = session["game_state"]
+
+    adaptive_ai = session["adaptive_ai"]
+
+    # Puzzle completion may precede final reasoning on multi-case routes.
+    # A final reasoning submission itself is accepted only once.
+    if session.get("final_reasoning_submitted") or (
+        game_state.game_over and game_state.current_puzzle is not None
+    ):
+
+        raise HTTPException(
+            status_code=400,
+            detail="Game is already over."
+        )
+
+    case = load_case(session["case_id"])
+
+    # Find the matching hypothesis.
+    selected = None
+
+    for hypothesis in case.hypotheses:
+
+        if hypothesis.get("id") == request.hypothesis_id:
+
+            selected = hypothesis
+
+            break
+
+    if selected is None:
+
+        raise HTTPException(
+            status_code=404,
+            detail=(
+                f"Hypothesis '{request.hypothesis_id}' not found. "
+                f"Valid IDs: "
+                f"{[h['id'] for h in case.hypotheses]}"
+            )
+        )
+
+    required = {p["id"] for p in case.puzzles}
+    if len(required) != 5 or set(solved_puzzle_ids(session)) != required:
+        raise HTTPException(status_code=403, detail="Complete all five puzzles before submitting final reasoning.")
+
+    # Evaluate the hypothesis outcome.
+    final_status = selected.get("final_status", "unknown")
+
+    if final_status == "supported":
+        hypothesis_result = "SUPPORTED"
+
+    elif final_status == "contradicted":
+        hypothesis_result = "CONTRADICTED"
+
+    else:
+        hypothesis_result = "NOT_ESTABLISHED"
+
+    # React — this may push ai_threat high enough to vanish.
+    ai_final_state = adaptive_ai.react_to_final_reasoning(
+        hypothesis_result,
+        game_state
+    )
+
+    # Trigger vanish if threat is high enough.
+    vanish_result = adaptive_ai.trigger_vanish(game_state)
+
+    # Mark the session complete.
+    game_state.game_over = True
+    session["final_reasoning_submitted"] = True
+
+    return {
+
+        "hypothesis_id": selected["id"],
+
+        "hypothesis_statement": selected.get("statement", ""),
+
+        "player_reasoning": request.reasoning,
+
+        "hypothesis_result": hypothesis_result,
+
+        "ai_state": ai_final_state,
+
+        "ai_action": adaptive_ai.choose_action(game_state),
+
+        "ai_trust": game_state.ai_trust,
+
+        "ai_thrill": game_state.ai_thrill,
+
+        "ai_threat": game_state.ai_threat,
+
+        "ai_vanished": game_state.ai_vanished,
+
+        "countdown_active": game_state.countdown_active,
+
+        "vanish_result": vanish_result,
+
+        "game_over": game_state.game_over,
+
+        "solved_puzzles": game_state.solved_puzzles
+    }
+
+
+
+def record_player_attempt(session, puzzle_data, correct, answer):
+    """Validate progression before logging or applying puzzle side effects."""
+    case = load_case(session["case_id"])
+    ids = [p["id"] for p in case.puzzles]
+    index = ids.index(puzzle_data["id"])
+    if not set(ids[:index]).issubset(solved_puzzle_ids(session)):
+        raise HTTPException(status_code=403, detail="Complete the preceding puzzles first.")
+    if session.get("final_reasoning_submitted"):
+        raise HTTPException(status_code=400, detail="Game is already over.")
+    player = session["player"]
+    game_state = session["game_state"]
+    puzzle_id = puzzle_data["id"]
+    is_connection = puzzle_data.get("type") in ("connection", "relationship_mapping")
+    if not correct:
+        player.record_mistake()
+        if is_connection:
+            player.record_unsupported_connection()
+        return
+
+    # Repeated correct answers must not inflate AI counters.
+    reacted = session.setdefault("ai_reacted_puzzles", set())
+    if puzzle_id in reacted:
+        return
+    reacted.add(puzzle_id)
+    solve_time = get_solve_time(answer)
+    if solve_time is not None:
+        player.record_solve_time(solve_time)
+    if is_connection:
+        player.record_correct_connection()
+    session["adaptive_ai"].react_to_puzzle(puzzle_id, game_state)
+
+def get_solve_time(answer):
+    """Read optional timing consistently for typed and dictionary payloads."""
+    import math
+
+    value = answer.get("solve_time") if isinstance(answer, dict) else getattr(answer, "solve_time", None)
+    if isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value) and value >= 0:
+        return value
+    return None

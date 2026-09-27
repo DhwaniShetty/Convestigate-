@@ -63,7 +63,7 @@ export function renderFinalInvestigation(container) {
 
         <div style="display: flex; justify-content: space-between; align-items: center; border-top: 2px solid var(--border-medium); padding-top: 20px; margin-top: 16px;">
           <button class="btn" id="btn-final-back">← RETURN TO DASHBOARD</button>
-          <button class="btn btn-primary" id="btn-proceed-answer" style="padding: 12px 24px;">
+          <button class="btn btn-primary" id="btn-proceed-answer" ${allSolved ? "" : "disabled"} style="padding: 12px 24px;">
             PROCEED TO FINAL VERDICT →
           </button>
         </div>
