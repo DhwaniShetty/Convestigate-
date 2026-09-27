@@ -4,6 +4,7 @@ import { sound } from '../effects/soundSystem.js';
 let selectedSuspectId = null;
 let selectedHypothesisId = null;
 let selectedEvidenceIds = [];
+let savedReasoningText = '';
 
 export function renderFinalAnswer(container) {
   const state = gameState.getState();
@@ -83,7 +84,7 @@ export function renderFinalAnswer(container) {
         <!-- 4. Written Explanation -->
         <div class="dossier-section">
           <h4 class="dossier-subtitle">4. DEDUCTIVE EXPLANATION & SUMMARY OF UNRESOLVED FACTS</h4>
-          <textarea class="form-input" id="final-reasoning-input" placeholder="Explain your deductive reconstruction, noting why correlation was rejected and which facts remain unproven..." style="width: 100%; height: 90px; resize: none;"></textarea>
+          <textarea class="form-input" id="final-reasoning-input" placeholder="Explain your deductive reconstruction, noting why correlation was rejected and which facts remain unproven..." style="width: 100%; height: 90px; resize: vertical;">${savedReasoningText}</textarea>
         </div>
 
         <div style="display: flex; justify-content: space-between; align-items: center; border-top: 2px solid var(--border-medium); padding-top: 20px; margin-top: 16px;">
@@ -95,6 +96,14 @@ export function renderFinalAnswer(container) {
       </div>
     </div>
   `;
+
+  // Reasoning textarea input listener
+  const reasoningInput = container.querySelector('#final-reasoning-input');
+  if (reasoningInput) {
+    reasoningInput.addEventListener('input', (e) => {
+      savedReasoningText = e.target.value;
+    });
+  }
 
   // Suspect selection
   container.querySelectorAll('input[name="final_suspect"]').forEach(radio => {
@@ -134,7 +143,7 @@ export function renderFinalAnswer(container) {
   // Submit verdict
   container.querySelector('#btn-submit-verdict')?.addEventListener('click', () => {
     sound.playStamp();
-    const reasoningText = container.querySelector('#final-reasoning-input')?.value || '';
+    const reasoningText = savedReasoningText || container.querySelector('#final-reasoning-input')?.value || '';
     gameState.submitFinalAnswer({
       suspectId: selectedSuspectId,
       hypothesisId: selectedHypothesisId,

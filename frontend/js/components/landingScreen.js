@@ -3,16 +3,20 @@ import { ALL_CASES, getCaseById } from '../data/caseLoader.js';
 import { cinematic } from '../effects/cinematic.js';
 import { sound } from '../effects/soundSystem.js';
 
-let activeCategory = 'ALL';
+let caseSearchQuery = '';
 
 export function renderLandingScreen(container) {
   const state = gameState.getState();
 
-  const filteredCases = activeCategory === 'ALL'
-    ? ALL_CASES
-    : activeCategory === 'COLD'
-      ? ALL_CASES.filter(c => c.status.includes('COLD') || c.status.includes('ARCHIVAL') || c.status.includes('UNRESOLVED'))
-      : ALL_CASES.filter(c => c.status.includes('ACTIVE') || c.status.includes('AUDIT') || c.status.includes('OPEN') || c.status.includes('INQUEST'));
+  const query = caseSearchQuery.trim().toLowerCase();
+  const filteredCases = query
+    ? ALL_CASES.filter(c => 
+        c.title.toLowerCase().includes(query) ||
+        c.case_id.includes(query) ||
+        (c.synopsis && c.synopsis.toLowerCase().includes(query)) ||
+        (c.victim?.name && c.victim.name.toLowerCase().includes(query))
+      )
+    : ALL_CASES;
 
   container.innerHTML = `
     <div class="landing-hero">
@@ -24,12 +28,6 @@ export function renderLandingScreen(container) {
         <button class="btn btn-primary" id="btn-quick-start" style="padding: 14px 32px; font-size: 1rem; letter-spacing: 1.5px;">
           <span>👉 INVESTIGATE CASE #${state.currentCaseId || '014'}: ${state.currentCase?.title || 'THE MAN WHO MOVED'} →</span>
         </button>
-        <button class="btn" id="btn-open-create">
-          <span>CREATE CASE ROOM</span>
-        </button>
-        <button class="btn" id="btn-open-join">
-          <span>JOIN ROOM CODE</span>
-        </button>
       </div>
 
       <!-- 14 Cases Filter Toolbar -->
@@ -37,10 +35,8 @@ export function renderLandingScreen(container) {
         <div>
           <span class="stamp stamp-white">TOTAL CASES AVAILABLE (${ALL_CASES.length})</span>
         </div>
-        <div class="category-tabs">
-          <button class="tab-btn ${activeCategory === 'ALL' ? 'active' : ''}" data-cat="ALL">ALL 14 CASES</button>
-          <button class="tab-btn ${activeCategory === 'ACTIVE' ? 'active' : ''}" data-cat="ACTIVE">ACTIVE FILES</button>
-          <button class="tab-btn ${activeCategory === 'COLD' ? 'active' : ''}" data-cat="COLD">COLD & HISTORICAL</button>
+        <div style="flex: 1; max-width: 360px; margin-left: 20px;">
+          <input type="text" class="form-input" id="case-search-input" placeholder="Search case dockets..." value="${caseSearchQuery}" style="width: 100%; padding: 6px 12px; font-size: 0.85rem;" />
         </div>
       </div>
 
@@ -91,65 +87,29 @@ export function renderLandingScreen(container) {
         </button>
       </div>
     </div>
-
-    <!-- Create Investigation Modal -->
-    <div class="modal-overlay" id="modal-create-game">
-      <div class="modal-box">
-        <div class="modal-header">
-          <div class="modal-title">CREATE INVESTIGATION</div>
-          <button class="modal-close" id="close-modal-create">&times;</button>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Lead Investigator Name</label>
-          <input type="text" class="form-input" id="input-creator-name" value="Detective Cross" placeholder="Enter your name" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Investigation Code / Room ID</label>
-          <input type="text" class="form-input" id="input-game-id" value="CONV-8492" readonly />
-        </div>
-        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
-          <button class="btn" id="btn-cancel-create">CANCEL</button>
-          <button class="btn btn-primary" id="btn-confirm-create">ENTER LOBBY</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Join Investigation Modal -->
-    <div class="modal-overlay" id="modal-join-game">
-      <div class="modal-box">
-        <div class="modal-header">
-          <div class="modal-title">JOIN INVESTIGATION</div>
-          <button class="modal-close" id="close-modal-join">&times;</button>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Partner Investigator Name</label>
-          <input type="text" class="form-input" id="input-joiner-name" placeholder="Enter your callsign" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Investigation Access Code</label>
-          <input type="text" class="form-input" id="input-join-code" placeholder="e.g. CONV-8492" />
-        </div>
-        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
-          <button class="btn" id="btn-cancel-join">CANCEL</button>
-          <button class="btn btn-primary" id="btn-confirm-join">CONNECT</button>
-        </div>
-      </div>
-    </div>
   `;
 
-  // Filter category listeners
-  container.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      sound.playClick();
-      activeCategory = btn.getAttribute('data-cat');
-      renderLandingScreen(container);
+  // Search input handler
+  const searchInput = container.querySelector('#case-search-input');
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      caseSearchQuery = e.target.value;
+      const targetQuery = caseSearchQuery.trim().toLowerCase();
+      container.querySelectorAll('.case-card').forEach(card => {
+        const cId = card.getAttribute('data-case-id');
+        const caseItem = getCaseById(cId);
+        if (!caseItem) return;
+        const matches = !targetQuery || 
+          caseItem.title.toLowerCase().includes(targetQuery) ||
+          caseItem.case_id.includes(targetQuery) ||
+          (caseItem.synopsis && caseItem.synopsis.toLowerCase().includes(targetQuery));
+        card.style.display = matches ? '' : 'none';
+      });
     });
-  });
+  }
 
   // Modal references
   const introModal = container.querySelector('#case-intro-modal');
-  const modalCreate = container.querySelector('#modal-create-game');
-  const modalJoin = container.querySelector('#modal-join-game');
 
   // Case card clicks -> Select Case & Update UI
   container.querySelectorAll('.case-card').forEach(card => {
@@ -237,30 +197,5 @@ export function renderLandingScreen(container) {
     cinematic.playCinematicCaseOpening(caseData, () => {
       gameState.setScreen('BRIEFING');
     });
-  });
-
-  // Create / Join modal controls
-  container.querySelector('#btn-open-create')?.addEventListener('click', () => {
-    sound.playClick();
-    modalCreate?.classList.add('open');
-  });
-  container.querySelector('#close-modal-create')?.addEventListener('click', () => modalCreate?.classList.remove('open'));
-  container.querySelector('#btn-cancel-create')?.addEventListener('click', () => modalCreate?.classList.remove('open'));
-  container.querySelector('#btn-confirm-create')?.addEventListener('click', () => {
-    sound.playClick();
-    modalCreate?.classList.remove('open');
-    gameState.setScreen('LOBBY');
-  });
-
-  container.querySelector('#btn-open-join')?.addEventListener('click', () => {
-    sound.playClick();
-    modalJoin?.classList.add('open');
-  });
-  container.querySelector('#close-modal-join')?.addEventListener('click', () => modalJoin?.classList.remove('open'));
-  container.querySelector('#btn-cancel-join')?.addEventListener('click', () => modalJoin?.classList.remove('open'));
-  container.querySelector('#btn-confirm-join')?.addEventListener('click', () => {
-    sound.playClick();
-    modalJoin?.classList.remove('open');
-    gameState.setScreen('LOBBY');
   });
 }

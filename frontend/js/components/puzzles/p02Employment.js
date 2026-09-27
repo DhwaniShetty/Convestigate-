@@ -1,4 +1,6 @@
 import { gameState } from '../../state/gameState.js';
+import { setDashboardTab } from '../dashboard.js';
+import { sound } from '../../effects/soundSystem.js';
 
 let selectedPattern = null;
 
@@ -57,15 +59,20 @@ export function renderP02Employment(container) {
         </label>
       </div>
 
-      <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 16px; margin-top: 12px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 16px; margin-top: 12px; flex-wrap: wrap; gap: 12px;">
         <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted);">
           UNLOCKS: E03 (EMPLOYMENT RECORD)
         </span>
-        ${!isCompleted ? `
-          <button class="btn btn-primary" id="btn-submit-p02">CONFIRM DEDUCTION →</button>
-        ` : `
-          <button class="btn btn-disabled" disabled>PUZZLE SOLVED</button>
-        `}
+        <div style="display: flex; gap: 10px;">
+          ${!isCompleted ? `
+            <button class="btn btn-primary" id="btn-submit-p02">CONFIRM DEDUCTION →</button>
+          ` : `
+            <button class="btn btn-disabled" disabled>PUZZLE SOLVED</button>
+          `}
+          <button class="btn btn-primary" id="btn-next-p03" style="padding: 10px 20px;">
+            NEXT PUZZLE (P03) →
+          </button>
+        </div>
       </div>
     </div>
   `;
@@ -80,5 +87,10 @@ export function renderP02Employment(container) {
   container.querySelector('#btn-submit-p02')?.addEventListener('click', () => {
     gameState.completePuzzle('P02');
     renderP02Employment(container);
+  });
+
+  container.querySelector('#btn-next-p03')?.addEventListener('click', () => {
+    sound.playStamp();
+    setDashboardTab('p03');
   });
 }

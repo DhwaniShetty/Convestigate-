@@ -110,7 +110,6 @@ body.tension-panic .cinematic-vignette {
 
 body.tension-vanished .cinematic-vignette {
   box-shadow: inset 0 0 150px rgba(192, 21, 21, 0.5), inset 0 0 220px rgba(0, 0, 0, 1);
-  animation: countdown-heartbeat-vignette 1s infinite ease-in-out;
 }
 
 @keyframes atmospheric-threat-breathe {
@@ -1019,7 +1018,7 @@ body.tension-vanished .cinematic-vignette {
 }
 
 /* --------------------------------------------------------------------------
-   3. WOW MOMENT 2: EVIDENCE INTERACTION & CORRELATION FOCUS
+   3. WOW MOMENT 2: PHYSICAL EVIDENCE EXPERIENCE & INVESTIGATION FOCUS
    -------------------------------------------------------------------------- */
 .evidence-card {
   transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), 
@@ -1027,6 +1026,7 @@ body.tension-vanished .cinematic-vignette {
               border-color 0.22s ease !important;
   cursor: pointer;
   position: relative;
+  transform-origin: center center;
 }
 
 .evidence-card:not(.locked):hover {
@@ -1037,7 +1037,12 @@ body.tension-vanished .cinematic-vignette {
 }
 
 .evidence-card:not(.locked):active {
-  transform: scale(0.99);
+  transform: scale(0.98);
+}
+
+.evidence-card.card-selected-burst {
+  box-shadow: 0 0 25px var(--blood-red-bright), 0 0 0 2px #ffffff !important;
+  border-color: #ffffff !important;
 }
 
 /* Tactile Stamp when Investigated */
@@ -1050,19 +1055,73 @@ body.tension-vanished .cinematic-vignette {
   100% { transform: scale(1); opacity: 1; }
 }
 
-/* Evidence Inspection Modal Pop */
-.modal-overlay.open .modal-box {
-  animation: evidence-folder-open 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+/* Surrounding UI Dimming & Depth of Field when Evidence is Inspected */
+.evidence-room-container {
+  position: relative;
+  transition: filter 0.35s ease, opacity 0.35s ease, transform 0.35s ease;
 }
 
-@keyframes evidence-folder-open {
+.evidence-room-container.evidence-inspecting-active .evidence-dimmable {
+  filter: blur(3px) brightness(0.35) contrast(0.85);
+  opacity: 0.35;
+  transform: scale(0.985);
+  pointer-events: none;
+  transition: filter 0.35s cubic-bezier(0.16, 1, 0.3, 1), 
+              opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), 
+              transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.evidence-room-container .evidence-dimmable {
+  transition: filter 0.3s ease-out, opacity 0.3s ease-out, transform 0.3s ease-out;
+}
+
+/* Modal Overlay Noir Vignette */
+#evidence-detail-modal {
+  background: radial-gradient(circle at 50% 45%, rgba(18, 18, 26, 0.9) 0%, rgba(3, 3, 5, 0.98) 100%);
+  backdrop-filter: blur(8px);
+  perspective: 1200px;
+  transition: opacity 0.28s ease, backdrop-filter 0.28s ease;
+}
+
+/* Physical Evidence Pop & 3D Spatial Depth */
+.modal-overlay.open .evidence-modal-box {
+  animation: physical-evidence-pop 0.42s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+  will-change: transform, opacity, filter, box-shadow;
+}
+
+.modal-overlay.closing .evidence-modal-box {
+  animation: physical-evidence-close 0.22s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes physical-evidence-pop {
   0% {
     opacity: 0;
-    transform: scale(0.92) translateY(14px);
+    transform: perspective(1200px) translate3d(0, 45px, -140px) rotateX(10deg) rotateY(-4deg) rotateZ(-1.5deg) scale(0.84);
+    filter: blur(6px) contrast(120%);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9);
+  }
+  65% {
+    transform: perspective(1200px) translate3d(0, -5px, 15px) rotateX(-1deg) rotateY(0.5deg) rotateZ(0deg) scale(1.015);
+    filter: blur(0px);
   }
   100% {
     opacity: 1;
-    transform: scale(1) translateY(0);
+    transform: perspective(1200px) translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1);
+    filter: blur(0px);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(255, 255, 255, 0.16), 10px 10px 0px var(--blood-red);
+  }
+}
+
+@keyframes physical-evidence-close {
+  0% {
+    opacity: 1;
+    transform: perspective(1200px) translate3d(0, 0, 0) scale(1);
+    filter: blur(0px);
+  }
+  100% {
+    opacity: 0;
+    transform: perspective(1200px) translate3d(0, 25px, -60px) rotateX(6deg) scale(0.92);
+    filter: blur(4px);
   }
 }
 
@@ -1071,41 +1130,397 @@ body.tension-vanished .cinematic-vignette {
   display: inline;
   background: linear-gradient(
     90deg,
-    rgba(192, 21, 21, 0.3) 0%,
-    rgba(229, 37, 37, 0.38) 100%
+    rgba(229, 37, 37, 0.38) 0%,
+    rgba(255, 220, 0, 0.35) 45%,
+    rgba(229, 37, 37, 0.45) 100%
   );
   background-size: 0% 100%;
   background-repeat: no-repeat;
   color: #ffffff;
-  padding: 1px 4px;
+  padding: 2px 6px;
   border-radius: 2px;
-  animation: marker-sweep 0.7s 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  font-weight: bold;
+  letter-spacing: 0.3px;
+  box-shadow: inset 0 0 0 transparent;
+  animation: marker-sweep 0.75s 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes marker-sweep {
-  0% { background-size: 0% 100%; }
-  100% { background-size: 100% 100%; }
+  0% { 
+    background-size: 0% 100%; 
+    box-shadow: inset 0 -2px 0 rgba(229, 37, 37, 0.8);
+  }
+  100% { 
+    background-size: 100% 100%; 
+    box-shadow: inset 0 -2px 0 rgba(229, 37, 37, 0.95), 0 0 12px rgba(229, 37, 37, 0.35);
+  }
+}
+
+/* Timestamp Emphasis Badge */
+.evidence-timestamp-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.85);
+  border: 1px solid var(--blood-red-bright);
+  color: #ff4d4d;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: bold;
+  padding: 1px 6px;
+  border-radius: 3px;
+  letter-spacing: 0.5px;
+  box-shadow: 0 0 8px rgba(229, 37, 37, 0.3);
+  text-shadow: 0 0 6px rgba(229, 37, 37, 0.6);
+  vertical-align: middle;
+  margin: 0 2px;
+}
+
+.evidence-timestamp-pill .timestamp-glyph {
+  font-size: 0.75rem;
+  opacity: 0.9;
 }
 
 /* Key Clue Discovery Badge Pulsing */
 .key-clue-badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  background: rgba(192, 21, 21, 0.18);
+  gap: 8px;
+  background: rgba(192, 21, 21, 0.16);
   border: 1px solid var(--blood-red-bright);
   color: #ffffff;
   font-family: var(--font-mono);
-  font-size: 0.75rem;
-  padding: 4px 10px;
-  margin-top: 8px;
-  box-shadow: 0 0 10px rgba(192, 21, 21, 0.35);
-  animation: clue-pulse 2s infinite ease-in-out;
+  font-size: 0.8rem;
+  padding: 8px 12px;
+  margin-top: 10px;
+  width: 100%;
+  box-shadow: 0 0 12px rgba(192, 21, 21, 0.35);
+  animation: clue-pulse 2.2s infinite ease-in-out;
 }
 
 @keyframes clue-pulse {
-  0%, 100% { box-shadow: 0 0 6px rgba(192, 21, 21, 0.3); }
-  50% { box-shadow: 0 0 16px rgba(229, 37, 37, 0.6); }
+  0%, 100% { box-shadow: 0 0 8px rgba(192, 21, 21, 0.3); border-color: var(--blood-red); }
+  50% { box-shadow: 0 0 20px rgba(229, 37, 37, 0.7); border-color: var(--blood-red-bright); }
+}
+
+/* --------------------------------------------------------------------------
+   PHYSICAL ARTIFACT TYPES: PHOTO MOUNT, CCTV, DOSSIER, OBJECT, PHONE
+   -------------------------------------------------------------------------- */
+
+/* 1. PHYSICAL PHOTO MOUNT */
+.evidence-photo-mount {
+  background: #0d0d12;
+  border: 3px solid #ffffff;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.9), inset 0 0 0 1px rgba(0, 0, 0, 0.8);
+  position: relative;
+  padding: 12px 12px 28px 12px;
+  margin-bottom: 14px;
+}
+
+.photo-tape-top-left {
+  position: absolute;
+  top: -10px;
+  left: 18px;
+  width: 55px;
+  height: 20px;
+  background: rgba(229, 37, 37, 0.7);
+  border: 1px dashed rgba(255, 255, 255, 0.6);
+  transform: rotate(-5deg);
+  pointer-events: none;
+  z-index: 10;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+}
+
+.photo-tape-top-right {
+  position: absolute;
+  top: -10px;
+  right: 18px;
+  width: 55px;
+  height: 20px;
+  background: rgba(240, 240, 240, 0.65);
+  transform: rotate(4deg);
+  pointer-events: none;
+  z-index: 10;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+}
+
+.evidence-photo-frame {
+  position: relative;
+  overflow: hidden;
+  background: #000000;
+  max-height: 310px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #222;
+  cursor: zoom-in;
+}
+
+.evidence-photo-frame.is-zoomed {
+  cursor: zoom-out;
+}
+
+.evidence-photo-frame img {
+  width: 100%;
+  height: auto;
+  max-height: 310px;
+  object-fit: contain;
+  filter: contrast(1.18) brightness(1.05);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.evidence-photo-frame.is-zoomed img {
+  transform: scale(1.85);
+}
+
+.photo-zoom-hint {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: #ffffff;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  padding: 3px 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  pointer-events: none;
+}
+
+.forensic-scale-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  padding: 3px 8px;
+  background: #f0f0f0;
+  color: #111111;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+  border: 1px solid #333;
+}
+
+.forensic-scale-ticks {
+  letter-spacing: 3px;
+  font-size: 0.6rem;
+}
+
+/* 2. CCTV MONITOR SCREEN */
+.evidence-cctv-screen {
+  background: #050807;
+  border: 2px solid #2a3a33;
+  box-shadow: inset 0 0 30px rgba(0, 40, 20, 0.6), 0 8px 24px rgba(0,0,0,0.9);
+  padding: 12px;
+  position: relative;
+  margin-bottom: 14px;
+  overflow: hidden;
+}
+
+.cctv-scanline-overlay {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.3) 0px,
+    rgba(0, 0, 0, 0.3) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  pointer-events: none;
+  z-index: 5;
+  opacity: 0.8;
+}
+
+.cctv-header-strip {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: #39ff14;
+  text-shadow: 0 0 6px rgba(57, 255, 20, 0.6);
+  z-index: 6;
+  position: relative;
+}
+
+.cctv-rec-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(229, 37, 37, 0.25);
+  border: 1px solid var(--blood-red-bright);
+  color: #ffffff;
+  padding: 2px 7px;
+  border-radius: 2px;
+  font-size: 0.7rem;
+}
+
+.cctv-rec-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--blood-red-bright);
+  border-radius: 50%;
+  animation: cctv-blink 1s infinite steps(1);
+}
+
+@keyframes cctv-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* 3. MANILA DOSSIER / OFFICIAL RECORD */
+.evidence-dossier-paper {
+  background: #fdfcf7;
+  color: #1a1a1f;
+  border: 1px solid #dcd8cf;
+  box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.25), inset 0 0 60px rgba(220, 210, 190, 0.35);
+  padding: 22px;
+  position: relative;
+  font-family: var(--font-mono);
+  line-height: 1.55;
+  margin-bottom: 14px;
+}
+
+.dossier-paperclip {
+  position: absolute;
+  top: -8px;
+  right: 28px;
+  width: 14px;
+  height: 42px;
+  border: 3px solid #888899;
+  border-radius: 8px;
+  background: transparent;
+  transform: rotate(5deg);
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  pointer-events: none;
+  z-index: 8;
+}
+
+.dossier-watermark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-25deg);
+  font-family: var(--font-headline);
+  font-size: 3.2rem;
+  letter-spacing: 6px;
+  color: rgba(192, 21, 21, 0.08);
+  pointer-events: none;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.dossier-confidential-stamp {
+  position: absolute;
+  top: 14px;
+  right: 56px;
+  border: 2px solid var(--blood-red);
+  color: var(--blood-red);
+  padding: 3px 10px;
+  font-family: var(--font-headline);
+  font-size: 0.9rem;
+  letter-spacing: 2px;
+  transform: rotate(-4deg);
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+/* 4. DIGITAL TRANSCRIPT / CELLULAR LOG */
+.evidence-phone-extract {
+  background: #090a0f;
+  border: 1px solid #272733;
+  padding: 16px;
+  margin-bottom: 14px;
+  font-family: var(--font-mono);
+}
+
+.phone-terminal-header {
+  border-bottom: 1px solid #272733;
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.phone-sms-bubble {
+  background: #141620;
+  border-left: 3px solid var(--blood-red-bright);
+  padding: 10px 12px;
+  margin: 8px 0;
+  color: #ffffff;
+  font-size: 0.88rem;
+}
+
+/* 5. PHYSICAL OBJECT / SPECIMEN TAG */
+.evidence-specimen-bag {
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.02),
+    rgba(255, 255, 255, 0.02) 10px,
+    rgba(0, 0, 0, 0.2) 10px,
+    rgba(0, 0, 0, 0.2) 20px
+  ), #111218;
+  border: 2px dashed #444455;
+  padding: 16px;
+  margin-bottom: 14px;
+  position: relative;
+}
+
+.specimen-hazard-seal {
+  background: repeating-linear-gradient(
+    -45deg,
+    #ffe600,
+    #ffe600 12px,
+    #000000 12px,
+    #000000 24px
+  );
+  color: #000000;
+  height: 16px;
+  width: 100%;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+/* Discovery Stamp Slam Feedback */
+.discovery-stamp-slam {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-6deg) scale(1);
+  background: rgba(192, 21, 21, 0.15);
+  border: 4px solid var(--blood-red-bright);
+  color: var(--blood-red-bright);
+  font-family: var(--font-headline);
+  font-size: 1.6rem;
+  letter-spacing: 4px;
+  padding: 10px 24px;
+  text-shadow: 0 0 14px rgba(229, 37, 37, 0.8);
+  box-shadow: 0 0 30px rgba(229, 37, 37, 0.6), inset 0 0 15px rgba(229, 37, 37, 0.3);
+  pointer-events: none;
+  z-index: 100;
+  animation: stamp-slam-dramatic 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes stamp-slam-dramatic {
+  0% {
+    transform: translate(-50%, -50%) rotate(-12deg) scale(2.4);
+    opacity: 0;
+  }
+  60% {
+    transform: translate(-50%, -50%) rotate(-5deg) scale(0.95);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(-6deg) scale(1);
+    opacity: 1;
+  }
 }
 
 /* --------------------------------------------------------------------------
@@ -1174,33 +1589,48 @@ body.tension-vanished .cinematic-vignette {
 
 /* Animated SVG Connection Strings */
 .conn-line-flowing {
-  stroke-dasharray: 6, 6;
-  animation: line-electron-flow 1.5s linear infinite;
+  stroke-dasharray: 8, 5;
+  animation: line-electron-flow 1.8s linear infinite;
 }
 
 @keyframes line-electron-flow {
-  from { stroke-dashoffset: 24; }
+  from { stroke-dashoffset: 26; }
   to { stroke-dashoffset: 0; }
 }
 
 .conn-line-confirmed {
-  stroke: #ffffff;
-  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.6));
+  stroke: #ffffff !important;
+  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.95)) drop-shadow(0 0 2px #ffffff);
 }
 
 .conn-line-relevant {
-  stroke: var(--blood-red-bright);
-  filter: drop-shadow(0 0 5px rgba(229, 37, 37, 0.7));
+  stroke: #ff2222 !important;
+  filter: drop-shadow(0 0 7px rgba(255, 34, 34, 0.95)) drop-shadow(0 0 2px #ff2222);
 }
 
-/* Connection Creation Draw-in */
+/* Connection Creation Subtle Glow / Shimmer */
 .conn-line-new {
-  animation: line-draw-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: line-draw-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards, line-glow-pulse 1.2s ease-out;
 }
 
 @keyframes line-draw-in {
-  from { opacity: 0; stroke-width: 0; }
-  to { opacity: 1; stroke-width: 2.5; }
+  from { opacity: 0; stroke-width: 0.5px; }
+  to { opacity: 1; stroke-width: 3px; }
+}
+
+@keyframes line-glow-pulse {
+  0% {
+    filter: drop-shadow(0 0 16px #ff2222) brightness(2);
+    stroke-width: 4.5px;
+  }
+  50% {
+    filter: drop-shadow(0 0 10px #ff2222) brightness(1.5);
+    stroke-width: 3.5px;
+  }
+  100% {
+    filter: drop-shadow(0 0 6px #ff2222) brightness(1);
+    stroke-width: 3px;
+  }
 }
 
 /* Board Helper Banner */
@@ -1381,42 +1811,8 @@ body.tension-vanished .cinematic-vignette {
 }
 
 /* --------------------------------------------------------------------------
-   6. COUNTDOWN TIMER ENHANCEMENTS
+   6. COUNTDOWN TIMER ENHANCEMENTS (REMOVED)
    -------------------------------------------------------------------------- */
-.countdown-box-active {
-  margin: 18px 0;
-  background: #000000;
-  border: 2px solid var(--blood-red);
-  padding: 14px 24px;
-  box-shadow: 0 0 20px rgba(192, 21, 21, 0.45);
-  animation: countdown-heartbeat 1s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
-}
-
-@keyframes countdown-heartbeat {
-  0% { transform: scale(1); box-shadow: 0 0 15px rgba(192, 21, 21, 0.4); }
-  15% { transform: scale(1.02); box-shadow: 0 0 25px rgba(229, 37, 37, 0.7); }
-  30% { transform: scale(1); box-shadow: 0 0 15px rgba(192, 21, 21, 0.4); }
-  100% { transform: scale(1); box-shadow: 0 0 15px rgba(192, 21, 21, 0.4); }
-}
-
-.countdown-digits {
-  font-family: var(--font-mono);
-  font-size: 2.6rem;
-  font-weight: 800;
-  color: var(--blood-red-bright);
-  letter-spacing: 5px;
-  text-shadow: 0 0 12px var(--blood-red-glow);
-}
-
-/* HUD Timer Pulse */
-.hud-timer {
-  animation: hud-timer-warn 1.5s infinite ease-in-out !important;
-}
-
-@keyframes hud-timer-warn {
-  0%, 100% { border-color: var(--blood-red-deep); background: rgba(220, 38, 38, 0.08); }
-  50% { border-color: var(--blood-red-bright); background: rgba(220, 38, 38, 0.22); box-shadow: 0 0 10px rgba(229, 37, 37, 0.4); }
-}
 
 /* --------------------------------------------------------------------------
    7. TOAST NOTIFICATION SYSTEM (FORENSIC / CRIME ALERT STYLE)

@@ -1,6 +1,5 @@
 import { gameState } from '../state/gameState.js';
 import { renderEvidenceRoom } from './evidenceRoom.js';
-import { renderSuspectDatabase } from './suspectDatabase.js';
 import { renderInvestigationBoard } from './investigationBoard.js';
 import { renderP01Timeline } from './puzzles/p01Timeline.js';
 import { renderP02Employment } from './puzzles/p02Employment.js';
@@ -13,6 +12,14 @@ import { sound } from '../effects/soundSystem.js';
 
 let activeTab = 'overview';
 let activeRightTab = 'ai'; // 'ai' or 'notes'
+
+export function setDashboardTab(tab) {
+  activeTab = tab;
+  const container = document.querySelector('#screen-dashboard');
+  if (container) {
+    renderDashboard(container);
+  }
+}
 
 export function renderDashboard(container) {
   const state = gameState.getState();
@@ -32,10 +39,6 @@ export function renderDashboard(container) {
           <li class="sidebar-item ${activeTab === 'evidence' ? 'active' : ''}" data-tab="evidence">
             <span>EVIDENCE REPOSITORY</span>
             <span class="sidebar-badge">${Object.keys(state.evidenceMap).length}</span>
-          </li>
-          <li class="sidebar-item ${activeTab === 'suspects' ? 'active' : ''}" data-tab="suspects">
-            <span>SUSPECT DATABASE</span>
-            <span class="sidebar-badge">${state.suspects.length}</span>
           </li>
           <li class="sidebar-item ${activeTab === 'board' ? 'active' : ''}" data-tab="board">
             <span>INVESTIGATION BOARD</span>
@@ -152,9 +155,6 @@ export function renderDashboard(container) {
       case 'evidence':
         renderEvidenceRoom(stage);
         break;
-      case 'suspects':
-        renderSuspectDatabase(stage);
-        break;
       case 'board':
         renderInvestigationBoard(stage);
         break;
@@ -226,6 +226,14 @@ function renderOverviewStage(container, c, solvedCount, totalPuzzles) {
         </div>
       </div>
 
+      <!-- Linear Workflow Navigation Button -->
+      <div style="margin-bottom: 24px;">
+        <button class="btn btn-primary" id="btn-flow-to-evidence" style="width: 100%; padding: 14px 24px; font-size: 1rem; letter-spacing: 1.5px; display: flex; align-items: center; justify-content: space-between;">
+          <span>STEP 1 // EXAMINE CASE ARTIFACTS & EVIDENCE</span>
+          <span>PROCEED TO EVIDENCE REPOSITORY →</span>
+        </button>
+      </div>
+
       <!-- Live Timeline Strip -->
       <div class="dossier-card" style="margin-bottom: 24px;">
         <h3 class="dossier-subtitle">INITIAL TIMELINE OVERVIEW</h3>
@@ -240,6 +248,12 @@ function renderOverviewStage(container, c, solvedCount, totalPuzzles) {
       </div>
     </div>
   `;
+
+  container.querySelector('#btn-flow-to-evidence')?.addEventListener('click', () => {
+    sound.playStamp();
+    activeTab = 'evidence';
+    renderDashboard(document.querySelector('#screen-dashboard'));
+  });
 
   // Quick jumps
   container.querySelector('#card-jump-evidence')?.addEventListener('click', () => {
