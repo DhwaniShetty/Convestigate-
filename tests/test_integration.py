@@ -433,12 +433,16 @@ class TestCaseLoader:
 
 
 @pytest.fixture()
-def client(monkeypatch):
+def client(monkeypatch, tmp_path):
     """
     Return a FastAPI TestClient with Gemini patched out so tests
     don't need a live API key.
     """
+    from src.database import db
+    monkeypatch.setattr(db, "DATABASE_NAME", str(tmp_path / "integration.db"))
+    db.create_database()
     import src.api.main as api_module
+    api_module.sessions.clear()
     from src.ai import adaptive_ai as ai_module
 
     # Patch LLMIntegration inside adaptive_ai so AdaptiveAI()
@@ -459,6 +463,25 @@ def client(monkeypatch):
 
     from fastapi.testclient import TestClient
     return TestClient(api_module.app)
+
+
+def solve_case014_until(client, sid, count):
+    """Submit the frontend's structured answers in puzzle order."""
+    case = client.get("/cases/014").json()
+    answers = [
+        ("timeline", {"order": [t["time"] for t in case["timeline"]], "solve_time": 12.0}),
+        ("employment", {"employment_verified": True, "transfer_verified": True, "solve_time": 20.0}),
+        ("connection", {"connections": case["puzzles"][2]["connections"]}),
+        ("contradictory", {"case_id": "014", "unreliable_witness": "W02"}),
+        ("missing-record", {"case_id": "014", "missing_record": "Case Assignment Log",
+                            "location": "weekly assignment ledger", "credential_use": True,
+                            "avoids_direct_accusation": True}),
+    ]
+    for endpoint, answer in answers[:count]:
+        response = client.post(f"/sessions/{sid}/puzzles/{endpoint}", json=answer)
+        assert response.status_code == 200, response.text
+        assert response.json()["correct"] is True
+    return answers
 
 
 class TestAPIEndpoints:
@@ -535,24 +558,30 @@ class TestAPIEndpoints:
             "/sessions", json={"case_id": "014"}
         ).json()["session_id"]
 
+        answers = solve_case014_until(client, sid, 1)
+
         r = client.post(
             f"/sessions/{sid}/puzzles/employment",
-            json={"answer": "confirmed", "solve_time": 20.0}
+            json=answers[1][1]
         )
         assert r.status_code == 200
         assert r.json()["correct"] is True
+
 
     def test_employment_incorrect(self, client):
         sid = client.post(
             "/sessions", json={"case_id": "014"}
         ).json()["session_id"]
 
+        answers = solve_case014_until(client, sid, 1)
+
         r = client.post(
             f"/sessions/{sid}/puzzles/employment",
-            json={"answer": "wrong"}
+            json={"employment_verified": False, "transfer_verified": False}
         )
         assert r.status_code == 200
         assert r.json()["correct"] is False
+
 
     # ------------------------------------------------------------------
     # Connection puzzle
@@ -563,12 +592,15 @@ class TestAPIEndpoints:
             "/sessions", json={"case_id": "014"}
         ).json()["session_id"]
 
+        answers = solve_case014_until(client, sid, 2)
+
         r = client.post(
             f"/sessions/{sid}/puzzles/connection",
-            json={"answer": "confirmed"}
+            json=answers[2][1]
         )
         assert r.status_code == 200
         assert r.json()["correct"] is True
+
 
     # ------------------------------------------------------------------
     # Contradictory puzzle
@@ -579,12 +611,15 @@ class TestAPIEndpoints:
             "/sessions", json={"case_id": "014"}
         ).json()["session_id"]
 
+        answers = solve_case014_until(client, sid, 3)
+
         r = client.post(
             f"/sessions/{sid}/puzzles/contradictory",
-            json={"answer": "confirmed"}
+            json=answers[3][1]
         )
         assert r.status_code == 200
         assert r.json()["correct"] is True
+
 
     # ------------------------------------------------------------------
     # Missing record puzzle
@@ -595,12 +630,15 @@ class TestAPIEndpoints:
             "/sessions", json={"case_id": "014"}
         ).json()["session_id"]
 
+        answers = solve_case014_until(client, sid, 4)
+
         r = client.post(
             f"/sessions/{sid}/puzzles/missing-record",
-            json={"answer": "confirmed"}
+            json=answers[4][1]
         )
         assert r.status_code == 200
         assert r.json()["correct"] is True
+
 
     # ------------------------------------------------------------------
     # Hint endpoint
@@ -766,17 +804,20 @@ class TestAPIEndpoints:
             "/sessions", json={"case_id": "014"}
         ).json()["session_id"]
 
+        answers = solve_case014_until(client, sid, 2)
+
         # Solve connection puzzle — react_to_puzzle("connection") should
         # add thrill+1 threat+1.
         client.post(
             f"/sessions/{sid}/puzzles/connection",
-            json={"answer": "confirmed"}
+            json=answers[2][1]
         )
 
         r = client.get(f"/sessions/{sid}")
         data = r.json()
         assert data["ai_thrill"] >= 1
         assert data["ai_threat"] >= 1
+
 
     def test_two_mistakes_causes_struggling_behavior(self, client):
         sid = client.post(
@@ -790,3 +831,96 @@ class TestAPIEndpoints:
 
         r = client.get(f"/sessions/{sid}")
         assert r.json()["player_behavior_profile"] == "STRUGGLING"
+
+class TestMergeIntegration:
+    @pytest.mark.parametrize("case_id", [f"{i:03d}" for i in range(1, 16)])
+    def test_all_cases_keep_ai_session_state(self, client, case_id):
+        case = client.get(f"/cases/{case_id}")
+        assert case.status_code == 200
+        response = client.post("/sessions", json={"case_id": case_id, "username": "integration"})
+        assert response.status_code == 200
+        session = response.json()
+        assert session["current_puzzle"] == case.json()["puzzles"][0]["type"]
+        assert session["ai_state"] == "CALM"
+        assert client.get(f"/sessions/{session['session_id']}").json()["player_behavior_profile"] == "UNKNOWN"
+
+    def test_full_case_then_final_reasoning(self, client):
+        sid = client.post("/sessions", json={"case_id": "014"}).json()["session_id"]
+        solve_case014_until(client, sid, 5)
+        payload = {"hypothesis_id": "H4", "reasoning": "The records support this hypothesis."}
+        response = client.post(f"/sessions/{sid}/final-reasoning", json=payload)
+        assert response.status_code == 200
+        assert response.json()["game_over"] is True
+        assert client.post(f"/sessions/{sid}/final-reasoning", json=payload).status_code == 400
+
+    def test_puzzle_prerequisite_is_preserved(self, client):
+        sid = client.post("/sessions", json={"case_id": "014"}).json()["session_id"]
+        response = client.post(f"/sessions/{sid}/puzzles/employment",
+                               json={"employment_verified": True, "transfer_verified": True})
+        assert response.status_code == 403
+
+    def test_repeat_solution_does_not_inflate_ai(self, client):
+        sid = client.post("/sessions", json={"case_id": "014"}).json()["session_id"]
+        answers = solve_case014_until(client, sid, 3)
+        before = client.get(f"/sessions/{sid}").json()
+        client.post(f"/sessions/{sid}/puzzles/connection", json=answers[2][1])
+        after = client.get(f"/sessions/{sid}").json()
+        assert (before["ai_thrill"], before["ai_threat"]) == (after["ai_thrill"], after["ai_threat"])
+
+    def test_hint_and_evidence_tracking(self, client):
+        from src.database.db import get_connection
+        import src.api.main as api
+        sid = client.post("/sessions", json={"case_id": "014"}).json()["session_id"]
+        solve_case014_until(client, sid, 1)
+        session = api.sessions[sid]
+        evidence_id = session["game_state"].unlocked_evidence[0]
+        for _ in range(2):
+            assert client.post(f"/sessions/{sid}/evidence/{evidence_id}").status_code == 200
+        assert session["player"].evidence_inspected == 1
+        assert client.post(f"/sessions/{sid}/hint", json={"puzzle_id": "P02"}).status_code == 200
+        connection = get_connection()
+        try:
+            assert connection.execute("SELECT COUNT(*) FROM player_actions WHERE action_type = 'inspect_evidence'").fetchone()[0] == 1
+            assert connection.execute("SELECT hints_used FROM player_behaviour").fetchone()[0] == 1
+        finally:
+            connection.close()
+
+    @pytest.mark.parametrize("case_id", ["001", "003", "005"])
+    def test_new_case_puzzle_updates_ai_and_database(self, client, case_id):
+        from src.database.db import get_connection
+        import src.api.main as api
+        import json
+        from pathlib import Path
+        sid = client.post("/sessions", json={"case_id": case_id}).json()["session_id"]
+        schemas = json.loads(Path("frontend/js/utils/puzzle_schemas.js").read_text(encoding="utf-8").replace("export const CASE_SCHEMAS = ", "").strip().rstrip(";"))
+        fields = schemas[case_id]["P01"]["schema"]["fields"]
+        payload = {key: field["value"] for key, field in fields.items()}
+        payload["solve_time"] = 11.0
+        response = client.post(f"/sessions/{sid}/puzzles/{schemas[case_id]['P01']['endpoint']}", json=payload)
+        assert response.status_code == 200, response.text
+        assert response.json()["correct"] is True
+        assert api.sessions[sid]["player"].solve_times == [11.0]
+        connection = get_connection()
+        try:
+            assert connection.execute("SELECT puzzles_solved FROM player_behaviour").fetchone()[0] == 1
+            assert connection.execute("SELECT result, time_taken FROM puzzle_logs").fetchone() == ("success", 11.0)
+        finally:
+            connection.close()
+
+    def test_ai_context_uses_selected_case(self, client, monkeypatch):
+        import src.api.main as api
+        sid = client.post("/sessions", json={"case_id": "001"}).json()["session_id"]
+        captured = {}
+        def respond(game_state, message, case_context=None):
+            captured.update(case_context)
+            return "Case-specific response"
+        monkeypatch.setattr(api.sessions[sid]["adaptive_ai"], "generate_ai_response", respond)
+        assert client.post(f"/sessions/{sid}/ai", json={"message": "What can I investigate?"}).status_code == 200
+        case = client.get("/cases/001").json()
+        assert captured["victim"] == case["victim"]["name"]
+        assert captured["unlocked_evidence"] == []
+
+    def test_routes_are_unique(self, client):
+        import src.api.main as api
+        keys = [(method, route.path) for route in api.app.routes for method in getattr(route, "methods", [])]
+        assert len(keys) == len(set(keys))

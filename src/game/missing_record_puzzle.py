@@ -28,7 +28,27 @@ class MissingRecordPuzzle:
         return True, answer
 
     def check_answer(self, answer):
-        return answer == "confirmed"
+        """
+        Validate the player's understanding of the missing record
+        and the credential access evidence.
+        """
+
+        if not isinstance(answer, dict):
+            return False
+
+        missing_record = answer.get("missing_record")
+        location = answer.get("location")
+        credential_use = answer.get("credential_use")
+        avoids_direct_accusation = answer.get(
+            "avoids_direct_accusation"
+        )
+
+        return (
+            missing_record == "Case Assignment Log"
+            and location == "weekly assignment ledger"
+            and credential_use is True
+            and avoids_direct_accusation is True
+        )
 
     def get_unlocked_evidence(self):
         return self.unlocks

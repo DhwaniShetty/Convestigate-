@@ -1,0 +1,310 @@
+{
+  "case_id": "006",
+  "title": "THE $10 QUESTION",
+  "genre": "disappearance_mystery",
+  "status": "prototype",
+  "difficulty": "hard",
+  "victim": {
+    "name": "Tim Molnar",
+    "age": 19,
+    "occupation": "aeronautical_mechanics_student",
+    "status": "deceased",
+    "note": "Disappeared January 24, 1984, from Daytona Beach, Florida. Remains were later identified; cause of death was never established. Real case has no known suspects \u2014 'THE DRIVER' below is a Convestigate fictional invention, not a claim about the real case."
+  },
+  "suspects": [
+    {
+      "id": "501",
+      "name": "THE DRIVER (Fictional)",
+      "occupation": "unknown",
+      "relationship_to_victim": "unknown",
+      "note": "Convestigate game-design invention. Recognized Tim's vulnerability during his planned disappearance and allegedly intercepted him after Atlanta. Not established by the real source material; exists only as the fictional game antagonist."
+    }
+  ],
+  "timeline": [
+    {
+      "time": "day_0",
+      "event": "Tim withdraws most of his savings, deliberately leaving a $10 balance"
+    },
+    {
+      "time": "day_0",
+      "event": "Tim leaves Daytona Beach, Florida, taking minimal clothing and leaving identifying documents in his car"
+    },
+    {
+      "time": "day_1",
+      "event": "A credit-card purchase is made during travel"
+    },
+    {
+      "time": "day_2",
+      "event": "Tim's car is found abandoned near a Greyhound bus terminal in Atlanta, Georgia, with his wallet and license inside"
+    },
+    {
+      "time": "unknown",
+      "event": "A silent phone call is reportedly placed, suggesting possible contact with home after the disappearance"
+    },
+    {
+      "time": "unknown, fictional reconstruction",
+      "event": "Tim is intercepted by THE DRIVER after Atlanta, per the game's hidden truth"
+    },
+    {
+      "time": "years later",
+      "event": "Remains are identified in Wisconsin; cause of death cannot be established"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "E01",
+      "name": "Bank Withdrawal Record",
+      "type": "financial_record",
+      "description": "Shows a large withdrawal leaving exactly $10 in the account \u2014 later revealed as the minimum balance needed to avoid automatic account closure in-game, not a symbolic farewell message.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Bank records",
+      "supports": [
+        "H1",
+        "H3"
+      ],
+      "contradicts": [],
+      "unlocked_by": "P01"
+    },
+    {
+      "id": "E02",
+      "name": "Vehicle Inventory",
+      "type": "physical_evidence",
+      "description": "Records what possessions remained in the car versus what disappeared; Tim left almost no clothing despite apparently planning a long-term new life.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Vehicle search",
+      "supports": [
+        "H1"
+      ],
+      "contradicts": [
+        "H1"
+      ],
+      "unlocked_by": "P01"
+    },
+    {
+      "id": "E03",
+      "name": "Missing Valuables Report",
+      "type": "investigative_record",
+      "description": "Tim's valuable possessions disappeared, but the exact circumstances of their removal are unknown.",
+      "reliability": "medium",
+      "status": "locked",
+      "source": "Family/investigative inventory",
+      "supports": [
+        "H3"
+      ],
+      "contradicts": [],
+      "unlocked_by": "P01"
+    },
+    {
+      "id": "E04",
+      "name": "Identification Left in Vehicle",
+      "type": "physical_evidence",
+      "description": "Tim's driver's license and wallet were left behind \u2014 useful items for someone planning a new identity, creating a contradiction with the voluntary-disappearance theory.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Vehicle search",
+      "supports": [
+        "H3"
+      ],
+      "contradicts": [
+        "H1"
+      ],
+      "unlocked_by": "P02"
+    },
+    {
+      "id": "E05",
+      "name": "Silent Phone Call Log",
+      "type": "phone_record",
+      "description": "A silent call suggesting possible contact with home after the disappearance; proves nothing about who called.",
+      "reliability": "low",
+      "status": "locked",
+      "source": "Phone carrier records",
+      "supports": [],
+      "contradicts": [],
+      "unlocked_by": "P02"
+    },
+    {
+      "id": "E06",
+      "name": "Credit-Card Purchase Record",
+      "type": "financial_record",
+      "description": "A purchase during travel that makes Tim appear to be travelling voluntarily.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Credit card statement",
+      "supports": [
+        "H1",
+        "H3"
+      ],
+      "contradicts": [],
+      "unlocked_by": "P03"
+    },
+    {
+      "id": "E07",
+      "name": "Abandoned Car Location (Atlanta)",
+      "type": "field_record",
+      "description": "The car's location near the Greyhound terminal makes a subsequent bus journey plausible \u2014 the last reliable portion of the journey that can be reconstructed.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Vehicle recovery report",
+      "supports": [
+        "H1",
+        "H3"
+      ],
+      "contradicts": [],
+      "unlocked_by": "P03"
+    },
+    {
+      "id": "E08",
+      "name": "Route Reconstruction Gap Analysis",
+      "type": "investigative_synthesis",
+      "description": "Identifies the unexplained gap between Atlanta and Wisconsin; no confirmed explanation exists for how Tim reached Wisconsin.",
+      "reliability": "medium",
+      "status": "locked",
+      "source": "Investigative reconstruction",
+      "supports": [
+        "H3"
+      ],
+      "contradicts": [
+        "H1",
+        "H2"
+      ],
+      "unlocked_by": "P04"
+    },
+    {
+      "id": "E09",
+      "name": "Remains Identification Report",
+      "type": "forensic_record",
+      "description": "Confirms Tim's remains were identified in Wisconsin, far outside the known Florida-to-Atlanta sequence; cause of death could not be established.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Medical examiner records",
+      "supports": [
+        "H3",
+        "H4"
+      ],
+      "contradicts": [
+        "H1"
+      ],
+      "unlocked_by": "P05"
+    }
+  ],
+  "puzzles": [
+    {
+      "id": "P01",
+      "name": "The $10 Question & The Empty Car",
+      "type": "evidence_generation",
+      "description": "Examine the bank withdrawal and generate multiple explanations, then determine which possessions remained in the vehicle and which disappeared.",
+      "unlocks": [
+        "E01",
+        "E02",
+        "E03"
+      ]
+    },
+    {
+      "id": "P02",
+      "name": "The Identity Break & The Silent Call",
+      "type": "evidence_classification",
+      "description": "Decide whether leaving identification behind supports a planned disappearance, and separate the silent call's evidentiary weight from interpretation.",
+      "unlocks": [
+        "E04",
+        "E05"
+      ]
+    },
+    {
+      "id": "P03",
+      "name": "The Atlanta Terminal",
+      "type": "timeline_reconstruction",
+      "description": "Reconstruct the last reliable portion of the journey using the credit-card purchase and the car's location.",
+      "unlocks": [
+        "E06",
+        "E07"
+      ]
+    },
+    {
+      "id": "P04",
+      "name": "The Missing Route & The Two Stories",
+      "type": "hypothesis_test",
+      "description": "Identify the unexplained gap between Atlanta and Wisconsin, then compare the voluntary-disappearance theory with the interception theory.",
+      "unlocks": [
+        "E08"
+      ]
+    },
+    {
+      "id": "P05",
+      "name": "The Final Question & The $10 Reveal",
+      "type": "hypothesis_management",
+      "critical": true,
+      "description": "Revisit the player's original interpretation of the $10 and state what can actually be proven. The system reveals the $10 was never confirmed to be a farewell message \u2014 simply the surviving balance of a withdrawal made during genuine preparation to leave.",
+      "ai_initial_behavior": "Initially encourages the voluntary-disappearance theory as the most coherent early explanation; becomes increasingly confident if the player accepts it quickly ('Everything fits. Why keep digging?'). Becomes evasive and offers alternative interpretations if the player questions provenance. At the Atlanta-to-Wisconsin gap, attempts to redirect the player toward the emotionally satisfying 'chose a new life' explanation.",
+      "design_constraint": "Tim really did intend to disappear \u2014 which means a later, unrelated event could hide inside a genuine voluntary disappearance. THE DRIVER, the exact route, and the exact circumstances of death remain explicitly unresolved game elements, not proven facts.",
+      "unlocks": [
+        "E09"
+      ]
+    }
+  ],
+  "hypotheses": [
+    {
+      "id": "H1",
+      "statement": "Tim voluntarily disappeared and simply started a new life elsewhere.",
+      "supporting_evidence": [
+        "E01",
+        "E02",
+        "E06",
+        "E07"
+      ],
+      "contradicting_evidence": [
+        "E02",
+        "E04",
+        "E08",
+        "E09"
+      ],
+      "insufficient_evidence": [
+        "E02"
+      ],
+      "final_status": "contradicted"
+    },
+    {
+      "id": "H2",
+      "statement": "Tim's disappearance was staged by a third party from the very beginning.",
+      "supporting_evidence": [],
+      "contradicting_evidence": [
+        "E01",
+        "E06",
+        "E08"
+      ],
+      "insufficient_evidence": [],
+      "final_status": "contradicted"
+    },
+    {
+      "id": "H3",
+      "statement": "Tim planned a genuine but incomplete voluntary disappearance, and was later intercepted by an unknown third party (the fictional 'Driver').",
+      "supporting_evidence": [
+        "E01",
+        "E03",
+        "E04",
+        "E06",
+        "E07",
+        "E08",
+        "E09"
+      ],
+      "contradicting_evidence": [],
+      "insufficient_evidence": [
+        "E03",
+        "E08"
+      ],
+      "final_status": "supported"
+    },
+    {
+      "id": "H4",
+      "statement": "The exact route, cause of death, and identity/motive of any third party cannot be established from available evidence.",
+      "supporting_evidence": [
+        "E08",
+        "E09"
+      ],
+      "contradicting_evidence": [],
+      "insufficient_evidence": [],
+      "final_status": "supported"
+    }
+  ]
+}

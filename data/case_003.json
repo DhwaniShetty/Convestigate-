@@ -1,0 +1,412 @@
+{
+  "case_id": "003",
+  "title": "THE MAN FROM THE BAR",
+  "genre": "unresolved_disappearance",
+  "status": "prototype",
+  "difficulty": "hard",
+  "victim": {
+    "name": "Ronald Paul \"Ronnie\" Jack",
+    "age": 26,
+    "occupation": "millworker (recently unemployed due to back injury)",
+    "status": "missing",
+    "note": "Disappeared with his family on the night of August 1-2, 1980, from Prince George, British Columbia. No trace of any of them was ever located. Represents the primary case figure \u2014 see 'missing_family' for the other three. Also missing with him: Doreen Jack (26, partner/mother), Russell Jack (9, child), and Ryan Jack (4, child) \u2014 all four disappeared together and none was ever located."
+  },
+  "suspects": [
+    {
+      "id": "501",
+      "name": "Unknown Man from the Bar",
+      "occupation": "unknown",
+      "relationship_to_victim": "unidentified job offeror",
+      "note": "Tall, heavyset Caucasian man in his late 30s with reddish-brown hair and a full beard; wore a baseball cap, red checkered work shirt, and a blue waist-length nylon jacket with an orange logo later associated with a forestry-equipment brand. Never identified."
+    },
+    {
+      "id": "502",
+      "name": "Unrelated Third Party (Hypothetical)",
+      "occupation": "unknown",
+      "relationship_to_victim": "unknown",
+      "note": "Represents the hypothesis that the unknown man's presence was coincidental and a separate person or group was actually responsible."
+    }
+  ],
+  "timeline": [
+    {
+      "time": "evening, Aug 1",
+      "event": "Ronnie visits a local pub in Prince George"
+    },
+    {
+      "time": "unknown time",
+      "event": "An unidentified man enters the pub and speaks with Ronnie"
+    },
+    {
+      "time": "~23:00",
+      "event": "Ronnie and the unknown man leave the pub in the man's dark 4x4 pickup truck"
+    },
+    {
+      "time": "~23:00",
+      "event": "They travel roughly 350 metres to the Jack family home"
+    },
+    {
+      "time": "23:16",
+      "event": "Phone records show Ronnie calling his brother and discussing the job"
+    },
+    {
+      "time": "~00:00",
+      "event": "Doreen's cousin visits and sees her packing supplies for several weeks; the unknown man is inside the property"
+    },
+    {
+      "time": "~01:00",
+      "event": "Doreen's cousin leaves after about an hour at the home"
+    },
+    {
+      "time": "01:21, Aug 2",
+      "event": "Phone records confirm a call made from the Jack family residence"
+    },
+    {
+      "time": "early Aug 2",
+      "event": "Ronnie, Doreen, Russell, and Ryan disappear"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "E01",
+      "name": "Pub Witness Account",
+      "type": "witness_statement",
+      "description": "True eyewitness account establishing the meeting between Ronnie and the unknown man.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Pub patrons/staff",
+      "supports": [
+        "H1",
+        "H2",
+        "H4"
+      ],
+      "contradicts": [
+        "H5"
+      ],
+      "unlocked_by": "P01"
+    },
+    {
+      "id": "E02",
+      "name": "Unknown Man's Physical Description",
+      "type": "witness_statement",
+      "description": "True but incomplete; provides the main identification pattern for the unknown man.",
+      "reliability": "medium",
+      "status": "locked",
+      "source": "Multiple pub witnesses",
+      "supports": [],
+      "contradicts": [],
+      "unlocked_by": "P02"
+    },
+    {
+      "id": "E03",
+      "name": "Dark 4x4 Pickup Observation",
+      "type": "witness_statement",
+      "description": "True eyewitness account linking the man and Ronnie to the journey home.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Bystander witness",
+      "supports": [
+        "H4"
+      ],
+      "contradicts": [],
+      "unlocked_by": "P01"
+    },
+    {
+      "id": "E04",
+      "name": "11:16 PM Phone Call",
+      "type": "phone_record",
+      "description": "Shows Ronnie contacted his brother and discussed the job offer.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Phone carrier records",
+      "supports": [
+        "H1",
+        "H2"
+      ],
+      "contradicts": [],
+      "unlocked_by": "P01"
+    },
+    {
+      "id": "E05",
+      "name": "Doreen's Cousin's Visit",
+      "type": "witness_statement",
+      "description": "Places the unknown man inside the home while Doreen packed.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Doreen's cousin",
+      "supports": [
+        "H1",
+        "H4"
+      ],
+      "contradicts": [],
+      "unlocked_by": "P01"
+    },
+    {
+      "id": "E06",
+      "name": "1:21 AM Residence Call",
+      "type": "phone_record",
+      "description": "Establishes another communication from the family residence shortly before the disappearance.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Phone carrier records",
+      "supports": [],
+      "contradicts": [],
+      "unlocked_by": "P01"
+    },
+    {
+      "id": "E07",
+      "name": "School Registration Records",
+      "type": "official_record",
+      "description": "Russell was registered to start school weeks after the disappearance \u2014 evidence against the idea the family had simply abandoned their planned lives.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "School district records",
+      "supports": [
+        "H1"
+      ],
+      "contradicts": [
+        "H2"
+      ],
+      "unlocked_by": "P02"
+    },
+    {
+      "id": "E08",
+      "name": "Family Belongings",
+      "type": "physical_evidence",
+      "description": "The family took clothing sufficient for roughly two weeks \u2014 supports short-term preparation but does not establish what happened after departure.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Scene/residence inventory",
+      "supports": [
+        "H1"
+      ],
+      "contradicts": [],
+      "unlocked_by": "P02"
+    },
+    {
+      "id": "E09",
+      "name": "Police Report / Initial Theory",
+      "type": "official_record",
+      "description": "Documents the early assumption that Ronnie may have found work and left voluntarily.",
+      "reliability": "medium",
+      "status": "locked",
+      "source": "Initial police file",
+      "supports": [
+        "H1"
+      ],
+      "contradicts": [],
+      "unlocked_by": "P04"
+    },
+    {
+      "id": "E10",
+      "name": "Incorrect 'Family Found' Report",
+      "type": "official_record",
+      "description": "Shows a major investigative communication failure \u2014 the family had not actually been found.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Police communications",
+      "supports": [],
+      "contradicts": [],
+      "unlocked_by": "P04"
+    },
+    {
+      "id": "E11",
+      "name": "Logging-Camp Interviews/Searches",
+      "type": "investigative_record",
+      "description": "Later efforts to locate the alleged workplace; no camp matching the description was confirmed.",
+      "reliability": "medium",
+      "status": "locked",
+      "source": "Follow-up investigation",
+      "supports": [
+        "H2"
+      ],
+      "contradicts": [
+        "H1"
+      ],
+      "unlocked_by": "P03"
+    },
+    {
+      "id": "E12",
+      "name": "Husqvarna Jacket-Logo Lead",
+      "type": "secondary_source",
+      "description": "Unverified \u2014 the jacket logo was reportedly identified as a forestry-equipment supply brand, suggesting a possible genuine forestry connection but not establishing identity or a genuine job offer.",
+      "reliability": "low",
+      "status": "locked",
+      "source": "Secondary source material",
+      "supports": [
+        "H1"
+      ],
+      "contradicts": [],
+      "unlocked_by": "P02"
+    },
+    {
+      "id": "E13",
+      "name": "Reward / Public Appeals",
+      "type": "public_record",
+      "description": "Shows later attempts to generate new information from the public.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Public appeal records",
+      "supports": [],
+      "contradicts": [],
+      "unlocked_by": "P05"
+    },
+    {
+      "id": "E14",
+      "name": "Later Searches and Excavations",
+      "type": "investigative_record",
+      "description": "No trace of the family was ever located according to the source material.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Search and recovery operations",
+      "supports": [],
+      "contradicts": [
+        "H1"
+      ],
+      "unlocked_by": "P05"
+    }
+  ],
+  "puzzles": [
+    {
+      "id": "P01",
+      "name": "Night Timeline & Witness Description",
+      "type": "timeline_reconstruction",
+      "description": "Reconstruct the sequence from the bar encounter through the family's disappearance, and assemble the unknown man's physical description and clothing from witness information.",
+      "unlocks": [
+        "E01",
+        "E03",
+        "E04",
+        "E05",
+        "E06"
+      ]
+    },
+    {
+      "id": "P02",
+      "name": "Job Offer Audit & Packing Analysis",
+      "type": "evidence_classification",
+      "description": "Separate what was actually observed about the job offer from assumptions about whether it was genuine, and determine what the family's preparation suggests and what it cannot establish.",
+      "unlocks": [
+        "E07",
+        "E08",
+        "E12",
+        "E02"
+      ]
+    },
+    {
+      "id": "P03",
+      "name": "Logging Camp Search",
+      "type": "field_investigation",
+      "description": "Compare the alleged location and job details with information from forestry workers and searches.",
+      "unlocks": [
+        "E11"
+      ]
+    },
+    {
+      "id": "P04",
+      "name": "Investigation Failure",
+      "type": "institutional_review",
+      "description": "Investigate the incorrect report that the family had been found and identify how that affected the case.",
+      "unlocks": [
+        "E09",
+        "E10"
+      ]
+    },
+    {
+      "id": "P05",
+      "name": "Alternative Hypotheses & Final Uncertainty Report",
+      "type": "hypothesis_management",
+      "critical": true,
+      "description": "Compare accident, voluntary disappearance, abduction/foul play, and unrelated-unknown-man hypotheses, then state what can be established, what is plausible, and what remains unknown.",
+      "ai_initial_behavior": "Should not manufacture a culprit when the underlying case is unresolved. Adaptation changes hints, evidence order, framing, and difficulty \u2014 not the facts.",
+      "design_constraint": "'Insufficient evidence to determine what happened' is a valid, rewarded final conclusion. The evaluator rewards epistemic discipline: knowing what the evidence proves, what it suggests, and what it cannot establish.",
+      "unlocks": [
+        "E13",
+        "E14"
+      ]
+    }
+  ],
+  "hypotheses": [
+    {
+      "id": "H1",
+      "statement": "The family voluntarily left for genuine employment and later became unreachable.",
+      "supporting_evidence": [
+        "E01",
+        "E04",
+        "E05",
+        "E07",
+        "E08",
+        "E12",
+        "E09"
+      ],
+      "contradicting_evidence": [
+        "E11",
+        "E14"
+      ],
+      "insufficient_evidence": [
+        "E07",
+        "E08",
+        "E12"
+      ],
+      "final_status": "unresolved"
+    },
+    {
+      "id": "H2",
+      "statement": "The job offer was fabricated and the family was deliberately lured away from home.",
+      "supporting_evidence": [
+        "E01",
+        "E11"
+      ],
+      "contradicting_evidence": [
+        "E07"
+      ],
+      "insufficient_evidence": [
+        "E01"
+      ],
+      "final_status": "unresolved"
+    },
+    {
+      "id": "H3",
+      "statement": "The family travelled to a remote location and suffered an accident or other event.",
+      "supporting_evidence": [],
+      "contradicting_evidence": [],
+      "insufficient_evidence": [
+        "E14"
+      ],
+      "final_status": "unresolved"
+    },
+    {
+      "id": "H4",
+      "statement": "The unknown man was directly involved in the family's disappearance.",
+      "supporting_evidence": [
+        "E01",
+        "E03",
+        "E05"
+      ],
+      "contradicting_evidence": [],
+      "insufficient_evidence": [
+        "E01",
+        "E03",
+        "E05"
+      ],
+      "final_status": "unresolved"
+    },
+    {
+      "id": "H5",
+      "statement": "The unknown man's presence was coincidental and is not connected to the disappearance.",
+      "supporting_evidence": [],
+      "contradicting_evidence": [
+        "E01",
+        "E05"
+      ],
+      "insufficient_evidence": [],
+      "final_status": "unresolved"
+    },
+    {
+      "id": "H6",
+      "statement": "Another person or group was responsible, while the unknown man is only one part of the story.",
+      "supporting_evidence": [],
+      "contradicting_evidence": [],
+      "insufficient_evidence": [],
+      "final_status": "unresolved"
+    }
+  ]
+}

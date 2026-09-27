@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>CONVESTIGATE // Investigation Console</title>
+  <meta name="description"
+    content="Interactive murder-investigation deduction game. Reconstruct timelines, audit evidence provenance, and reason through deception.">
+
+  <!-- Design System CSS (Strict Black / White / Blood Red) -->
+  <link rel="stylesheet" href="css/theme.css?v=5">
+  <link rel="stylesheet" href="css/layout.css?v=5">
+  <link rel="stylesheet" href="css/components.css?v=5">
+  <link rel="stylesheet" href="css/board.css?v=5">
+  <link rel="stylesheet" href="css/animations.css?v=5">
+  <link rel="stylesheet" href="css/manga.css?v=1">
+
+  <link rel="stylesheet" href="css/splash.css?v=1">
+</head>
+
+<body>
+  <div id="boot-splash-root"></div>
+  <!-- Carved Archival Investigation Desk Surface (Engraved Slate / Desk Texture) -->
+  <div id="carved-noir-surface" aria-hidden="true"></div>
+
+  <!-- Atmospheric CRT scanlines & dynamic tension vignette -->
+  <div id="cinematic-atmosphere" aria-hidden="true"></div>
+
+  <!-- Cinematic Overlay (Case Opening Sequence & Flash transitions) -->
+  <div id="cinematic-overlay-root"></div>
+
+  <!-- Global Forensic Toast Alerts -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Detective Field Manual Modal Container -->
+  <div id="manual-modal-root"></div>
+
+  <div id="app-root">
+    <!-- Top HUD Navigation -->
+    <div id="hud-nav-root"></div>
+
+    <!-- Main Screens Container -->
+    <main class="main-content">
+      <!-- 1. Landing Screen -->
+      <section id="screen-landing" class="screen-view active"></section>
+
+      <!-- 2. Multiplayer Lobby -->
+      <section id="screen-lobby" class="screen-view"></section>
+
+      <!-- 3. Case Briefing -->
+      <section id="screen-briefing" class="screen-view"></section>
+
+      <!-- 4. Main Investigation Dashboard -->
+      <section id="screen-dashboard" class="screen-view"></section>
+
+      <!-- 5. Final Investigation Review -->
+      <section id="screen-final-investigation" class="screen-view"></section>
+
+      <!-- 6. Final Answer / Verdict -->
+      <section id="screen-final-answer" class="screen-view"></section>
+
+      <!-- 7. Evaluation & Results -->
+      <section id="screen-results" class="screen-view"></section>
+    </main>
+  </div>
+
+  <!-- Application Bundle -->
+  <script type="module" src="js/app.js?v=5"></script>
+</body>
+
+</html>
