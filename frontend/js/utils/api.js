@@ -1,7 +1,7 @@
 const API_BASE_URL = window.location.hostname === 'localhost' ||
                      window.location.hostname === '127.0.0.1'
   ? 'http://127.0.0.1:8000'
-  : 'https://convestigate.onrender.com';
+  : 'https://convestigate-1.onrender.com';
 
 export async function createSession(caseId, playerCount, username) {
   const response = await fetch(`${API_BASE_URL}/sessions`, {
