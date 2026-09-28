@@ -1061,47 +1061,24 @@ export const CASE_SCHEMAS = {
       "type": "forensic_analysis",
       "endpoint": "connection",
       "schema": {
-        "type": "compound",
-        "fields": {
-          "establishes": {
-            "type": "string",
-            "value": "crash_mechanics"
-          },
-          "does_not_establish": {
-            "type": "string",
-            "value": "what_happened_to_bryce_afterward"
-          }
-        }
+        "type": "generic",
+        "component": "p03Connection"
       }
     },
     "P04": {
       "type": "field_evidence_analysis",
       "endpoint": "contradictory",
       "schema": {
-        "type": "compound",
-        "fields": {
-          "significance": {
-            "type": "string",
-            "value": "scent_trail_ends_near_roadway"
-          },
-          "limitation": {
-            "type": "string",
-            "value": "does_not_prove_what_happened_to_bryce"
-          }
-        }
+        "type": "generic",
+        "component": "p04Witness"
       }
     },
     "P05": {
       "type": "hypothesis_management",
       "endpoint": "missing-record",
       "schema": {
-        "type": "list",
-        "key": "hypotheses",
-        "values": [
-          "voluntary_disappearance",
-          "undiscovered_self_harm",
-          "third_party_intervention"
-        ]
+        "type": "generic",
+        "component": "p05Missing"
       }
     }
   },

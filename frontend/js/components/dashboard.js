@@ -13,7 +13,6 @@ import { renderNotesPanel } from './notesPanel.js';
 import { sound } from '../effects/soundSystem.js';
 
 let activeTab = 'overview';
-let dashboardVersion = -1;
 let activeRightTab = 'ai'; // 'ai' or 'notes'
 
 export function setDashboardTab(tab) {
@@ -25,11 +24,6 @@ export function setDashboardTab(tab) {
 }
 
 export function renderDashboard(container) {
-  if (dashboardVersion !== gameState.caseVersion) {
-    dashboardVersion = gameState.caseVersion;
-    activeTab = 'overview';
-    activeRightTab = 'ai';
-  }
   const state = gameState.getState();
   const c = state.currentCase;
   const solvedCount = Object.values(state.puzzleProgress).filter(Boolean).length;
@@ -79,7 +73,7 @@ export function renderDashboard(container) {
               <div style="width: ${(solvedCount / totalPuzzles) * 100}%; height: 100%; background: var(--blood-red);"></div>
             </div>
           </div>
-          <button class="btn btn-primary" id="btn-dash-verdict" ${gameState.allPuzzlesSolved() ? "" : "disabled"} style="width: 100%; font-size: 0.8rem;">
+          <button class="btn btn-primary" id="btn-dash-verdict" style="width: 100%; font-size: 0.8rem;">
             SUBMIT FINAL VERDICT →
           </button>
         </div>

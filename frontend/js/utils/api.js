@@ -1,7 +1,4 @@
-const API_BASE_URL = window.location.hostname === 'localhost' ||
-                     window.location.hostname === '127.0.0.1'
-  ? 'http://127.0.0.1:8000'
-  : 'https://convestigate-1.onrender.com';
+const API_BASE_URL = 'http://127.0.0.1:8000';
 
 export async function createSession(caseId, playerCount, username) {
   const response = await fetch(`${API_BASE_URL}/sessions`, {
@@ -193,57 +190,3 @@ export async function submitDynamicPuzzle(sessionId, endpoint, payload) {
   return await response.json();
 }
 
-
-// The backend owns AI access and verdict evaluation; only session-scoped data is sent.
-async function requestJSON(path, payload) {
-  let response;
-  try {
-    response = await fetch(API_BASE_URL + path, payload === undefined ? {} : {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-  } catch {
-    throw new Error('Cannot reach the investigation server. Check the connection and try again.');
-  }
-  const data = await response.json().catch(() => null);
-  if (!response.ok) {
-    const detail = data?.detail;
-    throw new Error(typeof detail === 'string' ? detail :
-      Array.isArray(detail) ? detail.map(item => item.msg).join('; ') :
-      'The server could not complete the request. Please try again.');
-  }
-  if (!data) throw new Error('The server returned an invalid response.');
-  return data;
-}
-
-function sessionPath(sessionId, action) {
-  if (!sessionId) throw new Error('Start an investigation before contacting the advisor.');
-  return `/sessions/${encodeURIComponent(sessionId)}/${action}`;
-}
-
-export function sendAIMessage(sessionId, message) {
-  return requestJSON(sessionPath(sessionId, 'ai'), { message });
-}
-
-export function requestHint(sessionId, puzzleId) {
-  return requestJSON(sessionPath(sessionId, 'hint'), { puzzle_id: puzzleId });
-}
-
-export function submitFinalReasoning(sessionId, hypothesisId, reasoning) {
-  return requestJSON(sessionPath(sessionId, 'final-reasoning'), {
-    hypothesis_id: hypothesisId, reasoning
-  });
-}
-
-export function getCases() {
-  return requestJSON('/cases');
-}
-
-export function inspectEvidence(sessionId, evidenceId) {
-  return requestJSON(sessionPath(sessionId, 'evidence/' + encodeURIComponent(evidenceId)), {});
-}
-
-export function getCaseDetails(caseId) {
-  return requestJSON(`/cases/${encodeURIComponent(caseId)}`);
-}

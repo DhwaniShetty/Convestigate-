@@ -1,7 +1,8 @@
-﻿import { gameState } from '../state/gameState.js';
+import { gameState } from '../state/gameState.js';
 import { ALL_CASES, getCaseById } from '../data/caseLoader.js';
 import { cinematic } from '../effects/cinematic.js';
 import { sound } from '../effects/soundSystem.js';
+import { createSession } from '../utils/api.js';
 
 let caseSearchQuery = '';
 
@@ -20,15 +21,11 @@ export function renderLandingScreen(container) {
 
   container.innerHTML = `
     <div class="landing-hero">
-      <div class="stamp stamp-red" style="margin-bottom: 12px; animation: stamp-pop 0.4s ease-out;">CONVESTIGATE // ${ALL_CASES.length} ARCHIVED DOCKETS</div>
+      <div class="stamp stamp-red" style="margin-bottom: 12px; animation: stamp-pop 0.4s ease-out;">CONVESTIGATE // 14 ARCHIVED DOCKETS</div>
       <h1 class="landing-title">CONV<span>ESTIGATE</span></h1>
       <p class="landing-tagline">SELECT A CASE DOCKET // REASON FROM EVIDENCE, NOT SPECULATION</p>
       
-      <div class="landing-actions">
-        <button class="btn btn-primary" id="btn-quick-start" style="padding: 14px 32px; font-size: 1rem; letter-spacing: 1.5px;">
-          <span>👉 INVESTIGATE CASE #${state.currentCaseId || '014'}: ${state.currentCase?.title || 'THE MAN WHO MOVED'} →</span>
-        </button>
-      </div>
+      
 
       <!-- 14 Cases Filter Toolbar -->
       <div class="case-filter-bar">
@@ -87,6 +84,50 @@ export function renderLandingScreen(container) {
         </button>
       </div>
     </div>
+
+    <!-- Create Investigation Modal -->
+    <div class="modal-overlay" id="modal-create-game">
+      <div class="modal-box">
+        <div class="modal-header">
+          <div class="modal-title">CREATE INVESTIGATION</div>
+          <button class="modal-close" id="close-modal-create">&times;</button>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Lead Investigator Name</label>
+          <input type="text" class="form-input" id="input-creator-name" value="Detective Cross" placeholder="Enter your name" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Investigation Code / Room ID</label>
+          <input type="text" class="form-input" id="input-game-id" value="${state.lobby.gameId}" readonly />
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
+          <button class="btn" id="btn-cancel-create">CANCEL</button>
+          <button class="btn btn-primary" id="btn-confirm-create">ENTER LOBBY</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Join Investigation Modal -->
+    <div class="modal-overlay" id="modal-join-game">
+      <div class="modal-box">
+        <div class="modal-header">
+          <div class="modal-title">JOIN INVESTIGATION</div>
+          <button class="modal-close" id="close-modal-join">&times;</button>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Partner Investigator Name</label>
+          <input type="text" class="form-input" id="input-joiner-name" placeholder="Enter your callsign" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Investigation Access Code</label>
+          <input type="text" class="form-input" id="input-join-code" placeholder="e.g. ${state.lobby.gameId}" />
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
+          <button class="btn" id="btn-cancel-join">CANCEL</button>
+          <button class="btn btn-primary" id="btn-confirm-join">CONNECT</button>
+        </div>
+      </div>
+    </div>
   `;
 
   // Search input handler
@@ -110,6 +151,8 @@ export function renderLandingScreen(container) {
 
   // Modal references
   const introModal = container.querySelector('#case-intro-modal');
+  const modalCreate = container.querySelector('#modal-create-game');
+  const modalJoin = container.querySelector('#modal-join-game');
 
   // Case card clicks -> Select Case & Update UI
   container.querySelectorAll('.case-card').forEach(card => {
@@ -180,9 +223,21 @@ export function renderLandingScreen(container) {
 
     const caseData = getCaseById(currentCaseId);
 
+    const playerName =
+      gameState.getState().lobby.playerName || 'Detective Cross';
+
     try {
+      const session = await createSession(
+        currentCaseId,
+        2,
+        playerName
+      );
+
+      gameState.state.sessionId = session.session_id;
+
       gameState.loadCase(caseData);
-      await gameState.ensureSession();
+
+      console.log('BACKEND SESSION CREATED:', session);
 
       cinematic.playCinematicCaseOpening(caseData, () => {
 
@@ -215,5 +270,42 @@ export function renderLandingScreen(container) {
     cinematic.playCinematicCaseOpening(caseData, () => {
       gameState.setScreen('BRIEFING');
     });
+  });
+
+  // Create / Join modal controls
+  container.querySelector('#btn-open-create')?.addEventListener('click', () => {
+    sound.playClick();
+    modalCreate?.classList.add('open');
+  });
+  container.querySelector('#close-modal-create')?.addEventListener('click', () => modalCreate?.classList.remove('open'));
+  container.querySelector('#btn-cancel-create')?.addEventListener('click', () => modalCreate?.classList.remove('open'));
+  container.querySelector('#btn-confirm-create')?.addEventListener('click', () => {
+    sound.playClick();
+    const nameInput = container.querySelector('#input-creator-name');
+    if (nameInput && nameInput.value.trim()) {
+      gameState.state.lobby.playerName = nameInput.value.trim();
+    }
+    modalCreate?.classList.remove('open');
+    gameState.setScreen('LOBBY');
+  });
+
+  container.querySelector('#btn-open-join')?.addEventListener('click', () => {
+    sound.playClick();
+    modalJoin?.classList.add('open');
+  });
+  container.querySelector('#close-modal-join')?.addEventListener('click', () => modalJoin?.classList.remove('open'));
+  container.querySelector('#btn-cancel-join')?.addEventListener('click', () => modalJoin?.classList.remove('open'));
+  container.querySelector('#btn-confirm-join')?.addEventListener('click', () => {
+    sound.playClick();
+    const joinCode = container.querySelector('#input-join-code')?.value.trim();
+    const joinerName = container.querySelector('#input-joiner-name')?.value.trim();
+    if (joinCode) {
+      gameState.state.lobby.gameId = joinCode;
+    }
+    if (joinerName) {
+      gameState.state.lobby.playerName = joinerName;
+    }
+    modalJoin?.classList.remove('open');
+    gameState.setScreen('LOBBY');
   });
 }

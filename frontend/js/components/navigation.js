@@ -32,7 +32,7 @@ export function renderNavigation(container) {
           <button class="nav-link ${state.currentScreen === 'LANDING' ? 'active' : ''}" id="nav-btn-landing">Cases</button>
           <button class="nav-link ${state.currentScreen === 'BRIEFING' ? 'active' : ''}" id="nav-btn-briefing">Briefing</button>
           <button class="nav-link ${['DASHBOARD', 'EVIDENCE', 'BOARD', 'PUZZLES'].includes(state.currentScreen) ? 'active' : ''}" id="nav-btn-investigate">Investigation</button>
-          <button class="nav-link ${state.currentScreen === 'FINAL_INVESTIGATION' || state.currentScreen === 'FINAL_ANSWER' ? 'active' : ''}" id="nav-btn-final" ${gameState.allPuzzlesSolved() ? "" : "disabled"}>Final Verdict</button>
+          <button class="nav-link ${state.currentScreen === 'FINAL_INVESTIGATION' || state.currentScreen === 'FINAL_ANSWER' ? 'active' : ''}" id="nav-btn-final">Final Verdict</button>
         </nav>
       </div>
     </header>

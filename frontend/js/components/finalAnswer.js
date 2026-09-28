@@ -1,23 +1,14 @@
 import { gameState } from '../state/gameState.js';
-import { escapeHTML } from '../utils/text.js';
 import { sound } from '../effects/soundSystem.js';
 
 let selectedSuspectId = null;
 let selectedHypothesisId = null;
 let selectedEvidenceIds = [];
 let savedReasoningText = '';
-let draftSessionId;
 
 export function renderFinalAnswer(container) {
   const state = gameState.getState();
   const c = state.currentCase;
-  if (draftSessionId !== state.sessionId) {
-    draftSessionId = state.sessionId;
-    selectedSuspectId = state.finalAnswer.suspectId;
-    selectedHypothesisId = state.finalAnswer.hypothesisId;
-    selectedEvidenceIds = [...state.finalAnswer.selectedEvidenceIds];
-    savedReasoningText = state.finalAnswer.reasoningText;
-  }
   const suspects = state.suspects || [];
   const hypotheses = c?.hypotheses || [];
   const unlockedEvidence = Object.values(state.evidenceMap).filter(e => e.status !== 'locked');
@@ -65,7 +56,7 @@ export function renderFinalAnswer(container) {
             ${hypotheses.map(h => `
               <label class="checklist-item ${selectedHypothesisId === h.id ? 'complete' : ''}" style="cursor: pointer; ${selectedHypothesisId === h.id ? 'border-color: var(--blood-red);' : ''}">
                 <input type="radio" name="final_hypothesis" value="${h.id}" ${selectedHypothesisId === h.id ? 'checked' : ''} />
-                <span style="font-family: var(--font-mono); font-size: 0.85rem; color: #ffffff;">[${h.id}] ${escapeHTML(h.statement)}</span>
+                <span style="font-family: var(--font-mono); font-size: 0.85rem; color: #ffffff;">[${h.id}] ${h.statement}</span>
               </label>
             `).join('')}
           </div>
@@ -93,15 +84,13 @@ export function renderFinalAnswer(container) {
         <!-- 4. Written Explanation -->
         <div class="dossier-section">
           <h4 class="dossier-subtitle">4. DEDUCTIVE EXPLANATION & SUMMARY OF UNRESOLVED FACTS</h4>
-          <textarea class="form-input" id="final-reasoning-input" placeholder="Explain your deductive reconstruction, noting why correlation was rejected and which facts remain unproven..." style="width: 100%; height: 90px; resize: vertical;">${escapeHTML(savedReasoningText)}</textarea>
+          <textarea class="form-input" id="final-reasoning-input" placeholder="Explain your deductive reconstruction, noting why correlation was rejected and which facts remain unproven..." style="width: 100%; height: 90px; resize: vertical;">${savedReasoningText}</textarea>
         </div>
 
-        ${state.finalError ? `<p role="alert" style="color: var(--blood-red-bright);">${escapeHTML(state.finalError)}</p>` : ''}
-        ${state.finalPending ? '<p role="status" aria-live="polite">Awaiting the case evaluation...</p>' : ''}
         <div style="display: flex; justify-content: space-between; align-items: center; border-top: 2px solid var(--border-medium); padding-top: 20px; margin-top: 16px;">
           <button class="btn" id="btn-answer-back">← BACK TO CHECKLIST</button>
-          <button class="btn btn-primary" id="btn-submit-verdict" ${gameState.allPuzzlesSolved() ? "" : "disabled"} ${state.finalPending ? 'disabled' : ''} style="padding: 12px 28px; font-size: 0.95rem;">
-            ${state.finalPending ? 'SUBMITTING VERDICT...' : 'SUBMIT VERDICT FOR EVALUATION →'}
+          <button class="btn btn-primary" id="btn-submit-verdict" style="padding: 12px 28px; font-size: 0.95rem;">
+            SUBMIT VERDICT FOR EVALUATION →
           </button>
         </div>
       </div>
@@ -155,7 +144,7 @@ export function renderFinalAnswer(container) {
   container.querySelector('#btn-submit-verdict')?.addEventListener('click', () => {
     sound.playStamp();
     const reasoningText = savedReasoningText || container.querySelector('#final-reasoning-input')?.value || '';
-    void gameState.submitFinalAnswer({
+    gameState.submitFinalAnswer({
       suspectId: selectedSuspectId,
       hypothesisId: selectedHypothesisId,
       selectedEvidenceIds,

@@ -184,12 +184,10 @@ class CinematicOrchestrator {
    * CCTV/phone evidence, speech/thought bubbles, and cinematic transitions.
    */
   playCinematicCaseOpening(caseData, onComplete) {
-    if (!caseData.image) { if (onComplete) onComplete(); return; }
     mangaStory.presentCase(caseData, onComplete);
   }
 
   openMangaStory(caseData, onComplete) {
-    if (!caseData.image) { if (onComplete) onComplete(); return; }
     mangaStory.presentCase(caseData, onComplete);
   }
 

@@ -115,17 +115,16 @@ export function renderP03Connection(container) {
 
   try {
     const caseId = gameState.getState().currentCase.case_id;
-    const result = await gameState.submitPuzzle('P03', () => submitConnectionPuzzle(
+    const result = await submitConnectionPuzzle(
       sessionId,
       caseId,
       connections
-    ));
-      if (!result) return;
+    );
 
     console.log('P03 BACKEND RESULT:', result);
 
     if (result.correct) {
-
+      gameState.completePuzzle('P03');
       renderP03Connection(container);
     } else {
       alert(result.message || 'Incorrect connection analysis. Try again.');

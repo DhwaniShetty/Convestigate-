@@ -106,18 +106,8 @@ export function renderCaseBriefing(container) {
     mangaStory.presentCase(c, () => {});
   });
 
-  container.querySelector('#btn-briefing-start')?.addEventListener('click', async (event) => {
-    const button = event.currentTarget;
-    button.disabled = true;
-    button.textContent = 'CONNECTING TO INVESTIGATION...';
-    try {
-      await gameState.ensureSession();
-      sound.playStamp();
-      gameState.setScreen('DASHBOARD');
-    } catch (error) {
-      alert(`Unable to start investigation: ${error.message}`);
-      button.disabled = false;
-      button.textContent = 'ENTER INVESTIGATION CONSOLE →';
-    }
+  container.querySelector('#btn-briefing-start')?.addEventListener('click', () => {
+    sound.playStamp();
+    gameState.setScreen('DASHBOARD');
   });
 }

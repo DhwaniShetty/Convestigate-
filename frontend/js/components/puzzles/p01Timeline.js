@@ -5,18 +5,14 @@ import { submitTimelinePuzzle } from '../../utils/api.js';
 
 let localOrder = null;
 
-let draftVersion = -1;
-
 export function renderP01Timeline(container) {
   const state = gameState.getState();
-  if (draftVersion !== gameState.caseVersion) {
-    draftVersion = gameState.caseVersion;
-    localOrder = null;
-  }
   const isCompleted = state.puzzleProgress.P01;
 
   if (!localOrder) {
-    localOrder = [...state.timeline];
+    localOrder = [...state.timeline].filter(
+      ev => ev.time !== '22:15'
+    );
 
     if (!isCompleted && localOrder.length > 2) {
       localOrder = [localOrder[1], localOrder[0], ...localOrder.slice(2)];
@@ -115,13 +111,12 @@ export function renderP01Timeline(container) {
     const order = localOrder.map(ev => ev.time);
 
     try {
-      const result = await gameState.submitPuzzle('P01', () => submitTimelinePuzzle(sessionId, order));
-      if (!result) return;
+      const result = await submitTimelinePuzzle(sessionId, order);
 
       console.log('P01 BACKEND RESULT:', result);
 
       if (result.correct) {
-
+        gameState.completePuzzle('P01');
         renderP01Timeline(container);
       } else {
         alert(result.message || 'Incorrect order. Try again.');
