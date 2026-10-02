@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: convestigate-api
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn src.api.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /
+
+  - type: web
+    name: convestigate-game
+    runtime: static
+    buildCommand: node scripts/build_frontend.mjs
+    staticPublishPath: frontend
+    envVars:
+      - key: CONVESTIGATE_API_URL
+        fromService:
+          type: web
+          name: convestigate-api
+          envVarKey: RENDER_EXTERNAL_URL

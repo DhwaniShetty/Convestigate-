@@ -23,7 +23,7 @@ class EvidenceSystem:
         print("Name:", evidence["name"])
         print("type:" , evidence["type"])
         print("Discription:" , evidence["description"])
-        return
+        return evidence_id 
 
 
     print("evidence not found")

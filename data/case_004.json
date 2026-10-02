@@ -1,0 +1,240 @@
+{
+  "case_id": "004",
+  "title": "THE ALIBI THAT WASN'T THERE",
+  "genre": "murder_mystery_digital_forensics",
+  "status": "prototype",
+  "difficulty": "medium",
+
+  "victim": {
+    "name": "Sameer Kapoor",
+    "age": 34,
+    "occupation": "startup_co_founder",
+    "status": "deceased",
+    "note": "Found dead in his home office from blunt-force trauma. Had recently discovered irregularities in the company's equity records that he had not yet disclosed. This case is fully invented for Convestigate — no real person, company, or event is referenced."
+  },
+
+  "suspects": [
+    {
+      "id": "501",
+      "name": "Rhea Kapoor",
+      "age": 32,
+      "occupation": "startup_co_founder",
+      "relationship_to_victim": "wife",
+      "note": "Financial disputes with Sameer; had recently learned he had discovered her role in the equity irregularities. Claimed alibi: a wellness retreat two hours away, corroborated only by her own fitness-app data."
+    },
+    {
+      "id": "502",
+      "name": "Vikas Anand",
+      "age": 36,
+      "occupation": "business_partner",
+      "relationship_to_victim": "business partner",
+      "note": "Disputed an earlier buyout offer from Sameer. Claimed alibi: working late at the office, corroborated by two independent systems (badge log and laptop activity)."
+    },
+    {
+      "id": "503",
+      "name": "Neha Verma",
+      "age": 29,
+      "occupation": "former_employee",
+      "relationship_to_victim": "terminated by the victim",
+      "note": "Had a public confrontation with Sameer after her termination. Claimed alibi: a friend's birthday party, corroborated by multiple independent guests."
+    }
+  ],
+
+  "timeline": [
+    { "time": "18:40", "event": "Sameer is last seen alive by a neighbor, working in his home office" },
+    { "time": "19:00-22:00", "event": "Estimated time-of-death window per forensic examination" },
+    { "time": "19:05", "event": "Rhea's fitness app logs a check-in at the retreat venue" },
+    { "time": "19:10", "event": "Vikas badges into the office; laptop activity begins shortly after" },
+    { "time": "19:30", "event": "Neha is photographed at the birthday party by another guest" },
+    { "time": "21:50", "event": "Rhea's fitness app logs a second check-in and a step count consistent with an evening walk at the retreat" },
+    { "time": "next morning", "event": "Sameer's body is discovered by his housekeeper; the estimated window is refined post-autopsy" }
+  ],
+
+  "evidence": [
+    {
+      "id": "E01",
+      "name": "Forensic Time-of-Death Estimate",
+      "type": "forensic_record",
+      "description": "Establishes the 19:00-22:00 window that every alibi must be tested against.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Medical examiner report",
+      "supports": [],
+      "contradicts": [],
+      "unlocked_by": "P02"
+    },
+    {
+      "id": "E02",
+      "name": "Rhea's Fitness-App Location Log",
+      "type": "digital_record",
+      "description": "Appears to place Rhea at the retreat continuously throughout the window. True but incomplete — it proves the device's location, not conclusively where Rhea herself was.",
+      "reliability": "medium",
+      "status": "locked",
+      "source": "Fitness app provider records",
+      "supports": [],
+      "contradicts": ["H1"],
+      "unlocked_by": "P01"
+    },
+    {
+      "id": "E03",
+      "name": "Retreat Sign-In Sheet",
+      "type": "official_record",
+      "description": "An independent, human-logged record revealing a period where staff did not directly observe Rhea, despite her device continuing to log activity.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Retreat venue records",
+      "supports": ["H1"],
+      "contradicts": ["H1"],
+      "unlocked_by": "P03"
+    },
+    {
+      "id": "E04",
+      "name": "Highway Toll / Gas-Station Footage",
+      "type": "video_and_digital_record",
+      "description": "Places a car matching Rhea's rental near Sameer's home during part of the time-of-death window.",
+      "reliability": "medium",
+      "status": "locked",
+      "source": "Toll authority and gas station security footage",
+      "supports": ["H1"],
+      "contradicts": [],
+      "unlocked_by": "P03"
+    },
+    {
+      "id": "E05",
+      "name": "Vikas's Office Badge Log",
+      "type": "official_record",
+      "description": "An independent system record placing Vikas on-site through the time-of-death window.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Office access-control system",
+      "supports": ["H4"],
+      "contradicts": ["H2"],
+      "unlocked_by": "P01"
+    },
+    {
+      "id": "E06",
+      "name": "Vikas's Laptop Activity Log",
+      "type": "digital_record",
+      "description": "A second, independent system record corroborating the badge log without relying on Vikas's own testimony.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Company IT systems",
+      "supports": ["H4"],
+      "contradicts": ["H2"],
+      "unlocked_by": "P05"
+    },
+    {
+      "id": "E07",
+      "name": "Neha's Social-Media Check-Ins and Photos",
+      "type": "digital_record",
+      "description": "Corroborated by other identifiable guests at the party, not just Neha's own posts.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Social media platform, guest statements",
+      "supports": ["H4"],
+      "contradicts": ["H3"],
+      "unlocked_by": "P01"
+    },
+    {
+      "id": "E08",
+      "name": "Equity / Financial Audit",
+      "type": "financial_record",
+      "description": "Establishes the strength and timing of each suspect's motive; strongest and most time-sensitive for Rhea, whose fraud was about to be disclosed.",
+      "reliability": "high",
+      "status": "locked",
+      "source": "Independent financial audit",
+      "supports": ["H1"],
+      "contradicts": [],
+      "unlocked_by": "P04"
+    },
+    {
+      "id": "E09",
+      "name": "Companion's Statement",
+      "type": "witness_statement",
+      "description": "A retreat acquaintance's offhand comment reveals she carried Rhea's phone for part of the afternoon 'so Rhea could nap' — breaking the assumed link between the device's location and Rhea's own.",
+      "reliability": "medium",
+      "status": "locked",
+      "source": "Investigative interview",
+      "supports": ["H1", "H4"],
+      "contradicts": [],
+      "unlocked_by": "P03"
+    }
+  ],
+
+  "puzzles": [
+    {
+      "id": "P01",
+      "name": "Digital Alibi Map",
+      "type": "evidence_mapping",
+      "description": "Lay out each suspect's claimed alibi and the specific digital or system record behind it.",
+      "unlocks": ["E02", "E05", "E07"]
+    },
+    {
+      "id": "P02",
+      "name": "Time-of-Death Reconciliation",
+      "type": "timeline_reconciliation",
+      "description": "Establish the forensic time-of-death window and test which alibi actually covers the full window versus only part of it.",
+      "unlocks": ["E01"]
+    },
+    {
+      "id": "P03",
+      "name": "Metadata Authentication",
+      "type": "digital_provenance_analysis",
+      "critical": true,
+      "description": "Test whether each digital trail could be generated, delayed, or carried by someone other than the suspect — separating device presence from person presence.",
+      "ai_initial_behavior": "Initially presents each digital trail as settled fact ('Rhea's phone was at the retreat the entire evening'), encouraging the player to treat device data as equivalent to witnessed presence. Becomes less cooperative and surfaces the sign-in gap only gradually if the player asks who else was at the retreat.",
+      "design_constraint": "The AI never fabricates or alters what a piece of evidence actually says. Adaptation controls access, timing, framing, and hints — never the underlying truth.",
+      "unlocks": ["E03", "E04", "E09"]
+    },
+    {
+      "id": "P04",
+      "name": "Financial Motive Audit",
+      "type": "motive_analysis",
+      "description": "Examine the equity dispute, the buyout conflict, and the termination fallout to weigh motive independently of alibi.",
+      "unlocks": ["E08"]
+    },
+    {
+      "id": "P05",
+      "name": "Final Reconstruction",
+      "type": "hypothesis_management",
+      "critical": true,
+      "description": "Determine whose alibi survives independent human corroboration and whose does not, then commit to a reasoned conclusion. A strong solution identifies which alibis are independently corroborated, explains how the uncorroborated alibi could have been constructed, and explicitly flags what remains unproven (the exact return route) even after naming the culprit.",
+      "unlocks": ["E06"]
+    }
+  ],
+
+  "hypotheses": [
+    {
+      "id": "H1",
+      "statement": "Rhea killed Sameer; her digital alibi was staged by having a companion carry her phone while she left the retreat.",
+      "supporting_evidence": ["E03", "E04", "E08", "E09"],
+      "contradicting_evidence": ["E02"],
+      "insufficient_evidence": ["E04"],
+      "final_status": "supported"
+    },
+    {
+      "id": "H2",
+      "statement": "Vikas killed Sameer; his badge and laptop logs were manipulated or delegated to someone else on-site.",
+      "supporting_evidence": [],
+      "contradicting_evidence": ["E05", "E06"],
+      "insufficient_evidence": [],
+      "final_status": "contradicted"
+    },
+    {
+      "id": "H3",
+      "statement": "Neha killed Sameer; her social-media presence was staged using scheduled posts and a look-alike appearance at the party.",
+      "supporting_evidence": [],
+      "contradicting_evidence": ["E07"],
+      "insufficient_evidence": [],
+      "final_status": "contradicted"
+    },
+    {
+      "id": "H4",
+      "statement": "Digital location and activity data cannot establish a person's presence without independent human corroboration.",
+      "supporting_evidence": ["E05", "E06", "E07", "E09"],
+      "contradicting_evidence": [],
+      "insufficient_evidence": [],
+      "final_status": "supported"
+    }
+  ]
+}
