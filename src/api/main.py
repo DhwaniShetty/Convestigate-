@@ -1,4 +1,5 @@
 from urllib import request
+import logging
 import time
 
 from uuid import uuid4
@@ -22,6 +23,8 @@ from src.database.action_logger import log_player_action
 from src.database.puzzle_logger import log_puzzle_attempt
 from src.database.behaviour import calculate_player_behaviour
 from src.game.game_state import GameState
+
+logger = logging.getLogger(__name__)
 
 from src.game.timeline_puzzle import TimelinePuzzle
 
@@ -6290,8 +6293,14 @@ def get_ai_response(
         response = adaptive_ai.generate_ai_response(
             game_state, request.message, case_context=case_context
         )
-    except Exception:
-        # Provider errors may contain credentials or internal request details.
+    except Exception as error:
+        # Log only non-sensitive diagnostics; provider messages can contain secrets.
+        provider_status = getattr(error, "status_code", None) or getattr(error, "code", None)
+        logger.error(
+            "AI response generation failed (exception=%s, provider_status=%s)",
+            type(error).__name__,
+            provider_status,
+        )
         raise HTTPException(
             status_code=503, detail="The AI service is unavailable. Please try again."
         ) from None
@@ -6396,8 +6405,14 @@ def request_hint(
             "Suggest a next investigative step without revealing the answer or locked evidence.",
             case_context=build_ai_case_context(session)
         )
-    except Exception:
+    except Exception as error:
         # A failed generation must not consume a hint or create a hint log.
+        provider_status = getattr(error, "status_code", None) or getattr(error, "code", None)
+        logger.error(
+            "AI hint generation failed (exception=%s, provider_status=%s)",
+            type(error).__name__,
+            provider_status,
+        )
         raise HTTPException(
             status_code=503, detail="The AI service is unavailable. No hint was used."
         ) from None
