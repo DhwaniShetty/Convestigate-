@@ -11,7 +11,7 @@ services:
     name: convestigate-game
     runtime: static
     buildCommand: node scripts/build_frontend.mjs
-    publishDir: frontend
+    staticPublishPath: frontend
     envVars:
       - key: CONVESTIGATE_API_URL
         fromService:
