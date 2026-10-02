@@ -1,4 +1,4 @@
-import { gameState } from '../state/gameState.js';
+import { gameState } from '../state/gameState.js?v=13';
 import { eventBus, EVENTS } from '../state/eventBus.js';
 import { sound } from '../effects/soundSystem.js';
 import { cinematic } from '../effects/cinematic.js';

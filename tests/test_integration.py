@@ -496,6 +496,17 @@ class TestAPIEndpoints:
         data = r.json()
         assert "session_id" in data
         assert data["ai_state"] == "CALM"
+        assert data["time_limit_seconds"] == 15 * 60
+        assert data["deadline_at_ms"] > 0
+
+    def test_expired_case_rejects_gameplay_requests(self, client):
+        import src.api.main as api
+        sid = client.post("/sessions", json={"case_id": "014"}).json()["session_id"]
+        api.sessions[sid]["deadline_at"] = 0
+        response = client.post(f"/sessions/{sid}/ai", json={"message": "Help me"})
+        assert response.status_code == 410
+        assert response.json()["expired"] is True
+        assert api.sessions[sid]["game_state"].game_over is True
 
     def test_create_session_invalid_case(self, client):
         r = client.post("/sessions", json={"case_id": "999"})
@@ -930,6 +941,35 @@ class TestMergeIntegration:
         assert len(keys) == len(set(keys))
 
 class TestFrontendBackendContracts:
+    def test_ai_prompt_supports_intentional_but_evidence_bounded_misdirection(self):
+        from types import SimpleNamespace
+        from src.ai.adaptive_ai import AdaptiveAI
+
+        class CaptureLLM:
+            prompt = None
+            def generate_response(self, prompt):
+                self.prompt = prompt
+                return "A lead to test."
+
+        ai = AdaptiveAI.__new__(AdaptiveAI)
+        ai.llm = CaptureLLM()
+        state = SimpleNamespace(ai_trust=0, ai_thrill=0, ai_threat=0, last_ai_decision="MISLEAD")
+        result = ai.generate_ai_response(state, "Who looks suspicious?", case_context={
+            "victim": "Victim",
+            "suspects": ["Suspect A"],
+            "unlocked_evidence": ["Harbor log"],
+            "unlocked_evidence_details": [{
+                "name": "Harbor log", "description": "Records the departure time.",
+                "source": "Harbor authority", "reliability": "high"
+            }],
+            "solved_puzzles": []
+        })
+        assert result == "A lead to test."
+        assert "Current AI action:\nMISLEAD" in ai.llm.prompt
+        assert "plausible but weak interpretation" in ai.llm.prompt
+        assert "Do not invent evidence" in ai.llm.prompt
+        assert "Records the departure time" in ai.llm.prompt
+
     @pytest.mark.parametrize("case_id", [f"{i:03d}" for i in range(1, 16)])
     def test_case_api_exposes_canonical_hypotheses_without_outcomes(self, client, case_id):
         from src.case.case_loader import load_case

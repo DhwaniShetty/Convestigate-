@@ -1,4 +1,4 @@
-import { gameState } from '../../state/gameState.js';
+import { gameState } from '../../state/gameState.js?v=13';
 import { setDashboardTab } from '../dashboard.js';
 import { sound } from '../../effects/soundSystem.js';
 import { submitDynamicPuzzle } from '../../utils/api.js';
@@ -70,9 +70,12 @@ export function renderP0XGeneric(container, puzzleId) {
       const payload = collectPayload(container, schema, caseId);
       
       try {
-        const result = await submitDynamicPuzzle(sessionId, endpoint, payload);
+        const result = await gameState.submitPuzzle(
+          puzzleId,
+          () => submitDynamicPuzzle(sessionId, endpoint, payload)
+        );
+        if (!result) return;
         if (result.correct) {
-          gameState.completePuzzle(puzzleId);
           renderP0XGeneric(container, puzzleId); // re-render as completed
         } else {
           alert(result.message || 'Incorrect. Please review the evidence and try again.');

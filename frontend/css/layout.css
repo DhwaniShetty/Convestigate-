@@ -70,6 +70,32 @@
   border: 1px solid var(--blood-red-deep);
 }
 
+.ai-evidence-reminder {
+  margin-top: 6px;
+  padding: 6px 8px;
+  border-left: 2px solid var(--blood-red-bright);
+  background: rgba(220, 38, 38, 0.08);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  line-height: 1.4;
+  letter-spacing: 0.3px;
+  text-align: center;
+}
+
+.session-notice {
+  max-width: 760px;
+  margin: 0 auto 18px;
+  padding: 12px 16px;
+  border: 1px solid var(--blood-red-deep);
+  border-left: 3px solid var(--blood-red-bright);
+  background: rgba(220, 38, 38, 0.08);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
 .hud-nav {
   display: flex;
   align-items: center;

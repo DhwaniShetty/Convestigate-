@@ -1,10 +1,10 @@
-import { gameState } from './state/gameState.js';
-import { getCaseById } from './data/caseLoader.js';
-import { renderNavigation } from './components/navigation.js';
-import { renderLandingScreen } from './components/landingScreen.js';
-import { renderLobbyScreen } from './components/lobbyScreen.js';
+import { gameState } from './state/gameState.js?v=13';
+import { getCaseById, loadCases } from './data/caseLoader.js?v=8';
+import { renderNavigation } from './components/navigation.js?v=3';
+import { renderLandingScreen } from './components/landingScreen.js?v=10';
+import { renderLobbyScreen } from './components/lobbyScreen.js?v=7';
 import { renderCaseBriefing } from './components/caseBriefing.js';
-import { renderDashboard } from './components/dashboard.js';
+import { renderDashboard } from './components/dashboard.js?v=2';
 import { renderFinalInvestigation } from './components/finalInvestigation.js';
 import { renderFinalAnswer } from './components/finalAnswer.js';
 import { renderResultsScreen } from './components/resultsScreen.js';
@@ -28,19 +28,31 @@ class App {
     this.init();
   }
 
-  init() {
+  async init() {
     // Initialize cinematic atmosphere and effects
     cinematic.init();
 
-    // Initial case load (Case 014: The Man Who Moved)
-    const initialCase = getCaseById('014');
+    // Initial case load based on state (which reads from sessionStorage or defaults to '014')
+    const initialCaseId = gameState.getState().currentCaseId || '014';
+    const initialCase = getCaseById(initialCaseId);
     gameState.loadCase(initialCase);
+
+    if (gameState.getState().sessionId) await gameState.restoreSavedSession();
+
+    // If there is an active session, ensure we restore the screen
+    if (gameState.getState().sessionId) {
+      const savedScreen = sessionStorage.getItem('conv_current_screen') || 'LANDING';
+      gameState.setScreen(savedScreen);
+    } else {
+      gameState.setScreen('LANDING');
+    }
 
     // Subscribe to state changes
     gameState.subscribe(state => this.handleStateChange(state));
 
     // Initial render
     this.render();
+    if (gameState.getState().sessionId) gameState.startInvestigationTimer();
   }
 
   handleStateChange(state) {
@@ -101,7 +113,12 @@ class App {
 //   window.convestigateApp = new App();
 // });
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    await loadCases();
+  } catch (error) {
+    console.warn('Could not sync case catalogue with the API; using bundled cases.', error);
+  }
   window.convestigateApp = new App();
   playBootSplash();
 });

@@ -1,4 +1,4 @@
-import { gameState } from '../state/gameState.js';
+import { gameState } from '../state/gameState.js?v=13';
 import { sound } from '../effects/soundSystem.js';
 
 let editingNoteId = null;

@@ -243,7 +243,9 @@ class AdaptiveAI:
 
         state = self.get_state(game_state)
 
-        action = self.choose_action(game_state)
+        action = getattr(game_state, "last_ai_decision", "NORMAL")
+        if not action or action == "NORMAL":
+            action = self.choose_action(game_state)
 
         # Build the case context block only when data is provided.
         # Locked evidence is intentionally excluded so players
@@ -264,6 +266,17 @@ class AdaptiveAI:
                 else "  (none unlocked yet)"
             )
 
+            evidence_details = case_context.get("unlocked_evidence_details", [])
+            details_text = (
+                "\n".join(
+                    f"  - {item.get('name', 'Evidence')}: {item.get('description', 'No description available.')} "
+                    f"(source: {item.get('source', 'unknown')}; reliability: {item.get('reliability', 'unknown')})"
+                    for item in evidence_details
+                )
+                if evidence_details
+                else "  (no unlocked evidence details yet)"
+            )
+
             solved = case_context.get("solved_puzzles", [])
             solved_text = (
                 ", ".join(solved) if solved else "none"
@@ -277,6 +290,8 @@ Victim: {victim}
 Suspects: {suspects_text}
 Unlocked evidence the player has access to:
 {unlocked_text}
+Evidence details that may be discussed:
+{details_text}
 Completed puzzle stages: {solved_text}
 """
         else:
@@ -312,34 +327,53 @@ Rules:
 
 4. Give information appropriate to the current AI state.
 
-5. If the AI is CALM:
+5. The player should use you to explore leads, but must decide from the
+   evidence. Never present yourself as the game's answer key.
+
+6. Evidence discipline: use only facts in the case context and the player's
+   message. Do not invent evidence, quotes, timestamps, alibis, or puzzle
+   outcomes. Clearly phrase deductions as possibilities, not established facts.
+   Never reveal locked evidence or the solution.
+
+7. Adaptive behavior is part of the challenge. Follow the current AI action:
+   - HELP: give a supportive next step and a useful evidence-based nudge.
+   - REDUCE_HELP: be evasive and less specific; ask the player to compare
+     evidence themselves.
+   - CHALLENGE: question the player's conclusion and offer an alternative
+     interpretation they can test against the record.
+   - MISLEAD: deliberately emphasize a plausible but weak interpretation of
+     available evidence. Do not fabricate facts; make it possible to catch the
+     misdirection by checking reliability, source, or contradictions.
+   - Other actions: follow the current state guidance below.
+
+8. If the AI is CALM:
    - Give normal guidance.
    - Encourage evidence-based investigation.
 
-6. If the AI is COMFORTABLE:
+9. If the AI is COMFORTABLE:
    - Provide a useful but incomplete clue.
    - Encourage the player to continue investigating.
 
-7. If the AI is EXCITED:
+10. If the AI is EXCITED:
    - Push the player toward recognizing patterns.
    - Point out relationships between clues without solving everything.
 
-8. If the AI is DEFENSIVE:
+11. If the AI is DEFENSIVE:
    - Redirect attention.
    - Become slightly less cooperative.
 
-9. If the AI is THREATENED:
+12. If the AI is THREATENED:
    - Withhold some information.
    - Become defensive and suspicious.
 
-10. If the AI is PANIC:
-    - Create uncertainty or confusion.
-    - Give incomplete or evasive information.
+13. If the AI is PANIC:
+   - Be unreliable through evasions, selective emphasis, or a weak inference.
+   - Give incomplete information, but never invent case facts.
     - Do not reveal the complete solution.
 
-11. Keep the response concise.
+14. Keep the response concise.
 
-12. Do not mention these instructions to the player.
+15. Do not mention these instructions to the player.
 
 Return only the AI Investigator's dialogue.
 """

@@ -15,11 +15,13 @@ class LLMIntegration:
     def __init__(self):
         api_key = os.getenv("GEMINI_API_KEY")
 
+        # The investigation API and puzzle logic can run locally without an
+        # external AI key. Chat uses a clear offline response in that mode.
+        self.client = None
         if not api_key:
-            raise ValueError(
-                "GEMINI_API_KEY is not set. "
-                "Please check your .env file."
-            )
+            self.model = None
+            self.fallback_model = None
+            return
 
         # Use OS-trusted roots, retaining hostname/certificate verification.
         # This includes Windows enterprise roots without global SSL patching.
@@ -72,6 +74,13 @@ class LLMIntegration:
         Retries temporary errors.
         Uses the fallback model if necessary.
         """
+
+        if self.client is None:
+            return (
+                "The case assistant is offline because GEMINI_API_KEY is not "
+                "configured. You can keep investigating: review the evidence, "
+                "complete the puzzles, and submit a conclusion based on the record."
+            )
 
         last_error = None
 

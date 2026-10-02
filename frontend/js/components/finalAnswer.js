@@ -1,4 +1,4 @@
-import { gameState } from '../state/gameState.js';
+import { gameState } from '../state/gameState.js?v=13';
 import { sound } from '../effects/soundSystem.js';
 
 let selectedSuspectId = null;
@@ -6,12 +6,17 @@ let selectedHypothesisId = null;
 let selectedEvidenceIds = [];
 let savedReasoningText = '';
 
+const escapeHTML = value => String(value ?? '').replace(/[&<>"']/g, character => ({
+  '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+}[character]));
+
 export function renderFinalAnswer(container) {
   const state = gameState.getState();
   const c = state.currentCase;
   const suspects = state.suspects || [];
   const hypotheses = c?.hypotheses || [];
   const unlockedEvidence = Object.values(state.evidenceMap).filter(e => e.status !== 'locked');
+  const disabled = state.finalPending ? 'disabled' : '';
 
   container.innerHTML = `
     <div style="max-width: 900px; margin: 30px auto; padding: 0 20px;">
@@ -34,8 +39,8 @@ export function renderFinalAnswer(container) {
               <label class="checklist-item ${selectedSuspectId === s.id ? 'complete' : ''}" style="cursor: pointer; ${selectedSuspectId === s.id ? 'border-color: var(--blood-red); background: var(--bg-card-hover);' : ''}">
                 <input type="radio" name="final_suspect" value="${s.id}" ${selectedSuspectId === s.id ? 'checked' : ''} />
                 <div>
-                  <strong style="color: #ffffff; font-size: 0.9rem;">${s.name}</strong>
-                  <p style="font-size: 0.75rem; color: var(--text-muted);">${s.occupation}</p>
+                  <strong style="color: #ffffff; font-size: 0.9rem;">${escapeHTML(s.name)}</strong>
+                  <p style="font-size: 0.75rem; color: var(--text-muted);">${escapeHTML(s.occupation)}</p>
                 </div>
               </label>
             `).join('')}
@@ -56,7 +61,7 @@ export function renderFinalAnswer(container) {
             ${hypotheses.map(h => `
               <label class="checklist-item ${selectedHypothesisId === h.id ? 'complete' : ''}" style="cursor: pointer; ${selectedHypothesisId === h.id ? 'border-color: var(--blood-red);' : ''}">
                 <input type="radio" name="final_hypothesis" value="${h.id}" ${selectedHypothesisId === h.id ? 'checked' : ''} />
-                <span style="font-family: var(--font-mono); font-size: 0.85rem; color: #ffffff;">[${h.id}] ${h.statement}</span>
+                <span style="font-family: var(--font-mono); font-size: 0.85rem; color: #ffffff;">[${escapeHTML(h.id)}] ${escapeHTML(h.statement)}</span>
               </label>
             `).join('')}
           </div>
@@ -72,8 +77,8 @@ export function renderFinalAnswer(container) {
                 <label class="checklist-item ${isSelected ? 'complete' : ''}" style="cursor: pointer; ${isSelected ? 'border-color: var(--blood-red);' : ''}">
                   <input type="checkbox" class="ev-checkbox" value="${ev.id}" ${isSelected ? 'checked' : ''} />
                   <div>
-                    <strong style="font-size: 0.85rem; color: #ffffff;">${ev.id} // ${ev.name}</strong>
-                    <p style="font-size: 0.7rem; color: var(--text-muted);">${ev.type}</p>
+                    <strong style="font-size: 0.85rem; color: #ffffff;">${escapeHTML(ev.id)} // ${escapeHTML(ev.name)}</strong>
+                    <p style="font-size: 0.7rem; color: var(--text-muted);">${escapeHTML(ev.type)}</p>
                   </div>
                 </label>
               `;
@@ -84,13 +89,15 @@ export function renderFinalAnswer(container) {
         <!-- 4. Written Explanation -->
         <div class="dossier-section">
           <h4 class="dossier-subtitle">4. DEDUCTIVE EXPLANATION & SUMMARY OF UNRESOLVED FACTS</h4>
-          <textarea class="form-input" id="final-reasoning-input" placeholder="Explain your deductive reconstruction, noting why correlation was rejected and which facts remain unproven..." style="width: 100%; height: 90px; resize: vertical;">${savedReasoningText}</textarea>
+          <textarea class="form-input" id="final-reasoning-input" placeholder="Explain your deductive reconstruction, noting why correlation was rejected and which facts remain unproven..." style="width: 100%; height: 90px; resize: vertical;">${escapeHTML(savedReasoningText)}</textarea>
         </div>
+
+        <div role="status" aria-live="polite">${escapeHTML(state.finalError || '')}</div>
 
         <div style="display: flex; justify-content: space-between; align-items: center; border-top: 2px solid var(--border-medium); padding-top: 20px; margin-top: 16px;">
           <button class="btn" id="btn-answer-back">← BACK TO CHECKLIST</button>
-          <button class="btn btn-primary" id="btn-submit-verdict" style="padding: 12px 28px; font-size: 0.95rem;">
-            SUBMIT VERDICT FOR EVALUATION →
+          <button class="btn btn-primary" id="btn-submit-verdict" ${disabled} style="padding: 12px 28px; font-size: 0.95rem;">
+            ${state.finalPending ? 'SUBMITTING VERDICT…' : 'SUBMIT VERDICT FOR EVALUATION →'}
           </button>
         </div>
       </div>

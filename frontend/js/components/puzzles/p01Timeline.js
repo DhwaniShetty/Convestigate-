@@ -1,4 +1,4 @@
-import { gameState } from '../../state/gameState.js';
+import { gameState } from '../../state/gameState.js?v=13';
 import { setDashboardTab } from '../dashboard.js';
 import { sound } from '../../effects/soundSystem.js';
 import { submitTimelinePuzzle } from '../../utils/api.js';

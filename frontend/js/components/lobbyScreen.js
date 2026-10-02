@@ -1,5 +1,5 @@
-import { gameState } from '../state/gameState.js';
-import { getSessionState } from '../utils/api.js';
+import { gameState } from '../state/gameState.js?v=13';
+import { createSession, getSessionState } from '../utils/api.js';
 
 export function renderLobbyScreen(container) {
   const state = gameState.getState();
@@ -76,7 +76,23 @@ export function renderLobbyScreen(container) {
     }
   });
 
-  container.querySelector('#btn-lobby-start')?.addEventListener('click', () => {
-    gameState.setScreen('BRIEFING');
+  container.querySelector('#btn-lobby-start')?.addEventListener('click', async (event) => {
+    const button = event.currentTarget;
+    if (button.disabled) return;
+    button.disabled = true;
+    button.textContent = 'OPENING CASE…';
+    try {
+      const session = await createSession(
+        state.currentCaseId,
+        Math.max(1, lobby.players.length),
+        lobby.playerName || 'Detective Cross'
+      );
+      gameState.setSessionId(session.session_id, session.deadline_at_ms);
+      gameState.setScreen('BRIEFING');
+    } catch (error) {
+      window.alert(`Unable to start investigation: ${error.message}`);
+      button.disabled = false;
+      button.textContent = 'BEGIN CASE BRIEFING →';
+    }
   });
 }

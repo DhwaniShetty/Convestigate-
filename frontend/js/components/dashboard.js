@@ -1,4 +1,4 @@
-import { gameState } from '../state/gameState.js';
+import { gameState } from '../state/gameState.js?v=13';
 import { renderEvidenceRoom } from './evidenceRoom.js';
 import { renderInvestigationBoard } from './investigationBoard.js';
 import { renderP01Timeline } from './puzzles/p01Timeline.js';
@@ -8,7 +8,7 @@ import { renderP04Witness } from './puzzles/p04Witness.js';
 import { renderP05Missing } from './puzzles/p05Missing.js';
 import { renderP0XGeneric } from './puzzles/p0XGenericPuzzle.js';
 import { CASE_SCHEMAS } from '../utils/puzzle_schemas.js';
-import { renderAIPanel } from './aiPanel.js';
+import { renderAIPanel } from './aiPanel.js?v=2';
 import { renderNotesPanel } from './notesPanel.js';
 import { sound } from '../effects/soundSystem.js';
 
@@ -16,6 +16,8 @@ let activeTab = 'overview';
 let activeRightTab = 'ai'; // 'ai' or 'notes'
 
 export function setDashboardTab(tab) {
+  const puzzleMatch = /^p0[1-5]$/.exec(tab);
+  if (puzzleMatch && !gameState.isPuzzleAvailable(tab.toUpperCase())) return;
   activeTab = tab;
   const container = document.querySelector('#screen-dashboard');
   if (container) {
@@ -24,6 +26,7 @@ export function setDashboardTab(tab) {
 }
 
 export function renderDashboard(container) {
+  gameState.startInvestigationTimer();
   const state = gameState.getState();
   const c = state.currentCase;
   const solvedCount = Object.values(state.puzzleProgress).filter(Boolean).length;

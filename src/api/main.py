@@ -1,4 +1,5 @@
 from urllib import request
+import time
 
 from uuid import uuid4
 from pathlib import Path
@@ -7,7 +8,8 @@ from src.player.player_model import PlayerModel
 from src.ai.adaptive_ai import AdaptiveAI
 from fastapi.middleware.cors import CORSMiddleware
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse
 
 from pydantic import BaseModel
 from src import case
@@ -15,6 +17,7 @@ from src.case.case_loader import load_case
 from src.game import game_state
 
 from src.database.player_session import add_player_to_session, create_game_session, create_player
+from src.database.db import create_database
 from src.database.action_logger import log_player_action
 from src.database.puzzle_logger import log_puzzle_attempt
 from src.database.behaviour import calculate_player_behaviour
@@ -112,6 +115,12 @@ from src.database.behaviour import calculate_player_behaviour
 
 app = FastAPI(title="Convestigate API")
 
+
+@app.on_event("startup")
+def initialize_database():
+    """Create local SQLite tables before accepting game sessions."""
+    create_database()
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -131,6 +140,23 @@ PUZZLE_ORDER = [
 
 # Temporary in-memory session storage
 sessions = {}
+CASE_TIME_LIMIT_SECONDS = 15 * 60
+
+
+@app.middleware("http")
+async def enforce_case_deadline(request: Request, call_next):
+    parts = request.url.path.strip("/").split("/")
+    session = sessions.get(parts[1]) if len(parts) >= 2 and parts[0] == "sessions" else None
+    if session:
+        if time.time() >= session["deadline_at"]:
+            session["expired"] = True
+            session["game_state"].game_over = True
+        if session.get("expired") and request.method != "GET":
+            return JSONResponse(
+                status_code=410,
+                content={"detail": "Time is up. This investigation has ended.", "expired": True, "game_over": True},
+            )
+    return await call_next(request)
 
 def is_puzzle_unlocked(game_state, puzzle_name):
     if puzzle_name not in PUZZLE_ORDER:
@@ -284,6 +310,8 @@ def create_session(request: CreateSessionRequest):
 
     session_id = str(uuid4())
     game_state = GameState(request.case_id)
+    started_at = time.time()
+    deadline_at = started_at + CASE_TIME_LIMIT_SECONDS
 
     # Start with the first puzzle defined in the case
     if case.puzzles:
@@ -304,7 +332,10 @@ def create_session(request: CreateSessionRequest):
     "player_count": request.player_count,
     "game_state": game_state,
     "player": player,
-    "adaptive_ai": adaptive_ai
+    "adaptive_ai": adaptive_ai,
+    "started_at": started_at,
+    "deadline_at": deadline_at,
+    "expired": False,
     }
 
     return {
@@ -325,7 +356,9 @@ def create_session(request: CreateSessionRequest):
         "ai_action": adaptive_ai.choose_action(game_state),
         "ai_vanished": game_state.ai_vanished,
         "countdown_active": game_state.countdown_active,
-        "game_over": game_state.game_over
+        "game_over": game_state.game_over,
+        "deadline_at_ms": int(deadline_at * 1000),
+        "time_limit_seconds": CASE_TIME_LIMIT_SECONDS
     }
 
 
@@ -382,6 +415,10 @@ def get_session(session_id: str):
         "countdown_active": game_state.countdown_active,
 
         "game_over": game_state.game_over,
+        "expired": session.get("expired", False),
+
+        "deadline_at_ms": int(session["deadline_at"] * 1000),
+        "time_limit_seconds": CASE_TIME_LIMIT_SECONDS,
 
         "player_observations": game_state.player_observations
     }
@@ -6153,16 +6190,28 @@ def build_ai_case_context(session):
         e["id"]: e["name"] for e in case.evidence
     }
 
-    unlocked_names = [
-        evidence_by_id[eid]
-        for eid in game_state.unlocked_evidence
-        if eid in evidence_by_id
+    unlocked_items = [
+        evidence
+        for evidence in case.evidence
+        if evidence.get("id") in game_state.unlocked_evidence
+    ]
+    unlocked_names = [evidence.get("name", evidence.get("id", "Evidence")) for evidence in unlocked_items]
+    unlocked_details = [
+        {
+            "name": evidence.get("name", evidence.get("id", "Evidence")),
+            "type": evidence.get("type", "unknown"),
+            "description": evidence.get("description", ""),
+            "reliability": evidence.get("reliability", "unknown"),
+            "source": evidence.get("source", "unknown"),
+        }
+        for evidence in unlocked_items
     ]
 
     case_context = {
         "victim": victim_name,
         "suspects": suspect_names,
         "unlocked_evidence": unlocked_names,
+        "unlocked_evidence_details": unlocked_details,
         "solved_puzzles": list(game_state.solved_puzzles),
     }
 

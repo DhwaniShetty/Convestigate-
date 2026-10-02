@@ -1,4 +1,5 @@
 // Comprehensive Registry of all 14 Convestigate Cases
+import { API_BASE_URL } from '../utils/api.js';
 import { CASE_014 } from './cases/case_014.js';
 import { CASE_001 } from './cases/case_001.js';
 import { CASE_002 } from './cases/case_002.js';
@@ -682,7 +683,7 @@ export const CASE_013 = {
 };
 
 // All 14 Cases Array
-export const ALL_CASES = [
+export let ALL_CASES = [
   CASE_014, // The Man Who Moved (Full core data)
   CASE_001, // The Last Voyage
   CASE_002, // The Evidence Room
@@ -703,4 +704,28 @@ export function getCaseById(caseId) {
   // Normalize e.g. "14" or "014" or 14
   const normalizedId = String(caseId).padStart(3, '0');
   return ALL_CASES.find(c => c.case_id === normalizedId) || ALL_CASES[0];
+}
+
+export function toFrontendCase(record) {
+  const caseId = String(record.case_id).padStart(3, '0');
+  return {
+    ...record,
+    case_id: caseId,
+    synopsis: String(record.synopsis || record.description || ''),
+    image: record.image || `assets/cases/case_${caseId}.jpg`,
+    hypotheses: (record.hypotheses || []).map(({ id, statement, ...rest }) => ({
+      id,
+      statement,
+      ...rest
+    }))
+  };
+}
+
+export async function loadCases() {
+  const response = await fetch(`${API_BASE_URL}/cases`);
+  if (!response.ok) throw new Error(`Unable to load case catalogue (${response.status}).`);
+  const cases = await response.json();
+  if (!Array.isArray(cases) || !cases.length) throw new Error('The backend returned an empty case catalogue.');
+  ALL_CASES.splice(0, ALL_CASES.length, ...cases.map(toFrontendCase));
+  return ALL_CASES;
 }

@@ -1,10 +1,14 @@
-import { gameState } from '../state/gameState.js';
+import { gameState } from '../state/gameState.js?v=13';
 import { sound } from '../effects/soundSystem.js';
 import { cinematic } from '../effects/cinematic.js';
 
 export function renderNavigation(container) {
   const state = gameState.getState();
   const currentCase = state.currentCase;
+  const remainingSeconds = state.investigationTimer?.deadlineAt
+    ? Math.max(0, Math.ceil((state.investigationTimer.deadlineAt - Date.now()) / 1000))
+    : 15 * 60;
+  const timerText = `${String(Math.floor(remainingSeconds / 60)).padStart(2, '0')}:${String(remainingSeconds % 60).padStart(2, '0')}`;
 
   container.innerHTML = `
     <header class="hud-header">
@@ -18,6 +22,9 @@ export function renderNavigation(container) {
       </div>
 
       <div style="display: flex; align-items: center; gap: 10px;">
+        ${state.investigationTimer?.deadlineAt ? `
+          <span class="hud-timer" title="Time remaining to solve this case">⏱ CASE <span id="hud-investigation-timer">${timerText}</span></span>
+        ` : ''}
         ${currentCase ? `
           <button class="btn-sound-toggle" id="nav-btn-manga" style="border-color: var(--blood-red-bright); color: var(--blood-red-bright);" title="Replay Manga Story Presentation">
             📖 MANGA STORY

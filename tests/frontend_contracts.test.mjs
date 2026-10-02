@@ -1,7 +1,7 @@
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { GameState, gameState } from '../frontend/js/state/gameState.js';
+import { GameState, gameState } from '../frontend/js/state/gameState.js?v=13';
 import { sendAIMessage, requestHint, submitFinalReasoning } from '../frontend/js/utils/api.js';
 import { renderAIPanel } from '../frontend/js/components/aiPanel.js';
 import { renderResultsScreen } from '../frontend/js/components/resultsScreen.js';
@@ -32,6 +32,56 @@ test('three API utilities use the exact backend paths and Pydantic payloads', as
     { message: 'Investigate' }, { puzzle_id: 'P02' }, { hypothesis_id: 'H4', reasoning: 'Reasoning' }
   ]);
   assert.ok(calls.every(([, options]) => options.method === 'POST'));
+});
+
+test('15-minute case timer counts down, survives reloads and ends the case at zero', () => {
+  const originalStorage = globalThis.sessionStorage;
+  const originalNow = Date.now;
+  const originalSetInterval = globalThis.setInterval;
+  const originalClearInterval = globalThis.clearInterval;
+  const originalQuerySelector = globalThis.document.querySelector;
+  const values = new Map();
+  const ticks = [];
+  let now = 1_000_000;
+  const display = { textContent: '' };
+  globalThis.sessionStorage = {
+    getItem: key => values.get(key) ?? null,
+    setItem: (key, value) => values.set(key, String(value)),
+    removeItem: key => values.delete(key)
+  };
+  Date.now = () => now;
+  globalThis.setInterval = callback => { ticks.push(callback); return ticks.length; };
+  globalThis.clearInterval = () => {};
+  globalThis.document.querySelector = selector => selector === '#hud-investigation-timer' ? display : null;
+  try {
+    const game = new GameState();
+    game.state.currentCaseId = '015';
+    values.set('conv_case_id', '015');
+    game.setSessionId('session-015', now + 900_000);
+    game.startInvestigationTimer();
+    now += 896_000;
+    ticks[0]();
+    assert.equal(display.textContent, '00:04');
+    assert.equal(values.get('conv_timer_case_id'), '015');
+    const restored = new GameState();
+    assert.equal(restored.state.investigationTimer.deadlineAt, 1_900_000);
+    restored.setSessionId('new-session', now + 900_000);
+    assert.equal(restored.state.investigationTimer.deadlineAt, now + 900_000);
+    now += 4_000;
+    ticks[0]();
+    assert.equal(display.textContent, '00:00');
+    assert.equal(game.state.investigationTimer.expired, true);
+    assert.equal(game.state.currentScreen, 'RESULTS');
+    game.stopInvestigationTimer(true);
+    assert.equal(values.has('conv_timer_deadline_at'), false);
+  } finally {
+    Date.now = originalNow;
+    globalThis.setInterval = originalSetInterval;
+    globalThis.clearInterval = originalClearInterval;
+    globalThis.document.querySelector = originalQuerySelector;
+    if (originalStorage === undefined) delete globalThis.sessionStorage;
+    else globalThis.sessionStorage = originalStorage;
+  }
 });
 
 test('API errors handle network failures, non-JSON responses and validation details', async () => {
@@ -68,6 +118,17 @@ test('failed chat retains the draft without inventing a reply', async () => {
   assert.equal(game.state.ai.messages.length, count);
   assert.equal(game.state.ai.error, 'AI service unavailable');
   assert.equal(game.state.ai.chatPending, false);
+});
+
+test('missing backend session exits stale investigation and directs player to restart', async () => {
+  const game = state();
+  game.state.currentScreen = 'DASHBOARD';
+  globalThis.fetch = async () => response({ detail: 'Session not found' }, 404);
+  await game.sendAIMessage('What should I inspect?');
+  assert.equal(game.state.sessionId, null);
+  assert.equal(game.state.currentScreen, 'LANDING');
+  assert.equal(game.state.sessionNotice, 'Your previous investigation session is no longer available. Open the case briefing to start a fresh 15-minute run.');
+  assert.equal(game.state.ai.error, null);
 });
 
 test('failed hint consumes nothing; successful hint uses server text and allowance', async () => {
@@ -204,6 +265,15 @@ test('AI and final-result rendering escapes text and never fabricates scores', (
   renderFinalAnswer(final);
   assert.ok(final.innerHTML.includes('SUBMITTING VERDICT'));
   assert.ok(final.innerHTML.includes('&lt;script&gt;failed'));
+});
+
+test('expired case renders a clear loss screen', () => {
+  gameState.state.currentCase = { title: 'Expired case' };
+  gameState.state.results = { expired: true };
+  const target = container();
+  renderResultsScreen(target);
+  assert.match(target.innerHTML, /TIME EXPIRED/);
+  assert.match(target.innerHTML, /15-minute investigation window ended/);
 });
 
 import fs from 'node:fs';

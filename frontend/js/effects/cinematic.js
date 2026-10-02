@@ -3,7 +3,7 @@
  * Connects reactive events to the 3 WOW Moments, atmosphere, and micro-interactions.
  */
 import { eventBus, EVENTS } from '../state/eventBus.js';
-import { gameState } from '../state/gameState.js';
+import { gameState } from '../state/gameState.js?v=13';
 import { sound } from './soundSystem.js';
 import { mangaStory } from './mangaStory.js';
 

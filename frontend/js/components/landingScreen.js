@@ -1,5 +1,5 @@
-import { gameState } from '../state/gameState.js';
-import { ALL_CASES, getCaseById } from '../data/caseLoader.js';
+import { gameState } from '../state/gameState.js?v=13';
+import { ALL_CASES, getCaseById } from '../data/caseLoader.js?v=8';
 import { cinematic } from '../effects/cinematic.js';
 import { sound } from '../effects/soundSystem.js';
 import { createSession } from '../utils/api.js';
@@ -21,9 +21,10 @@ export function renderLandingScreen(container) {
 
   container.innerHTML = `
     <div class="landing-hero">
-      <div class="stamp stamp-red" style="margin-bottom: 12px; animation: stamp-pop 0.4s ease-out;">CONVESTIGATE // 14 ARCHIVED DOCKETS</div>
+      <div class="stamp stamp-red" style="margin-bottom: 12px; animation: stamp-pop 0.4s ease-out;">CONVESTIGATE // ${ALL_CASES.length} ARCHIVED DOCKETS</div>
       <h1 class="landing-title">CONV<span>ESTIGATE</span></h1>
       <p class="landing-tagline">SELECT A CASE DOCKET // REASON FROM EVIDENCE, NOT SPECULATION</p>
+      ${state.sessionNotice ? `<p role="alert" class="session-notice">${state.sessionNotice}</p>` : ''}
       
       
 
@@ -194,66 +195,60 @@ export function renderLandingScreen(container) {
       });
     });
 
+    // Helper to start session and transition
+    const startInvestigation = async () => {
+      sound.playStamp();
+      const currentCaseId = caseData.case_id;
+      const playerName = gameState.getState().lobby.playerName || 'Detective Cross';
+
+      try {
+        const session = await createSession(currentCaseId, 2, playerName);
+        gameState.loadCase(caseData);
+        gameState.setSessionId(session.session_id, session.deadline_at_ms);
+        console.log('BACKEND SESSION CREATED:', session);
+
+        cinematic.playCinematicCaseOpening(caseData, () => {
+          gameState.setScreen('BRIEFING');
+        });
+      } catch (error) {
+        console.error('Failed to create backend session:', error);
+        alert(`Unable to start investigation: ${error.message}`);
+      }
+    };
+
     // Clicking "OPEN BRIEFING →" link launches cinematic case opening into Briefing
     card.querySelector('.card-open-link')?.addEventListener('click', (e) => {
       e.stopPropagation();
-      sound.playStamp();
-      gameState.loadCase(caseData);
-      cinematic.playCinematicCaseOpening(caseData, () => {
-        gameState.setScreen('BRIEFING');
-      });
+      startInvestigation();
     });
 
     // Double clicking anywhere on a case card also starts case opening
     card.addEventListener('dblclick', () => {
-      sound.playStamp();
-      gameState.loadCase(caseData);
-      cinematic.playCinematicCaseOpening(caseData, () => {
-        gameState.setScreen('BRIEFING');
-      });
+      startInvestigation();
     });
   });
 
   // Main CTA Button -> Launches Cinematic Case Opening sequence and enters Case Briefing!
   container.querySelector('#btn-quick-start')?.addEventListener('click', async () => {
-
     sound.playStamp();
-
     const currentCaseId = gameState.getState().currentCaseId || '014';
-
     const caseData = getCaseById(currentCaseId);
-
-    const playerName =
-      gameState.getState().lobby.playerName || 'Detective Cross';
+    const playerName = gameState.getState().lobby.playerName || 'Detective Cross';
 
     try {
-      const session = await createSession(
-        currentCaseId,
-        2,
-        playerName
-      );
-
-      gameState.state.sessionId = session.session_id;
-
+      const session = await createSession(currentCaseId, 2, playerName);
       gameState.loadCase(caseData);
-
+      gameState.setSessionId(session.session_id, session.deadline_at_ms);
       console.log('BACKEND SESSION CREATED:', session);
 
       cinematic.playCinematicCaseOpening(caseData, () => {
-
         gameState.setScreen('BRIEFING');
-
       });
-
     } catch (error) {
-
       console.error('Failed to create backend session:', error);
-
       alert(`Unable to start investigation: ${error.message}`);
-
     }
-
-});
+  });
 
   // Modal controls
   container.querySelector('#btn-close-case-intro')?.addEventListener('click', () => {
