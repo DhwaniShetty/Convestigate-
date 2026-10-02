@@ -27,3 +27,11 @@ define `window.CONVESTIGATE_API_URL` before `frontend/js/app.js` loads, pointing
 it at the deployed FastAPI origin. The backend allows cross-origin requests.
 `GEMINI_API_KEY` is optional for local gameplay; without it, the game runs with
 the AI advisor in offline mode.
+
+## Deploy to Render
+
+The root `render.yaml` Blueprint creates the FastAPI backend and static game
+frontend together. In Render, choose **New → Blueprint**, connect this GitHub
+repository, and select the `dhwani-ai` branch. Render connects the frontend to
+the backend URL automatically. The AI advisor works in offline mode unless
+`GEMINI_API_KEY` is added to the backend service environment.
